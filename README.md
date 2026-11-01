@@ -9,7 +9,20 @@ This repository brings the admission policies of [kubernetes-air-gapped-ai-agent
 
 ## What one run shows
 
-<!-- numbers: filled from one CI run -->
+From the signed evidence of [run 41358080026](https://github.com/heyvaldemar/kubernetes-oscal-evidence/actions/runs/41358080026), on commit 85b8287, the flagship at v1.8.0:
+
+| | |
+|---|---|
+| Controls | 9 of 9 satisfied: 7 from SP 800-53 Rev. 5.2.0, 1 from the SSDF, 1 from the AI RMF |
+| Admission tests | 19 recorded: 16 planted pods refused, each by the policy the mapping names and with the flagship's own expected words, and 3 control pods admitted |
+| The game day | Kyverno's admission controller scaled to zero: its webhook configuration went with it, and the API server's own guard refused the signed model |
+| Kyverno's reports | 6 PolicyReports, 9 results, every one a pass: the model server passed all four reported policies; the ordinary pod and Kyverno's four pods passed carried-images |
+| C2P | 3 assessment plans and 3 assessment results; 4 observations with 9 subjects for SP 800-53, and no finding of its own |
+| trestle | 7 documents valid: the component definition, the plans, the results |
+| Signature | keyless, from this workflow's identity, verified in the same run |
+| The probe | egress-node reported for a moment on the admitted ordinary pod: Kyverno's background scan said "fail" |
+
+Every push runs it again. So does a weekly schedule, and so does every release, whose evidence is made by a run on the tag itself.
 
 ## The controls
 
@@ -67,7 +80,21 @@ A control C2P calls not satisfied is never called satisfied here, and a test hol
 
 A gate that has never failed proves nothing. Every push runs the whole thing seven more times, broken on purpose, and each of those jobs passes only if the gate fails, and fails on every control that rests on what was broken:
 
-<!-- plants table: filled from one CI run -->
+| Plant | What it breaks | Not satisfied | Tests failed |
+|---|---|---|---|
+| `remove:verify-models` | The signature policy is never applied | CM-14, SI-7, SR-4, SC-24, PW.4.4, MANAGE 3.1 | 11 of 19 |
+| `audit:verify-models` | The signature policy records instead of refusing, and a model nobody signed runs | CM-14, SI-7, SR-4, PW.4.4, MANAGE 3.1 | 7 |
+| `phantom-mapping` | The mapping names `verify-model-signatures`, a policy the flagship does not have | CM-14, SI-7, SR-4, PW.4.4, MANAGE 3.1 | 7 |
+| `remove:carried-images` | No list of carried digests | SR-11, CM-7(5) | 3 |
+| `remove:model-volumes` | No native check on where model weights come from | SI-7 | 1 |
+| `remove:models-need-kyverno` | No guard while Kyverno is away | SC-24 | 1 |
+| `remove:egress-node` | Nothing keeps pods off the egress node | AC-6 | 3 |
+
+Each was caught in [run 41358080026](https://github.com/heyvaldemar/kubernetes-oscal-evidence/actions/runs/41358080026). Three of them say more than that the gate works:
+
+- **`audit:verify-models` is the PolicyReport path.** With the policy recording rather than refusing, the unsigned model ran, Kyverno's report said "fail" for its pod, and C2P turned that into its own not-satisfied finding. The other plants reach the gate through missing reports and failed tests; this one through a report that names a violation.
+- **`phantom-mapping` is refused twice.** The mapping check stops it before anything runs. Built anyway, the run refuses it on its own: Kyverno reports `verify-models`, nothing reports `verify-model-signatures`, and every test is refused by a policy the mapping does not name.
+- **`remove:model-volumes` admitted the model from elsewhere.** The flagship's verify-models carries the same rule, "model weights come only from registry.boundary.internal:5000/models", and both policies print it. But Kyverno evaluates verify-models only for images that match its own `matchImageReferences` glob, so an image volume from anywhere else never reaches it. model-volumes is the only rule that holds the path, not a second layer.
 
 The gate's own rules are shown their failures too. [`tests/test_evidence.py`](tests/test_evidence.py) runs them on one real run's files, breaking one thing at a time, and [`scripts/mutate.py`](scripts/mutate.py) switches each rule off in a copy of the scripts, from [`tests/plants.tsv`](tests/plants.tsv), and requires a named test to fail. The first time it ran, 4 of 20 changes went unnoticed: one test passed because the changed gate crashed rather than because it judged, one change sat on a branch its test never reached, one rule is backed by the next so that switching it off alone changes nothing, and one test broke the mapping in more ways than the rule it was written for. The tests and the changes were fixed until each of the 21 now listed is caught by its own test.
 
