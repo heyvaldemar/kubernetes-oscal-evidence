@@ -210,6 +210,10 @@ def probe(out):
     here it is reported for a moment, after the reports are collected, so the reason is
     measured in every run rather than asserted, and then left out again."""
     label = "reports.kyverno.io/enabled"
+    if kubectl("get", "validatingadmissionpolicy", "egress-node").returncode != 0:
+        json.dump({"policy": "egress-node", "installed": False}, open(out, "w"), indent=2)
+        print("== probe: egress-node is not installed in this run, so there is nothing to report on")
+        return
     kubectl("label", "validatingadmissionpolicy", "egress-node", f"{label}=true", "--overwrite", check=True)
     kubectl("-n", "default", "annotate", "pod", "ordinary-pod", f"evidence/probe={int(time.time())}", "--overwrite")
     found = None
@@ -224,7 +228,7 @@ def probe(out):
         time.sleep(5)
     kubectl("label", "validatingadmissionpolicy", "egress-node", f"{label}-", check=True)
     node = kubectl("-n", "default", "get", "pod", "ordinary-pod", "-o", "jsonpath={.spec.nodeName}").stdout
-    record = {"policy": "egress-node", "pod": "default/ordinary-pod", "admitted": True, "node": node,
+    record = {"policy": "egress-node", "installed": True, "pod": "default/ordinary-pod", "admitted": True, "node": node,
               "kyverno_result": (found or {}).get("result"), "kyverno_message": (found or {}).get("message"),
               "kyverno_process": ((found or {}).get("properties") or {}).get("process")}
     json.dump(record, open(out, "w"), indent=2)

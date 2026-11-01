@@ -65,7 +65,11 @@ A control C2P calls not satisfied is never called satisfied here, and a test hol
 
 ## The plants
 
-<!-- plants: filled from one CI run -->
+A gate that has never failed proves nothing. Every push runs the whole thing seven more times, broken on purpose, and each of those jobs passes only if the gate fails, and fails on every control that rests on what was broken:
+
+<!-- plants table: filled from one CI run -->
+
+The gate's own rules are shown their failures too. [`tests/test_evidence.py`](tests/test_evidence.py) runs them on one real run's files, breaking one thing at a time, and [`scripts/mutate.py`](scripts/mutate.py) switches each rule off in a copy of the scripts, from [`tests/plants.tsv`](tests/plants.tsv), and requires a named test to fail. The first time it ran, 4 of 20 changes went unnoticed: one test passed because the changed gate crashed rather than because it judged, one change sat on a branch its test never reached, one rule is backed by the next so that switching it off alone changes nothing, and one test broke the mapping in more ways than the rule it was written for. The tests and the changes were fixed until each of the 21 now listed is caught by its own test.
 
 ## What the evidence proves, and what it does not
 
@@ -80,7 +84,41 @@ It does not prove:
 
 ## Check it yourself
 
-<!-- verification: filled after the release -->
+Each release carries the run's evidence beside its source: `kubernetes-oscal-evidence-<tag>-evidence.tar.gz`, its Sigstore bundle, and its SLSA provenance. The evidence was made by a run of the Evidence workflow on the tag itself, and nothing in this repository needs to be trusted to check it.
+
+```sh
+TAG=v1.0.0
+NAME=kubernetes-oscal-evidence-$TAG-evidence
+gh release download "$TAG" -R heyvaldemar/kubernetes-oscal-evidence -p "$NAME.*"
+```
+
+**The signature, offline.** cosign needs Sigstore's trust root and the bundle, nothing else. On any connected machine `cosign initialize` writes the trust root to `~/.sigstore/root/tuf-repo-cdn.sigstore.dev/targets/trusted_root.json`; carry that file across with the evidence.
+
+```sh
+cosign verify-blob "$NAME.tar.gz" --bundle "$NAME.tar.gz.sigstore.json" --trusted-root trusted_root.json \
+  --certificate-identity "https://github.com/heyvaldemar/kubernetes-oscal-evidence/.github/workflows/evidence.yml@refs/tags/$TAG" \
+  --certificate-oidc-issuer https://token.actions.githubusercontent.com
+```
+
+The identity is exact: the workflow file and the tag. A signature from any other workflow, branch or repository fails.
+
+**The provenance.** slsa-verifier checks that the archive was built by GitHub's runner from this repository at the tag; it reads Sigstore's public log, so it needs the network.
+
+```sh
+slsa-verifier verify-artifact "$NAME.tar.gz" --provenance-path "$NAME.intoto.jsonl" \
+  --source-uri github.com/heyvaldemar/kubernetes-oscal-evidence --source-tag "$TAG"
+```
+
+**The documents.** Unpack it and read `evidence/summary.md` first. The OSCAL documents are `evidence/assessment-results-*.json`, with C2P's own plans and results under `evidence/c2p/` and Kyverno's reports as the cluster held them under `evidence/policyreports/`. Validate them with compliance-trestle, and run the gate on them from the release's source archive (`kubernetes-oscal-evidence-<tag>.tar.gz`, signed and verifiable the same way, with `release-assets.yml` in place of `evidence.yml`):
+
+```sh
+tar -xzf "$NAME.tar.gz"
+python3 -m venv .venv && .venv/bin/pip install --require-hashes --no-deps -r requirements.lock
+PATH="$PWD/.venv/bin:$PATH" bash scripts/validate.sh evidence
+PATH="$PWD/.venv/bin:$PATH" python3 scripts/gate.py evidence
+```
+
+The release workflow ran the same two checks on the files the release now holds, and showed each a copy of the archive with one byte appended, which both refused.
 
 ## Run it yourself
 
