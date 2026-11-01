@@ -4,6 +4,15 @@ All notable changes to this project are documented in this file. The format is b
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-11-01
+
+### Changed
+
+- The mapping rests on the account's published control-to-test matrix (heyvaldemar/fleet-ops `docs/control-evidence.md`, shown at heyvaldemar.com/evidence), pinned by commit and sha256 in `catalogs.lock`. Every control names its matrix row, and `scripts/component.py` refuses a control with none, a row the pinned matrix does not have, and an SSDF control that is not its own row. Each finding in the assessment results names its rows.
+- The control set follows the matrix: SSDF PS.3.2 (the AI-BOM required at admission) is added beside PW.4.4; SP 800-53 CM-14, SI-7, SR-4, SR-11, CM-7(5) and AI RMF MANAGE 3.1 stay, each on a row the matrix already has (LLM03:2025, LLM04:2025, PS.3.2). SC-24 and AC-6 are no longer mapped: no matrix row carries them. Their tests still run and must still pass; the game day step now proves CM-14, whose rules are verify-models and the guard that refuses models while Kyverno is away.
+- The gate counts a plant as caught only if every control resting on the planted policy is not satisfied and a pod that policy must refuse got in; a plant caught only for some other reason fails its job.
+- 38 tests and 25 changes to the gate's rules, each caught. The evidence fixtures were rebuilt from the same run's recorded reports and admission answers.
+
 ## [1.0.0] - 2026-11-01
 
 ### Added
@@ -20,5 +29,6 @@ All notable changes to this project are documented in this file. The format is b
 - Kyverno 1.19.2 writes no admission report for a CEL policy whose actions include Deny, reports a native policy only when it is labelled, and evaluates every stored pod as if it were being created. The flagship's verify-models is reported here with its background scan on; egress-node is judged by its admission tests alone.
 - Without model-volumes, the flagship admits an image volume from outside the models path: verify-models never sees an image outside its own glob.
 
-[Unreleased]: https://github.com/heyvaldemar/kubernetes-oscal-evidence/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/heyvaldemar/kubernetes-oscal-evidence/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/heyvaldemar/kubernetes-oscal-evidence/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/heyvaldemar/kubernetes-oscal-evidence/releases/tag/v1.0.0
