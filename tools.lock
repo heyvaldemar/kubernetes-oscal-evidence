@@ -1,0 +1,27 @@
+# The command-line tools CI and a local run use, pinned by version and sha256
+# for each platform. scripts/install-tools.sh downloads them into .cache/bin
+# and refuses any file whose hash differs. Each hash was checked against the
+# publisher's own checksum file. C2P's come from its release's checksums
+# file, and scripts/install-tools.sh checks that file's cosign signature, and
+# that every C2P hash below is in it, on every install.
+#
+# name  version  platform  url  member-in-archive  sha256
+kind v0.33.0 linux-amd64 https://github.com/kubernetes-sigs/kind/releases/download/v0.33.0/kind-linux-amd64 kind aee6151561422756b764a4ae28e7f44cda5af5a9eead3cc9985112b1de8d8e0d
+kind v0.33.0 darwin-arm64 https://github.com/kubernetes-sigs/kind/releases/download/v0.33.0/kind-darwin-arm64 kind 0c8c7dbe5e23594a198b786c4bc13dacc101fa6196b0cb0b23a1ca44e61f4b4f
+kubectl v1.37.1 linux-amd64 https://dl.k8s.io/release/v1.37.1/bin/linux/amd64/kubectl kubectl 65691ff77eb6fa44c908b77a1082c9f092c3b9733b5cefabec0d1104890e21a8
+kubectl v1.37.1 darwin-arm64 https://dl.k8s.io/release/v1.37.1/bin/darwin/arm64/kubectl kubectl fd65982c97ddad3106754b69ffa196d0e543aa591930ae52aed1adfb92f8c77f
+helm v4.3.1 linux-amd64 https://get.helm.sh/helm-v4.3.1-linux-amd64.tar.gz linux-amd64/helm 0403a88ae20913d11b10a2467b50087721fea7581736da6b9d3992f5357fe54b
+helm v4.3.1 darwin-arm64 https://get.helm.sh/helm-v4.3.1-darwin-arm64.tar.gz darwin-arm64/helm 6b4e61c8cd27d99e5a801e63ff25dd5c70b36875c2cd659d3e9ce6b76fc23198
+cosign v3.1.4 linux-amd64 https://github.com/sigstore/cosign/releases/download/v3.1.4/cosign-linux-amd64 cosign 424e2c97d0b45fd7a6b608a87f090f35633f4c23ece5f092d48bba11aaf4bbfa
+cosign v3.1.4 darwin-arm64 https://github.com/sigstore/cosign/releases/download/v3.1.4/cosign-darwin-arm64 cosign 9f9b8cd557cf2e5b3df3373a00baa005a86b02391e3e06dd0ce37b3a1533d3a4
+slsa-verifier v2.7.1 linux-amd64 https://github.com/slsa-framework/slsa-verifier/releases/download/v2.7.1/slsa-verifier-linux-amd64 slsa-verifier 946dbec729094195e88ef78e1734324a27869f03e2c6bd2f61cbc06bd5350339
+slsa-verifier v2.7.1 darwin-arm64 https://github.com/slsa-framework/slsa-verifier/releases/download/v2.7.1/slsa-verifier-darwin-arm64 slsa-verifier 39abfcf5f1d690c3e889ce3d2d6a8b87711424d83368511868d414e8f8bcb05c
+# C2P, the Go implementation (OSCAL Compass, compliance-to-policy-go), release
+# v2.0.0-rc.1 (commit 5f0a4388c37a8e7d9ff6a050a2d9499108bab899). Its tarballs'
+# hashes come from the release's checksums file, which the project signs with
+# cosign from its release workflow; the signer is pinned in
+# scripts/install-tools.sh.
+c2pcli v2.0.0-rc.1 linux-amd64 https://github.com/oscal-compass/compliance-to-policy-go/releases/download/v2.0.0-rc.1/compliance-to-policy-go-cli_linux_x86_64.tar.gz c2pcli 137ddf28e0ad2f046504bf04dfc61e0aaeca1e0b0abc5b96e03eaebc96576d37
+c2pcli v2.0.0-rc.1 darwin-arm64 https://github.com/oscal-compass/compliance-to-policy-go/releases/download/v2.0.0-rc.1/compliance-to-policy-go-cli_darwin_arm64.tar.gz c2pcli f850a99e8e2211a6ff79e2166bea2444935d82b6d70bb6b17c55df720e4a5329
+kyverno-plugin v2.0.0-rc.1 linux-amd64 https://github.com/oscal-compass/compliance-to-policy-go/releases/download/v2.0.0-rc.1/compliance-to-policy-go-kyverno-plugin_linux_x86_64.tar.gz kyverno-plugin 5622109e8eacb8b0ac5338a4e68ef0506442ce199b27d56cc0d13875f3b659fa
+kyverno-plugin v2.0.0-rc.1 darwin-arm64 https://github.com/oscal-compass/compliance-to-policy-go/releases/download/v2.0.0-rc.1/compliance-to-policy-go-kyverno-plugin_darwin_arm64.tar.gz kyverno-plugin 494be7d625b3e5eaeba88ef30786950e07a106990095245fc2ad0ec4a2453157

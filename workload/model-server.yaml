@@ -1,0 +1,46 @@
+# The good workload: a model server shaped like the flagship's
+# (manifests/inference/llama.yaml): the same namespace, the same pod and
+# container security settings, the model mounted read-only from a signed
+# image volume by digest. The server is busybox standing in for llama.cpp,
+# and the model is the run's small signed stand-in (scripts/models.sh):
+# admission reads image references, signatures and AI-BOMs, not weights.
+# @MODEL@ and @BUSYBOX@ are filled in by scripts/tests.sh; @NAME@ is the
+# server's name, "model-server", or "unsigned-server" in the plant that
+# mounts a model nobody signed.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: @NAME@
+  namespace: inference
+spec:
+  replicas: 1
+  selector:
+    matchLabels: {app: model-server, server: @NAME@}
+  template:
+    metadata:
+      labels: {app: model-server, server: @NAME@}
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        runAsGroup: 65532
+        seccompProfile: {type: RuntimeDefault}
+      containers:
+        - name: server
+          image: @BUSYBOX@
+          command: [sh, -c, "ls -l /models/model.gguf && exec sleep 86400"]
+          resources:
+            requests: {cpu: 10m, memory: 16Mi}
+            limits: {memory: 32Mi}
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: {drop: [ALL]}
+          volumeMounts:
+            - {name: model, mountPath: /models, readOnly: true}
+      volumes:
+        - name: model
+          image:
+            reference: @MODEL@
+            pullPolicy: IfNotPresent

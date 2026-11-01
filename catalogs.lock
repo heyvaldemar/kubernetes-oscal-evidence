@@ -1,0 +1,10 @@
+# NIST's own OSCAL catalogs, from github.com/usnistgov/oscal-content, pinned
+# to one commit and to each file's sha256. scripts/catalogs.sh downloads them
+# and refuses a file whose hash differs. The component definition names each
+# by this URL, and scripts/component.py checks that every control it maps
+# is in its catalog, by the catalog's own statement id.
+#
+# file  url-at-commit  sha256
+NIST_SP-800-53_rev5_catalog.json https://raw.githubusercontent.com/usnistgov/oscal-content/f0de6d8d8c059d374f15e0ae07508d82e370fc1d/nist.gov/SP800-53/rev5/json/NIST_SP-800-53_rev5_catalog.json 64ca6b4161de51ab6af098a7d101d326f14c95e1abf721396cd8a049e8115eeb
+NIST_SP800-218_ver1_catalog.json https://raw.githubusercontent.com/usnistgov/oscal-content/f0de6d8d8c059d374f15e0ae07508d82e370fc1d/nist.gov/SP800-218/ver1/json/NIST_SP800-218_ver1_catalog.json fb864f27ccfe2c501737455180db91d8c05285a2ebb3fe1bdf1e193b06081634
+NIST_AI-RMF_v1_catalog.json https://raw.githubusercontent.com/usnistgov/oscal-content/f0de6d8d8c059d374f15e0ae07508d82e370fc1d/nist.gov/AI100-1/ver1/json/NIST_AI-RMF_v1_catalog.json 09de09ecd15f861c4ec05aa192872dc2faafc3bef41c4bc57e19247e84f92545

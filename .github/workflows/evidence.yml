@@ -1,0 +1,264 @@
+name: Evidence
+
+# THE FLAGSHIP'S ADMISSION CONTROLS, TURNED INTO OSCAL EVIDENCE, ON EVERY PUSH.
+#
+# checks    the scripts' own tests, each rule of the gate switched off in turn
+#           (scripts/mutate.py), the mapping checked against the flagship's
+#           release and NIST's catalogs, shellcheck and actionlint
+# evidence  kind with the flagship's policies from its signed release, its
+#           planted pods, Kyverno's PolicyReports, C2P and trestle, the
+#           gate; the evidence signed keyless with cosign, and on a release
+#           attached to it with SLSA provenance
+# plants    the same run broken on purpose, seven ways; each job passes only
+#           if the gate fails for the planted reason
+#
+# Everything runs on GitHub's hosted runners with no secret: the signature's
+# identity is this workflow's, from GitHub's OIDC token.
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  release:
+    types: [published]
+  schedule:
+    - cron: "17 5 * * 3"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: evidence-${{ github.event.release.tag_name || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  checks:
+    name: Static checks, and that each can fail
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install the tools and trestle, each by hash
+        run: |
+          set -euo pipefail
+          python3 --version
+          python3 -m venv .venv
+          .venv/bin/pip install --quiet --require-hashes --no-deps -r requirements.lock
+          echo "$PWD/.venv/bin" >> "$GITHUB_PATH"
+          bash scripts/install-tools.sh >> "$GITHUB_PATH"
+
+      - name: The flagship's release, verified, and NIST's catalogs
+        run: |
+          bash scripts/flagship.sh
+          bash scripts/catalogs.sh
+
+      - name: The component definition is what the mapping gives, and names nothing that does not exist
+        run: python3 scripts/component.py --check
+
+      - name: The cluster is the flagship's two nodes
+        run: |
+          set -euo pipefail
+          nodes() { sed -n '/^nodes:/,$p' "$1" | grep -v '^[[:space:]]*#'; }
+          diff <(nodes kind/cluster.yaml) <(nodes .cache/flagship/src/kind/frontier.yaml)
+          echo "kind/cluster.yaml has the nodes of the flagship's kind/frontier.yaml"
+
+      - name: The gate's tests
+        run: python3 -m unittest discover -s tests -v
+
+      - name: Each rule of the gate switched off in turn, and the tests notice
+        run: python3 scripts/mutate.py
+
+      - name: shellcheck and actionlint, the pinned images
+        run: |
+          set -euo pipefail
+          # shellcheck source=/dev/null
+          . <(grep -E '^[A-Z_]+=' ci-images.pins)
+          docker run --rm -v "$PWD:/mnt" -w /mnt "$SHELLCHECK_IMAGE" scripts/*.sh
+          docker run --rm -v "$PWD:/repo" -w /repo "$ACTIONLINT_IMAGE" -color
+
+  evidence:
+    name: The flagship's policies on kind, as OSCAL
+    needs: checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      contents: read
+      # cosign's keyless signature: the certificate names this workflow.
+      id-token: write
+    outputs:
+      name: ${{ steps.sign.outputs.name }}
+      subjects: ${{ steps.sign.outputs.subjects }}
+    env:
+      EVIDENCE_VERSION: ${{ github.event.release.tag_name || 'unreleased' }}
+      RUN_ID: ${{ github.run_id }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install the tools and trestle, each by hash
+        run: |
+          set -euo pipefail
+          python3 -m venv .venv
+          .venv/bin/pip install --quiet --require-hashes --no-deps -r requirements.lock
+          echo "$PWD/.venv/bin" >> "$GITHUB_PATH"
+          bash scripts/install-tools.sh >> "$GITHUB_PATH"
+
+      - name: Run it, and judge it
+        run: bash scripts/run.sh
+
+      - name: What the run showed
+        if: always()
+        run: |
+          [ -f .cache/run/evidence/summary.md ] && cat .cache/run/evidence/summary.md >> "$GITHUB_STEP_SUMMARY"
+          [ -f .cache/run/evidence/summary.md ] && cat .cache/run/evidence/summary.md || echo "no evidence was written"
+
+      # A pull request's run is judged, not signed: a pull request from a
+      # fork gets no OIDC token, and its evidence is not this repository's.
+      - name: Sign the evidence, keyless, and verify the signature
+        id: sign
+        if: github.event_name != 'pull_request'
+        env:
+          NAME: ${{ github.event.repository.name }}-${{ github.event.release.tag_name || github.sha }}-evidence
+        run: |
+          set -euo pipefail
+          mkdir -p out
+          # A deterministic archive: sorted names, one owner, the commit's time.
+          tar --sort=name --owner=0 --group=0 --numeric-owner \
+            --mtime="@$(git log -1 --format=%ct)" -C .cache/run -czf "out/$NAME.tar.gz" evidence
+          cosign sign-blob --yes "out/$NAME.tar.gz" --bundle "out/$NAME.tar.gz.sigstore.json"
+          cosign verify-blob "out/$NAME.tar.gz" --bundle "out/$NAME.tar.gz.sigstore.json" \
+            --certificate-identity "https://github.com/$GITHUB_REPOSITORY/.github/workflows/evidence.yml@$GITHUB_REF" \
+            --certificate-oidc-issuer https://token.actions.githubusercontent.com
+          echo "name=$NAME" >> "$GITHUB_OUTPUT"
+          echo "subjects=$(cd out && sha256sum "$NAME.tar.gz" | base64 -w0)" >> "$GITHUB_OUTPUT"
+
+      - name: Keep it with the run
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: evidence
+          path: out/
+          retention-days: 90
+
+  provenance:
+    name: SLSA provenance for the evidence
+    if: github.event_name == 'release'
+    needs: evidence
+    permissions:
+      actions: read
+      id-token: write
+      contents: write
+    # By tag, as the generator requires (release-assets.yml says why).
+    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v2.1.0
+    with:
+      base64-subjects: ${{ needs.evidence.outputs.subjects }}
+      provenance-name: ${{ needs.evidence.outputs.name }}.intoto.jsonl
+      upload-assets: false
+
+  attach:
+    name: Attach the evidence to the release, and verify it as a stranger would
+    if: github.event_name == 'release'
+    needs: [evidence, provenance]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - name: Install cosign
+        uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
+
+      - name: Install slsa-verifier
+        uses: slsa-framework/slsa-verifier/actions/installer@ea584f4502babc6f60d9bc799dbbb13c1caa9ee6 # v2.7.1
+
+      - name: Download the evidence and its signature
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: evidence
+          path: out
+
+      - name: Download its provenance
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: ${{ needs.provenance.outputs.provenance-name }}
+          path: out
+
+      - name: Attach all three
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          TAG: ${{ github.event.release.tag_name }}
+          NAME: ${{ needs.evidence.outputs.name }}
+        run: gh release upload "$TAG" "out/$NAME.tar.gz" "out/$NAME.tar.gz.sigstore.json" "out/$NAME.intoto.jsonl" --clobber
+
+      - name: Verify what the release now holds, and that a changed copy fails
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.event.release.tag_name }}
+          NAME: ${{ needs.evidence.outputs.name }}
+        run: |
+          set -euo pipefail
+          mkdir -p check && cd check
+          gh release download "$TAG" -R "$GITHUB_REPOSITORY" -p "$NAME.tar.gz" -p "$NAME.tar.gz.sigstore.json" -p "$NAME.intoto.jsonl"
+          sig=(--certificate-identity "https://github.com/$GITHUB_REPOSITORY/.github/workflows/evidence.yml@refs/tags/$TAG"
+               --certificate-oidc-issuer https://token.actions.githubusercontent.com)
+          cosign verify-blob "$NAME.tar.gz" --bundle "$NAME.tar.gz.sigstore.json" "${sig[@]}"
+          slsa-verifier verify-artifact "$NAME.tar.gz" --provenance-path "$NAME.intoto.jsonl" \
+            --source-uri "github.com/$GITHUB_REPOSITORY" --source-tag "$TAG"
+          cp "$NAME.tar.gz" changed.tar.gz && printf 'x' >> changed.tar.gz
+          if cosign verify-blob changed.tar.gz --bundle "$NAME.tar.gz.sigstore.json" "${sig[@]}"; then
+            echo "::error::cosign accepted the evidence with one byte appended"; exit 1
+          fi
+          if slsa-verifier verify-artifact changed.tar.gz --provenance-path "$NAME.intoto.jsonl" \
+               --source-uri "github.com/$GITHUB_REPOSITORY" --source-tag "$TAG"; then
+            echo "::error::slsa-verifier accepted the evidence with one byte appended"; exit 1
+          fi
+          echo "the evidence verifies, and a changed copy does not"
+
+  plants:
+    name: "Plant: ${{ matrix.plant }}"
+    needs: checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        plant:
+          - remove:verify-models
+          - remove:model-volumes
+          - remove:carried-images
+          - remove:models-need-kyverno
+          - remove:egress-node
+          - audit:verify-models
+          - phantom-mapping
+    env:
+      PLANT: ${{ matrix.plant }}
+      RUN_ID: ${{ github.run_id }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install the tools and trestle, each by hash
+        run: |
+          set -euo pipefail
+          python3 -m venv .venv
+          .venv/bin/pip install --quiet --require-hashes --no-deps -r requirements.lock
+          echo "$PWD/.venv/bin" >> "$GITHUB_PATH"
+          bash scripts/install-tools.sh >> "$GITHUB_PATH"
+
+      - name: Run it broken, and the gate must catch it
+        run: bash scripts/run.sh
+
+      - name: What the run showed
+        if: always()
+        run: |
+          [ -f .cache/run/evidence/summary.md ] && cat .cache/run/evidence/summary.md >> "$GITHUB_STEP_SUMMARY"
+          [ -f .cache/run/evidence/summary.md ] && cat .cache/run/evidence/summary.md || echo "no evidence was written"

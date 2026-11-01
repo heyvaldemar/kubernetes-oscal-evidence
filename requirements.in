@@ -1,0 +1,4 @@
+# compliance-trestle, OSCAL Compass's OSCAL tooling, and what it needs.
+# requirements.lock is generated from this with hashes for every file:
+#   uv pip compile --universal --python-version 3.13 --generate-hashes requirements.in -o requirements.lock
+compliance-trestle==5.2.0

@@ -1,0 +1,193 @@
+{
+  "plant": null,
+  "workloads": [
+    {
+      "workload": "inference/deployment/model-server",
+      "model": "registry.boundary.internal:5000/models/model@sha256:68a6b16e1e0ee5f302bf9716e0c8568bb222c2ebf53daf1a8bcc1118296c582d",
+      "applied": true,
+      "message": "deployment.apps/model-server unchanged",
+      "running": true
+    },
+    {
+      "workload": "default/pod/ordinary-pod",
+      "applied": true,
+      "message": "pod/ordinary-pod unchanged",
+      "running": true
+    }
+  ],
+  "tests": [
+    {
+      "test": "kyverno-away",
+      "source": "tests/e2e/gameday.sh (step 1)",
+      "flagship_says": "Kyverno's admission controller at zero replicas: the signed model is refused, and admitted again once Kyverno is back",
+      "expect": "no params found for policy binding with `Deny` parameterNotFoundAction",
+      "webhook": "deleted by Kyverno on the way down",
+      "admitted": false,
+      "refused_by": "models-need-kyverno",
+      "message": "failed to configure binding: no params found for policy binding with `Deny` parameterNotFoundAction",
+      "readmitted_after_seconds": 12
+    },
+    {
+      "test": "image-by-tag",
+      "source": "tests/e2e/plants/image-by-tag.yaml",
+      "flagship_says": "an image the bundle carried, named by its tag alone",
+      "expect": "named by digest",
+      "admitted": false,
+      "refused_by": "carried-images",
+      "message": "every image a pod runs is named by digest"
+    },
+    {
+      "test": "image-not-carried",
+      "source": "tests/e2e/plants/image-not-carried.yaml",
+      "flagship_says": "an image the bundle never carried, by a digest of its own",
+      "expect": "one the bundle carried",
+      "admitted": false,
+      "refused_by": "carried-images",
+      "message": "every image a pod runs is one the bundle carried"
+    },
+    {
+      "test": "model-by-tag",
+      "source": "tests/e2e/plants/model-by-tag.yaml",
+      "flagship_says": "the signed model, named by tag instead of digest",
+      "expect": "by digest",
+      "admitted": false,
+      "refused_by": "carried-images",
+      "message": "every image a pod runs is named by digest"
+    },
+    {
+      "test": "model-licence-concluded",
+      "source": "tests/e2e/plants/model-licence-concluded.yaml",
+      "flagship_says": "the control: model weights signed by the operator, declared Apache-2.0 OR CC-BY-NC-4.0 and concluded to Apache-2.0",
+      "expect": "admitted",
+      "admitted": true,
+      "refused_by": null,
+      "message": "pod/model-licence-concluded created (server dry run)"
+    },
+    {
+      "test": "model-licence-expression",
+      "source": "tests/e2e/plants/model-licence-expression.yaml",
+      "flagship_says": "model weights signed by the operator, whose AI-BOM gives its licence as an SPDX expression, Apache-2.0 AND MIT",
+      "expect": "names each licence by its SPDX id, with no expression",
+      "admitted": false,
+      "refused_by": "verify-models",
+      "message": "Policy verify-models failed: the model's AI-BOM names each licence by its SPDX id, with no expression and no nested component (scripts/mlbom.py concludes an expression to ids)"
+    },
+    {
+      "test": "model-licence-mixed",
+      "source": "tests/e2e/plants/model-licence-mixed.yaml",
+      "flagship_says": "model weights signed by the operator, whose AI-BOM lists Apache-2.0 beside CC-BY-NC-4.0",
+      "expect": "every model in the AI-BOM declares only licences the site allows",
+      "admitted": false,
+      "refused_by": "verify-models",
+      "message": "Policy verify-models failed: every model in the AI-BOM declares only licences the site allows (Apache-2.0, MIT)"
+    },
+    {
+      "test": "model-licence-second",
+      "source": "tests/e2e/plants/model-licence-second.yaml",
+      "flagship_says": "model weights signed by the operator, whose AI-BOM lists a second model with no licence beside the licensed one",
+      "expect": "every model in the AI-BOM declares only licences the site allows",
+      "admitted": false,
+      "refused_by": "verify-models",
+      "message": "Policy verify-models failed: every model in the AI-BOM declares only licences the site allows (Apache-2.0, MIT)"
+    },
+    {
+      "test": "model-nobom",
+      "source": "tests/e2e/plants/model-nobom.yaml",
+      "flagship_says": "model weights signed by the operator, with no AI-BOM",
+      "expect": "model weights carry an AI-BOM signed with the operator's key",
+      "admitted": false,
+      "refused_by": "verify-models",
+      "message": "Policy verify-models failed: model weights carry an AI-BOM signed with the operator's key"
+    },
+    {
+      "test": "model-signed",
+      "source": "tests/e2e/plants/model-signed.yaml",
+      "flagship_says": "the control: the signed model, by digest",
+      "expect": "admitted",
+      "admitted": true,
+      "refused_by": null,
+      "message": "pod/model-signed created (server dry run)"
+    },
+    {
+      "test": "model-stranger",
+      "source": "tests/e2e/plants/model-stranger.yaml",
+      "flagship_says": "model weights signed by a key the cluster does not trust",
+      "expect": "signed with the operator's key",
+      "admitted": false,
+      "refused_by": "verify-models",
+      "message": "Policy verify-models failed: model weights are signed with the operator's key"
+    },
+    {
+      "test": "model-unlicensed",
+      "source": "tests/e2e/plants/model-unlicensed.yaml",
+      "flagship_says": "model weights signed by the operator, whose AI-BOM declares a licence the site does not allow",
+      "expect": "every model in the AI-BOM declares only licences the site allows",
+      "admitted": false,
+      "refused_by": "verify-models",
+      "message": "Policy verify-models failed: every model in the AI-BOM declares only licences the site allows (Apache-2.0, MIT)"
+    },
+    {
+      "test": "model-unsigned",
+      "source": "tests/e2e/plants/model-unsigned.yaml",
+      "flagship_says": "model weights nobody signed",
+      "expect": "signed with the operator's key",
+      "admitted": false,
+      "refused_by": "verify-models",
+      "message": "Policy verify-models failed: model weights are signed with the operator's key"
+    },
+    {
+      "test": "volume-elsewhere",
+      "source": "tests/e2e/plants/volume-elsewhere.yaml",
+      "flagship_says": "an image volume from outside the models path",
+      "expect": "only from registry.boundary.internal:5000/models",
+      "admitted": false,
+      "refused_by": "model-volumes",
+      "message": "model weights come only from registry.boundary.internal:5000/models, by digest"
+    },
+    {
+      "test": "volume-not-carried",
+      "source": "tests/e2e/plants/volume-not-carried.yaml",
+      "flagship_says": "an image the bundle never carried, mounted as a volume where no model policy looks: carried-images holds every image a pod uses, volumes too",
+      "expect": "one the bundle carried",
+      "admitted": false,
+      "refused_by": "carried-images",
+      "message": "every image a pod runs is one the bundle carried"
+    },
+    {
+      "test": "egress-node-name",
+      "source": "tests/e2e/plants-frontier/egress-node-name.yaml",
+      "flagship_says": "a pod that names the egress node and skips the scheduler and its taint",
+      "expect": "may not name its node",
+      "admitted": false,
+      "refused_by": "egress-node",
+      "message": "a pod may not name its node and skip the scheduler, which is how a taint is passed by"
+    },
+    {
+      "test": "egress-tolerate-all",
+      "source": "tests/e2e/plants-frontier/egress-tolerate-all.yaml",
+      "flagship_says": "a pod outside the gateway's namespace that tolerates every taint",
+      "expect": "may not tolerate every taint",
+      "admitted": false,
+      "refused_by": "egress-node",
+      "message": "a pod outside namespace gateway may not tolerate every taint, the egress node's among them"
+    },
+    {
+      "test": "egress-toleration",
+      "source": "tests/e2e/plants-frontier/egress-toleration.yaml",
+      "flagship_says": "a pod outside the gateway's namespace that tolerates the egress node's taint",
+      "expect": "may not tolerate its taint",
+      "admitted": false,
+      "refused_by": "egress-node",
+      "message": "only the gateway runs on the egress node; a pod outside namespace gateway may not tolerate its taint"
+    },
+    {
+      "test": "ordinary-pod",
+      "source": "tests/e2e/plants-frontier/ordinary-pod.yaml",
+      "flagship_says": "the control: the same pod with no toleration and no node named",
+      "expect": "admitted",
+      "admitted": true,
+      "refused_by": null,
+      "message": "pod/ordinary-pod unchanged (server dry run)"
+    }
+  ]
+}

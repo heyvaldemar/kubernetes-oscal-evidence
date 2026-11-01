@@ -1,0 +1,27 @@
+# The flagship's two-node cluster from kind/frontier.yaml at the release
+# flagship.lock pins, with its node image: everything runs on the control
+# plane, and the worker is the egress node, labelled and tainted the same
+# way, so that the policy that keeps pods off it (admission/egress-node.yaml)
+# has a node to keep them off. The name differs; scripts/tests.sh writes it
+# into the flagship's planted pods where they name the node.
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+name: oscal-evidence
+nodes:
+  - role: control-plane
+    image: kindest/node:v1.37.0@sha256:a1ed56cfb0e7b93589bdf97c8cd566405a265939e3620fc4f5de89adff580ae5
+    kubeadmConfigPatches:
+      - |
+        kind: InitConfiguration
+        nodeRegistration:
+          taints: []
+  - role: worker
+    image: kindest/node:v1.37.0@sha256:a1ed56cfb0e7b93589bdf97c8cd566405a265939e3620fc4f5de89adff580ae5
+    labels:
+      boundary.heyvaldemar.com/egress: anthropic
+    kubeadmConfigPatches:
+      - |
+        kind: JoinConfiguration
+        nodeRegistration:
+          taints:
+            - {key: boundary.heyvaldemar.com/egress, value: anthropic, effect: NoSchedule}

@@ -1,0 +1,10 @@
+# The system whose admission controls this repository turns into evidence:
+# heyvaldemar/kubernetes-air-gapped-ai-agent, at one release. Its policies,
+# its planted pods and its AI-BOM writer are read from that release's signed
+# source archive, never from a branch, and scripts/flagship.sh refuses the
+# archive unless all three hold: its sha256 is the one below, cosign verifies
+# its keyless signature as made by the flagship's release workflow on this
+# tag, and slsa-verifier verifies its SLSA provenance for this tag.
+#
+# repository  tag  sha256-of-the-source-archive
+heyvaldemar/kubernetes-air-gapped-ai-agent v1.8.0 4c5d2eed62aa7bf43cd17be97900bf5b1e890cf987d5f87c22084d9214d9e106

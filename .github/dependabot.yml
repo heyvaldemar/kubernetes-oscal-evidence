@@ -1,0 +1,17 @@
+# Keeps the pinned GitHub Actions current. The tools, the images, trestle
+# and the flagship release are pinned by hash in tools.lock, ci-images.pins,
+# requirements.lock and flagship.lock; they are moved by hand, with the new
+# hash checked against the publisher's.
+#
+# Grouped: one pull request per week is a queue that gets read.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      github-actions:
+        patterns: ["*"]
+    commit-message:
+      prefix: ci

@@ -1,0 +1,324 @@
+{
+  "apiVersion": "v1",
+  "items": [
+    {
+      "apiVersion": "wgpolicyk8s.io/v1alpha2",
+      "kind": "PolicyReport",
+      "metadata": {
+        "creationTimestamp": "2026-11-01T22:19:31Z",
+        "generation": 4,
+        "labels": {
+          "app.kubernetes.io/managed-by": "kyverno"
+        },
+        "name": "aa066855-220d-4737-8084-50d7a80ff223",
+        "namespace": "default",
+        "ownerReferences": [
+          {
+            "apiVersion": "v1",
+            "kind": "Pod",
+            "name": "ordinary-pod",
+            "uid": "aa066855-220d-4737-8084-50d7a80ff223"
+          }
+        ],
+        "resourceVersion": "1614",
+        "uid": "e5571fb4-88f0-425d-b507-a46f8c2d56a2"
+      },
+      "results": [
+        {
+          "policy": "carried-images",
+          "properties": {
+            "binding": "carried-images",
+            "process": "background scan"
+          },
+          "result": "pass",
+          "rule": "carried-images",
+          "scored": true,
+          "source": "ValidatingAdmissionPolicy",
+          "timestamp": {
+            "nanos": 0,
+            "seconds": 1793571604
+          }
+        }
+      ],
+      "scope": {
+        "apiVersion": "v1",
+        "kind": "Pod",
+        "name": "ordinary-pod",
+        "namespace": "default",
+        "uid": "aa066855-220d-4737-8084-50d7a80ff223"
+      },
+      "summary": {
+        "error": 0,
+        "fail": 0,
+        "pass": 1,
+        "skip": 0,
+        "warn": 0
+      }
+    },
+    {
+      "apiVersion": "wgpolicyk8s.io/v1alpha2",
+      "kind": "PolicyReport",
+      "metadata": {
+        "creationTimestamp": "2026-11-01T22:19:31Z",
+        "generation": 3,
+        "labels": {
+          "app.kubernetes.io/managed-by": "kyverno"
+        },
+        "name": "ad5d88fb-dd5b-4210-b468-75f5da8f0276",
+        "namespace": "inference",
+        "ownerReferences": [
+          {
+            "apiVersion": "v1",
+            "kind": "Pod",
+            "name": "model-server-cf9b6f49-jjdlc",
+            "uid": "ad5d88fb-dd5b-4210-b468-75f5da8f0276"
+          }
+        ],
+        "resourceVersion": "1536",
+        "uid": "39fcc573-d5f8-4439-a075-081e58c88fc4"
+      },
+      "results": [
+        {
+          "policy": "carried-images",
+          "properties": {
+            "binding": "carried-images",
+            "process": "background scan"
+          },
+          "result": "pass",
+          "rule": "carried-images",
+          "scored": true,
+          "source": "ValidatingAdmissionPolicy",
+          "timestamp": {
+            "nanos": 0,
+            "seconds": 1793571585
+          }
+        },
+        {
+          "policy": "model-volumes",
+          "properties": {
+            "binding": "model-volumes",
+            "process": "background scan"
+          },
+          "result": "pass",
+          "rule": "model-volumes",
+          "scored": true,
+          "source": "ValidatingAdmissionPolicy",
+          "timestamp": {
+            "nanos": 0,
+            "seconds": 1793571585
+          }
+        },
+        {
+          "policy": "models-need-kyverno",
+          "properties": {
+            "binding": "models-need-kyverno",
+            "process": "background scan"
+          },
+          "result": "pass",
+          "rule": "models-need-kyverno",
+          "scored": true,
+          "source": "ValidatingAdmissionPolicy",
+          "timestamp": {
+            "nanos": 0,
+            "seconds": 1793571585
+          }
+        },
+        {
+          "message": "success",
+          "policy": "verify-models",
+          "properties": {
+            "process": "background scan"
+          },
+          "result": "pass",
+          "rule": "verify-models",
+          "scored": true,
+          "source": "KyvernoImageValidatingPolicy",
+          "timestamp": {
+            "nanos": 0,
+            "seconds": 1793571585
+          }
+        }
+      ],
+      "scope": {
+        "apiVersion": "v1",
+        "kind": "Pod",
+        "name": "model-server-cf9b6f49-jjdlc",
+        "namespace": "inference",
+        "uid": "ad5d88fb-dd5b-4210-b468-75f5da8f0276"
+      },
+      "summary": {
+        "error": 0,
+        "fail": 0,
+        "pass": 4,
+        "skip": 0,
+        "warn": 0
+      }
+    },
+    {
+      "apiVersion": "wgpolicyk8s.io/v1alpha2",
+      "kind": "PolicyReport",
+      "metadata": {
+        "creationTimestamp": "2026-11-01T22:18:25Z",
+        "generation": 4,
+        "labels": {
+          "app.kubernetes.io/managed-by": "kyverno"
+        },
+        "name": "15a42155-7b14-48de-8940-d4b2d034700d",
+        "namespace": "kyverno",
+        "ownerReferences": [
+          {
+            "apiVersion": "v1",
+            "kind": "Pod",
+            "name": "kyverno-reports-controller-86d59886fd-p6l72",
+            "uid": "15a42155-7b14-48de-8940-d4b2d034700d"
+          }
+        ],
+        "resourceVersion": "1534",
+        "uid": "0296a40e-150f-4ddd-9991-8b3df02ae08b"
+      },
+      "results": [
+        {
+          "policy": "carried-images",
+          "properties": {
+            "binding": "carried-images",
+            "process": "background scan"
+          },
+          "result": "pass",
+          "rule": "carried-images",
+          "scored": true,
+          "source": "ValidatingAdmissionPolicy",
+          "timestamp": {
+            "nanos": 0,
+            "seconds": 1793571585
+          }
+        }
+      ],
+      "scope": {
+        "apiVersion": "v1",
+        "kind": "Pod",
+        "name": "kyverno-reports-controller-86d59886fd-p6l72",
+        "namespace": "kyverno",
+        "uid": "15a42155-7b14-48de-8940-d4b2d034700d"
+      },
+      "summary": {
+        "error": 0,
+        "fail": 0,
+        "pass": 1,
+        "skip": 0,
+        "warn": 0
+      }
+    },
+    {
+      "apiVersion": "wgpolicyk8s.io/v1alpha2",
+      "kind": "PolicyReport",
+      "metadata": {
+        "creationTimestamp": "2026-11-01T22:18:25Z",
+        "generation": 4,
+        "labels": {
+          "app.kubernetes.io/managed-by": "kyverno"
+        },
+        "name": "94469611-3022-432b-8c35-23a8614a3743",
+        "namespace": "kyverno",
+        "ownerReferences": [
+          {
+            "apiVersion": "v1",
+            "kind": "Pod",
+            "name": "kyverno-background-controller-594f76ccb6-xt9rr",
+            "uid": "94469611-3022-432b-8c35-23a8614a3743"
+          }
+        ],
+        "resourceVersion": "1532",
+        "uid": "9dbd3bbc-2998-4180-9501-62a9975da414"
+      },
+      "results": [
+        {
+          "policy": "carried-images",
+          "properties": {
+            "binding": "carried-images",
+            "process": "background scan"
+          },
+          "result": "pass",
+          "rule": "carried-images",
+          "scored": true,
+          "source": "ValidatingAdmissionPolicy",
+          "timestamp": {
+            "nanos": 0,
+            "seconds": 1793571585
+          }
+        }
+      ],
+      "scope": {
+        "apiVersion": "v1",
+        "kind": "Pod",
+        "name": "kyverno-background-controller-594f76ccb6-xt9rr",
+        "namespace": "kyverno",
+        "uid": "94469611-3022-432b-8c35-23a8614a3743"
+      },
+      "summary": {
+        "error": 0,
+        "fail": 0,
+        "pass": 1,
+        "skip": 0,
+        "warn": 0
+      }
+    },
+    {
+      "apiVersion": "wgpolicyk8s.io/v1alpha2",
+      "kind": "PolicyReport",
+      "metadata": {
+        "creationTimestamp": "2026-11-01T22:18:25Z",
+        "generation": 4,
+        "labels": {
+          "app.kubernetes.io/managed-by": "kyverno"
+        },
+        "name": "bccf3461-07cf-4ea9-8a5e-10319fc0812f",
+        "namespace": "kyverno",
+        "ownerReferences": [
+          {
+            "apiVersion": "v1",
+            "kind": "Pod",
+            "name": "kyverno-cleanup-controller-b8b66b769-w8vfs",
+            "uid": "bccf3461-07cf-4ea9-8a5e-10319fc0812f"
+          }
+        ],
+        "resourceVersion": "1531",
+        "uid": "7a5919e3-a8f3-44d5-9a4a-0e21c8b0e2ca"
+      },
+      "results": [
+        {
+          "policy": "carried-images",
+          "properties": {
+            "binding": "carried-images",
+            "process": "background scan"
+          },
+          "result": "pass",
+          "rule": "carried-images",
+          "scored": true,
+          "source": "ValidatingAdmissionPolicy",
+          "timestamp": {
+            "nanos": 0,
+            "seconds": 1793571585
+          }
+        }
+      ],
+      "scope": {
+        "apiVersion": "v1",
+        "kind": "Pod",
+        "name": "kyverno-cleanup-controller-b8b66b769-w8vfs",
+        "namespace": "kyverno",
+        "uid": "bccf3461-07cf-4ea9-8a5e-10319fc0812f"
+      },
+      "summary": {
+        "error": 0,
+        "fail": 0,
+        "pass": 1,
+        "skip": 0,
+        "warn": 0
+      }
+    }
+  ],
+  "kind": "List",
+  "metadata": {
+    "resourceVersion": ""
+  }
+}

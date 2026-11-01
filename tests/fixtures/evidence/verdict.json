@@ -1,0 +1,143 @@
+{
+  "run": "a local run",
+  "plant": null,
+  "flagship": "heyvaldemar/kubernetes-air-gapped-ai-agent v1.8.0",
+  "frameworks": {
+    "nist_800_53": {
+      "cm-14": {
+        "state": "satisfied",
+        "why": []
+      },
+      "si-7": {
+        "state": "satisfied",
+        "why": []
+      },
+      "sr-4": {
+        "state": "satisfied",
+        "why": []
+      },
+      "sr-11": {
+        "state": "satisfied",
+        "why": []
+      },
+      "cm-7.5": {
+        "state": "satisfied",
+        "why": []
+      },
+      "sc-24": {
+        "state": "satisfied",
+        "why": []
+      },
+      "ac-6": {
+        "state": "satisfied",
+        "why": []
+      }
+    },
+    "nist_ssdf": {
+      "PW.4.4": {
+        "state": "satisfied",
+        "why": []
+      }
+    },
+    "nist_ai_rmf": {
+      "MANAGE_3.1": {
+        "state": "satisfied",
+        "why": []
+      }
+    }
+  },
+  "tests": {
+    "kyverno-away": {
+      "passed": true,
+      "why": "refused by models-need-kyverno: failed to configure binding: no params found for policy binding with `Deny` parameterNotFoundAction"
+    },
+    "image-by-tag": {
+      "passed": true,
+      "why": "refused by carried-images: every image a pod runs is named by digest"
+    },
+    "image-not-carried": {
+      "passed": true,
+      "why": "refused by carried-images: every image a pod runs is one the bundle carried"
+    },
+    "volume-not-carried": {
+      "passed": true,
+      "why": "refused by carried-images: every image a pod runs is one the bundle carried"
+    },
+    "model-by-tag": {
+      "passed": true,
+      "why": "refused by carried-images: every image a pod runs is named by digest"
+    },
+    "volume-elsewhere": {
+      "passed": true,
+      "why": "refused by model-volumes: model weights come only from registry.boundary.internal:5000/models, by digest"
+    },
+    "model-unsigned": {
+      "passed": true,
+      "why": "refused by verify-models: Policy verify-models failed: model weights are signed with the operator's key"
+    },
+    "model-stranger": {
+      "passed": true,
+      "why": "refused by verify-models: Policy verify-models failed: model weights are signed with the operator's key"
+    },
+    "model-nobom": {
+      "passed": true,
+      "why": "refused by verify-models: Policy verify-models failed: model weights carry an AI-BOM signed with the operator's key"
+    },
+    "model-unlicensed": {
+      "passed": true,
+      "why": "refused by verify-models: Policy verify-models failed: every model in the AI-BOM declares only licences the site allows (Apache-2.0, MIT)"
+    },
+    "model-licence-mixed": {
+      "passed": true,
+      "why": "refused by verify-models: Policy verify-models failed: every model in the AI-BOM declares only licences the site allows (Apache-2.0, MIT)"
+    },
+    "model-licence-second": {
+      "passed": true,
+      "why": "refused by verify-models: Policy verify-models failed: every model in the AI-BOM declares only licences the site allows (Apache-2.0, MIT)"
+    },
+    "model-licence-expression": {
+      "passed": true,
+      "why": "refused by verify-models: Policy verify-models failed: the model's AI-BOM names each licence by its SPDX id, with no expression and no nested component (scripts/mlbom.py concludes an expression to ids)"
+    },
+    "model-signed": {
+      "passed": true,
+      "why": "admitted"
+    },
+    "model-licence-concluded": {
+      "passed": true,
+      "why": "admitted"
+    },
+    "egress-node-name": {
+      "passed": true,
+      "why": "refused by egress-node: a pod may not name its node and skip the scheduler, which is how a taint is passed by"
+    },
+    "egress-tolerate-all": {
+      "passed": true,
+      "why": "refused by egress-node: a pod outside namespace gateway may not tolerate every taint, the egress node's among them"
+    },
+    "egress-toleration": {
+      "passed": true,
+      "why": "refused by egress-node: only the gateway runs on the egress node; a pod outside namespace gateway may not tolerate its taint"
+    },
+    "ordinary-pod": {
+      "passed": true,
+      "why": "admitted"
+    }
+  },
+  "unmapped_tests": [],
+  "workloads": [
+    {
+      "workload": "inference/deployment/model-server",
+      "model": "registry.boundary.internal:5000/models/model@sha256:68a6b16e1e0ee5f302bf9716e0c8568bb222c2ebf53daf1a8bcc1118296c582d",
+      "applied": true,
+      "message": "deployment.apps/model-server unchanged",
+      "running": true
+    },
+    {
+      "workload": "default/pod/ordinary-pod",
+      "applied": true,
+      "message": "pod/ordinary-pod unchanged",
+      "running": true
+    }
+  ]
+}

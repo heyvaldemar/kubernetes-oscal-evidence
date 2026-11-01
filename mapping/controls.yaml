@@ -1,0 +1,220 @@
+# Which controls the flagship's admission policies carry, and which test proves each.
+#
+# This file is the mapping, written for a person to read; scripts/component.py
+# turns it into the OSCAL component definition in oscal/, and CI fails if
+# the two differ. Every control below names the policy that carries it and
+# the planted pods that show it working: pods the policy must refuse, and a
+# control pod it must admit. A control is claimed only where a policy does
+# the work the control's statement asks for, and each says what it leaves
+# out. Nothing here is a claim that a system meets a framework.
+#
+# The policies and the planted pods are the flagship's, read from its
+# signed release (flagship.lock). The catalogs are NIST's own OSCAL,
+# pinned by commit and sha256 (catalogs.lock).
+
+# The mapping's own version and date, written into the component definition.
+version: 1.0.0
+last_modified: "2026-11-01T00:00:00+00:00"
+
+frameworks:
+  nist_800_53:
+    title: NIST SP 800-53 Rev. 5.2.0
+    catalog: NIST_SP-800-53_rev5_catalog.json
+  nist_ssdf:
+    title: NIST SP 800-218 SSDF v1.1
+    catalog: NIST_SP800-218_ver1_catalog.json
+  nist_ai_rmf:
+    title: NIST AI RMF 1.0 (AI 100-1)
+    catalog: NIST_AI-RMF_v1_catalog.json
+
+# The flagship's policies (admission/ in its release). "posture: kyverno"
+# means Kyverno's PolicyReports describe the running pods for this policy,
+# and C2P turns them into observations. "posture: none" means the reports
+# cannot judge it, and the README says why; it is judged by its tests alone.
+rules:
+  verify-models:
+    file: admission/verify-models.yaml
+    kind: Kyverno ImageValidatingPolicy
+    description: >-
+      Model weights are mounted only from the registry inside the boundary,
+      by digest, signed with the operator's key, with an AI-BOM attested with
+      the same key whose every licence is one the site allows.
+    posture: kyverno
+  model-volumes:
+    file: admission/model-volumes.yaml
+    kind: Kubernetes ValidatingAdmissionPolicy
+    description: >-
+      An image volume in a namespace for verified models names an image
+      under the registry's models path, by digest, checked by the API server
+      itself, so the rule holds while Kyverno is down.
+    posture: kyverno
+  carried-images:
+    file: admission/carried-images.yaml
+    kind: Kubernetes ValidatingAdmissionPolicy
+    description: >-
+      Every image a pod uses (containers, init and ephemeral containers,
+      image volumes) is named by digest, and the digest is one the signed
+      bundle carried; kube-system and local-path-storage excepted.
+    posture: kyverno
+  models-need-kyverno:
+    file: admission/kyverno-guard.yaml
+    kind: Kubernetes ValidatingAdmissionPolicy
+    description: >-
+      No model is mounted while Kyverno's webhook for verify-models is
+      missing or no longer fails closed.
+    posture: kyverno
+  egress-node:
+    file: admission/egress-node.yaml
+    kind: Kubernetes ValidatingAdmissionPolicy
+    description: >-
+      Only the gateway runs on the egress node: a pod outside its namespace
+      may not tolerate the node's taint, tolerate every taint, or name a node
+      when it is created.
+    posture: none
+    why: >-
+      Its third rule applies only when a pod is created. Kyverno's background
+      scan evaluates every stored pod as if it were being created, and every
+      pod the scheduler placed names its node, so the report says "fail" for
+      pods that broke nothing.
+
+# Every admission test scripts/tests.py records, and what it must show:
+# refused by the named policy with the flagship's expected words, or
+# admitted. A test the run records and this list does not name fails the
+# gate, and so does a test named here that the run did not record.
+tests:
+  kyverno-away: {outcome: refused, by: [models-need-kyverno]}
+  image-by-tag: {outcome: refused, by: [carried-images]}
+  image-not-carried: {outcome: refused, by: [carried-images]}
+  volume-not-carried: {outcome: refused, by: [carried-images]}
+  # Both native policies refuse a model named by tag, and the API server
+  # reports one of them: the test holds the layering, and proves no single
+  # control.
+  model-by-tag: {outcome: refused, by: [carried-images, model-volumes]}
+  volume-elsewhere: {outcome: refused, by: [model-volumes]}
+  model-unsigned: {outcome: refused, by: [verify-models]}
+  model-stranger: {outcome: refused, by: [verify-models]}
+  model-nobom: {outcome: refused, by: [verify-models]}
+  model-unlicensed: {outcome: refused, by: [verify-models]}
+  model-licence-mixed: {outcome: refused, by: [verify-models]}
+  model-licence-second: {outcome: refused, by: [verify-models]}
+  model-licence-expression: {outcome: refused, by: [verify-models]}
+  model-signed: {outcome: admitted}
+  model-licence-concluded: {outcome: admitted}
+  egress-node-name: {outcome: refused, by: [egress-node]}
+  egress-tolerate-all: {outcome: refused, by: [egress-node]}
+  egress-toleration: {outcome: refused, by: [egress-node]}
+  ordinary-pod: {outcome: admitted}
+
+controls:
+  - framework: nist_800_53
+    control: cm-14
+    rules: [verify-models]
+    proven_by: [model-unsigned, model-stranger, model-signed]
+    implementation: >-
+      A pod in a namespace for verified models mounts model weights only if
+      the image's signature verifies with the operator's public key; Kyverno
+      checks it at admission.
+    not_covered: >-
+      Model weights only: container images are held to a list of digests
+      (CM-7(5)), not to signatures. The operator's key is a public key
+      written into the policy, with no certificate and no transparency log.
+
+  - framework: nist_800_53
+    control: si-7
+    rules: [model-volumes, verify-models]
+    proven_by: [volume-elsewhere, model-unsigned, model-stranger, model-signed]
+    implementation: >-
+      A model image is named by its digest, so a changed image is a different
+      name, and its signature is verified before it is mounted; a model that
+      fails either is refused.
+    not_covered: >-
+      Checked when a pod is admitted. The flagship's policy does not check
+      running pods again; here Kyverno re-reads them for its reports, which
+      records and refuses nothing.
+
+  - framework: nist_800_53
+    control: sr-4
+    rules: [verify-models]
+    proven_by: [model-nobom, model-signed]
+    implementation: >-
+      A model is mounted only with an AI-BOM attested with the operator's
+      key: what the model is, where its file came from at which revision, and
+      its sha256.
+    not_covered: >-
+      Admission checks that the provenance record is there and signed, not
+      that it is true of the source. Container images carry no provenance
+      check here.
+
+  - framework: nist_800_53
+    control: sr-11
+    rules: [carried-images]
+    proven_by: [image-not-carried, volume-not-carried, ordinary-pod]
+    implementation: >-
+      An image the signed bundle did not carry is refused, whoever made the
+      pod and however the image reached the cluster: containers, init and
+      ephemeral containers, and image volumes.
+    not_covered: >-
+      Part (b), reporting counterfeit components to anyone, is not done.
+      kube-system and local-path-storage are exempt: their images come with
+      the node image.
+
+  - framework: nist_800_53
+    control: cm-7.5
+    rules: [carried-images]
+    proven_by: [image-by-tag, image-not-carried, ordinary-pod]
+    implementation: >-
+      Deny-all, permit-by-exception: the exceptions are the digests the
+      signed bundle carried, the policy's parameter. An image named by tag
+      alone is refused.
+    not_covered: >-
+      Part (c), reviewing the list of authorized software, is a person's
+      work. kube-system and local-path-storage are exempt.
+
+  - framework: nist_800_53
+    control: sc-24
+    rules: [models-need-kyverno]
+    proven_by: [kyverno-away]
+    implementation: >-
+      With Kyverno's admission controller at zero replicas and its webhook
+      gone, the API server's own policy refuses every model mount: the
+      failure is an outage, not an open door.
+    not_covered: >-
+      Model mounts only. Other pods are admitted while Kyverno is away; their
+      images are still held to the bundle by carried-images, which needs no
+      Kyverno.
+
+  - framework: nist_800_53
+    control: ac-6
+    rules: [egress-node]
+    proven_by: [egress-toleration, egress-tolerate-all, egress-node-name, ordinary-pod]
+    implementation: >-
+      Only the gateway may run on the one node with a way out of the cluster:
+      a pod elsewhere may not tolerate that node's taint, tolerate every
+      taint, or name the node and skip the scheduler.
+    not_covered: >-
+      Where pods run, not what they may do there. Judged by admission tests
+      alone: Kyverno's reports cannot judge this policy (rules.egress-node.why).
+
+  - framework: nist_ssdf
+    control: PW.4.4
+    rules: [verify-models]
+    proven_by: [model-unlicensed, model-licence-mixed, model-licence-second, model-licence-expression, model-licence-concluded]
+    implementation: >-
+      Every model a pod mounts has an AI-BOM in which every model declares
+      only licences the site allows (Apache-2.0, MIT), named by SPDX id;
+      checked at admission.
+    not_covered: >-
+      Licence, signature and provenance record only: no check for known
+      vulnerabilities in the model or in the server that loads it.
+
+  - framework: nist_ai_rmf
+    control: MANAGE_3.1
+    rules: [verify-models]
+    proven_by: [model-unsigned, model-nobom, model-unlicensed, model-signed]
+    implementation: >-
+      Third-party models are held to risk controls where they are used:
+      signed by the operator, with an attested AI-BOM, under a licence the
+      site allows; each refusal names the rule it broke.
+    not_covered: >-
+      Applied and recorded at admission, not monitored over time; the
+      benefits and performance of a third-party model are not assessed here.
