@@ -26,23 +26,24 @@ Every push runs it again. So does a weekly schedule, and so does every release, 
 
 ## The controls
 
-Nine controls from three NIST catalogs, each carried by a policy the flagship ships and proven by planted pods: pods the policy must refuse, and a control pod it must admit. [`mapping/controls.yaml`](mapping/controls.yaml) has every line in full, with what each control leaves out.
+This is the machine-readable form of rows that already exist. The account's [control-to-test matrix](https://github.com/heyvaldemar/fleet-ops/blob/95e34294b69dd54ffa90fe2bcce542b6745ed267/docs/control-evidence.md), shown at [heyvaldemar.com/evidence](https://heyvaldemar.com/evidence/#frameworks-h), maps SLSA, the SSDF, the OWASP Top 10 for LLM Applications and Article 12 of the EU AI Act onto checks, by hand. Every control here names the matrix row it rests on, and [`scripts/component.py`](scripts/component.py) refuses a row the pinned matrix does not have. The SSDF controls are matrix rows themselves. An SP 800-53 or AI RMF control is here only where it maps onto a row the matrix already has; the OWASP rows have no OSCAL catalog to point at, so they are named on the controls that map onto them.
 
-| Framework | Control | Carried by | Proven by |
-|---|---|---|---|
-| SP 800-53 Rev. 5.2.0 | CM-14 Signed Components | verify-models | model-unsigned, model-stranger refused; model-signed admitted |
-| SP 800-53 Rev. 5.2.0 | SI-7 Software, Firmware, and Information Integrity | model-volumes, verify-models | volume-elsewhere, model-unsigned, model-stranger refused; model-signed admitted |
-| SP 800-53 Rev. 5.2.0 | SR-4 Provenance | verify-models | model-nobom refused; model-signed admitted |
-| SP 800-53 Rev. 5.2.0 | SR-11 Component Authenticity | carried-images | image-not-carried, volume-not-carried refused; ordinary-pod admitted |
-| SP 800-53 Rev. 5.2.0 | CM-7(5) Authorized Software, allow-by-exception | carried-images | image-by-tag, image-not-carried refused; ordinary-pod admitted |
-| SP 800-53 Rev. 5.2.0 | SC-24 Fail in Known State | models-need-kyverno | kyverno-away: Kyverno at zero replicas, the signed model refused |
-| SP 800-53 Rev. 5.2.0 | AC-6 Least Privilege | egress-node | egress-toleration, egress-tolerate-all, egress-node-name refused; ordinary-pod admitted |
-| SP 800-218 SSDF v1.1 | PW.4.4 | verify-models | model-unlicensed, model-licence-mixed, -second, -expression refused; model-licence-concluded admitted |
-| AI RMF 1.0 | MANAGE 3.1 | verify-models | model-unsigned, model-nobom, model-unlicensed refused; model-signed admitted |
+Eight controls, each carried by a policy the flagship ships and proven by planted pods: pods the policy must refuse, and a control pod it must admit. They are the flagship's e2e check 9, which the matrix's LLM03 row counts as 12 planted pods refused and 2 controls admitted, and its game day step. [`mapping/controls.yaml`](mapping/controls.yaml) has every line in full, with what each control leaves out.
 
-**Not mapped: SSDF PS.2 and PS.3.** They ask a producer to make release integrity checkable and to archive each release. No admission policy does that. This repository's own releases do (cosign, SLSA provenance), and that is shown by the commands under "Check it yourself", not by a PolicyReport.
+| Framework | Control | Matrix row | Carried by | Proven by |
+|---|---|---|---|---|
+| SSDF v1.1 | PS.3.2 | PS.3.2, LLM04:2025 | verify-models | model-nobom refused; model-signed admitted |
+| SSDF v1.1 | PW.4.4 | PW.4.4, LLM03:2025 | verify-models | model-unlicensed, model-licence-mixed, -second, -expression refused; model-licence-concluded admitted |
+| SP 800-53 Rev. 5.2.0 | CM-14 Signed Components | LLM03:2025 | verify-models, models-need-kyverno | model-unsigned, model-stranger refused; with Kyverno at zero replicas, the signed model refused; model-signed admitted |
+| SP 800-53 Rev. 5.2.0 | SI-7 Software, Firmware, and Information Integrity | LLM03:2025, LLM04:2025 | model-volumes, verify-models | volume-elsewhere, model-unsigned, model-stranger refused; model-signed admitted |
+| SP 800-53 Rev. 5.2.0 | SR-4 Provenance | PS.3.2, LLM04:2025 | verify-models | model-nobom refused; model-signed admitted |
+| SP 800-53 Rev. 5.2.0 | SR-11 Component Authenticity | LLM03:2025 | carried-images | image-not-carried, volume-not-carried refused; model-signed admitted |
+| SP 800-53 Rev. 5.2.0 | CM-7(5) Authorized Software, allow-by-exception | LLM03:2025 | carried-images | image-by-tag, image-not-carried refused; model-signed admitted |
+| AI RMF 1.0 | MANAGE 3.1 | LLM03:2025 | verify-models | model-unsigned, model-nobom, model-unlicensed refused; model-signed admitted |
 
-The policies and the planted pods are read from the flagship's v1.8.0 release archive after cosign and slsa-verifier verify it ([`flagship.lock`](flagship.lock)). The catalogs are NIST's own OSCAL, pinned by commit and sha256 ([`catalogs.lock`](catalogs.lock)), and every finding names the catalog's own statement id.
+**Not mapped.** SSDF PS.2.1 and PS.3.1 ask a producer to make release integrity checkable and to archive each release; no admission policy does that, and the matrix shows them through release signing. Version 1.0.0 also mapped SC-24 Fail in Known State and AC-6 Least Privilege; no matrix row carries either, so 1.1.0 does not. Their tests still run and the gate still needs them to pass: the game day now proves CM-14, and the egress-node pods prove no control. The matrix's gaps stay gaps; nothing here closes one.
+
+The policies and the planted pods are read from the flagship's v1.8.0 release archive after cosign and slsa-verifier verify it ([`flagship.lock`](flagship.lock)). The catalogs are NIST's own OSCAL, and they and the matrix are pinned by commit and sha256 ([`catalogs.lock`](catalogs.lock)). Every finding names the catalog's own statement id and the matrix rows it rests on.
 
 ## What Kyverno's reports needed
 
@@ -52,7 +53,7 @@ The flagship refuses well and reports nothing, because nothing asked it to. Thre
 2. **A CEL policy whose actions include Deny gets no admission report, even for a pod it admits.** In Kyverno 1.19.2, the handlers for ImageValidatingPolicy and ValidatingPolicy decide "blocked" from the policy's actions, not from the outcome (`pkg/webhooks/resource/ivpol/handler.go`, `audit()`), and skip the report when it is set. The legacy ClusterPolicy path decides from the outcome. The flagship's verify-models also turns Kyverno's background scan off, so no path reports it at all. Here its background scan is on: Kyverno re-verifies each running pod's model and writes the result. That field, and the operator's public key that the flagship's own install writes in the same way, are the only differences from the flagship's file.
 3. **Kyverno's reports controller cannot read a webhook configuration**, which is the parameter of models-need-kyverno. Without a role that lets it, Kyverno logs "forbidden" and gives up on the report of each pod that policy matches; until the role was added, verify-models never reached the model server's report either. One aggregated ClusterRole grants read.
 
-The fifth policy cannot be reported honestly. Kyverno's background scan evaluates every stored object as if it were being created (`pkg/admissionpolicy/validate.go`, `admission.Create`). egress-node refuses a pod that names its node at creation, and every pod the scheduler placed names its node. So the report says "fail" for pods that broke nothing. Every run measures this again: after the reports are collected, egress-node is reported for a moment on the admitted ordinary pod, and the answer is kept as `reporting-probe.json`. AC-6 is judged by its admission tests alone.
+The fifth policy cannot be reported honestly. Kyverno's background scan evaluates every stored object as if it were being created (`pkg/admissionpolicy/validate.go`, `admission.Create`). egress-node refuses a pod that names its node at creation, and every pod the scheduler placed names its node. So the report says "fail" for pods that broke nothing. Every run measures this again: after the reports are collected, egress-node is reported for a moment on the admitted ordinary pod, and the answer is kept as `reporting-probe.json`. So egress-node is judged by its admission tests alone, and since 1.1.0 no control rests on it.
 
 ## What C2P needed
 
@@ -74,7 +75,7 @@ A control is satisfied in a run only when all three hold:
 2. Every policy that carries it, and that Kyverno reports on, has at least one running pod in the reports, and every result for it is a pass.
 3. Every test that proves it did what the mapping says: refused by the named policy, with the flagship's own expected words, or admitted.
 
-A control C2P calls not satisfied is never called satisfied here, and a test holds that. [`scripts/gate.py`](scripts/gate.py) reads the signed assessment results themselves, parsed by trestle's models, and exits 1 on any control short of satisfied or any failed admission test, 2 when a document is missing or unreadable. No evidence is a failure, never a pass.
+A control C2P calls not satisfied is never called satisfied here, and a test holds that. [`scripts/gate.py`](scripts/gate.py) reads the signed assessment results themselves, parsed by trestle's models, and exits 1 on any control short of satisfied or any failed admission test, 2 when a document is missing or unreadable. No evidence is a failure, never a pass. Given a plant, the gate passes only if every control resting on the planted policy is not satisfied and a pod that policy must refuse got in: caught for the planted reason, not for some other.
 
 ## The plants
 

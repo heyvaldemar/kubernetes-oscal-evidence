@@ -4,7 +4,7 @@
       "resources": [
         {
           "title": "ApiVersion: v1, Kind: Pod, Namespace: inference, Name: model-server-cf9b6f49-jjdlc",
-          "uuid": "fc2dc040-bfc3-4c25-81ca-fb0e7f295384"
+          "uuid": "30c988f4-9e2e-463e-9385-0a8057e95fe9"
         }
       ]
     },
@@ -13,7 +13,7 @@
     },
     "metadata": {
       "title": "Admission controls of kubernetes-air-gapped-ai-agent v1.8.0: NIST SP 800-218 SSDF v1.1, one run",
-      "last-modified": "2026-11-01T22:21:29+00:00",
+      "last-modified": "2026-11-01T23:19:29+00:00",
       "version": "unreleased",
       "oscal-version": "1.1.3",
       "props": [
@@ -50,7 +50,7 @@
         "description": "OSCAL Assessment Result For Task \"Automated Assessment\"",
         "observations": [
           {
-            "collected": "2026-11-01T22:21:29.708392Z",
+            "collected": "2026-11-01T23:19:29.505608Z",
             "description": "Observation of check verify-models",
             "methods": [
               "TEST-AUTOMATED",
@@ -77,7 +77,7 @@
                         "type": "component"
                       }
                     ],
-                    "task-uuid": "051116c7-e0f4-4600-8005-162f0977d215"
+                    "task-uuid": "c4ae097e-3257-4fbf-b353-b0b8997ecbec"
                   }
                 ]
               }
@@ -110,7 +110,7 @@
                   {
                     "name": "evaluated-on",
                     "ns": "https://oscal-compass.github.io/compliance-trestle/schemas/oscal",
-                    "value": "2026-11-01 22:21:29.708393 +0000 UTC"
+                    "value": "2026-11-01 23:19:29.505608 +0000 UTC"
                   },
                   {
                     "name": "reason",
@@ -118,13 +118,119 @@
                     "value": "success"
                   }
                 ],
-                "subject-uuid": "fc2dc040-bfc3-4c25-81ca-fb0e7f295384",
+                "subject-uuid": "30c988f4-9e2e-463e-9385-0a8057e95fe9",
                 "title": "ApiVersion: v1, Kind: Pod, Namespace: inference, Name: model-server-cf9b6f49-jjdlc",
                 "type": "resource"
               }
             ],
             "title": "verify-models",
-            "uuid": "0da7c8fc-cca2-4abb-8b4c-a2ed9435d7ce"
+            "uuid": "e8536c8e-908d-4aec-883d-14f31f0bddb4"
+          },
+          {
+            "uuid": "6aa9369a-d714-598b-a15b-50e0c03571ba",
+            "title": "Admission test: model-nobom",
+            "description": "model weights signed by the operator, with no AI-BOM",
+            "methods": [
+              "TEST"
+            ],
+            "props": [
+              {
+                "name": "test",
+                "ns": "https://github.com/heyvaldemar/kubernetes-oscal-evidence/ns",
+                "value": "model-nobom"
+              },
+              {
+                "name": "expected-outcome",
+                "ns": "https://github.com/heyvaldemar/kubernetes-oscal-evidence/ns",
+                "value": "refused"
+              },
+              {
+                "name": "verdict",
+                "ns": "https://github.com/heyvaldemar/kubernetes-oscal-evidence/ns",
+                "value": "pass"
+              },
+              {
+                "name": "refused-by-expected",
+                "ns": "https://github.com/heyvaldemar/kubernetes-oscal-evidence/ns",
+                "value": "verify-models"
+              },
+              {
+                "name": "assessment-rule-id",
+                "ns": "https://oscal-compass.github.io/compliance-trestle/schemas/oscal",
+                "value": "verify-models"
+              },
+              {
+                "name": "admitted",
+                "ns": "https://github.com/heyvaldemar/kubernetes-oscal-evidence/ns",
+                "value": "false"
+              },
+              {
+                "name": "refused-by",
+                "ns": "https://github.com/heyvaldemar/kubernetes-oscal-evidence/ns",
+                "value": "verify-models"
+              },
+              {
+                "name": "expected-words",
+                "ns": "https://github.com/heyvaldemar/kubernetes-oscal-evidence/ns",
+                "value": "model weights carry an AI-BOM signed with the operator's key"
+              }
+            ],
+            "collected": "2026-11-01T23:19:29+00:00",
+            "remarks": "refused by verify-models: Policy verify-models failed: model weights carry an AI-BOM signed with the operator's key",
+            "relevant-evidence": [
+              {
+                "href": "https://github.com/heyvaldemar/kubernetes-air-gapped-ai-agent/blob/v1.8.0/tests/e2e/plants/model-nobom.yaml",
+                "description": "The planted pod, as the flagship ships it at v1.8.0"
+              }
+            ]
+          },
+          {
+            "uuid": "57965008-d4ab-51f2-af30-9bc9a7eb8a18",
+            "title": "Admission test: model-signed",
+            "description": "the control: the signed model, by digest",
+            "methods": [
+              "TEST"
+            ],
+            "props": [
+              {
+                "name": "test",
+                "ns": "https://github.com/heyvaldemar/kubernetes-oscal-evidence/ns",
+                "value": "model-signed"
+              },
+              {
+                "name": "expected-outcome",
+                "ns": "https://github.com/heyvaldemar/kubernetes-oscal-evidence/ns",
+                "value": "admitted"
+              },
+              {
+                "name": "verdict",
+                "ns": "https://github.com/heyvaldemar/kubernetes-oscal-evidence/ns",
+                "value": "pass"
+              },
+              {
+                "name": "assessment-rule-id",
+                "ns": "https://oscal-compass.github.io/compliance-trestle/schemas/oscal",
+                "value": "verify-models"
+              },
+              {
+                "name": "admitted",
+                "ns": "https://github.com/heyvaldemar/kubernetes-oscal-evidence/ns",
+                "value": "true"
+              },
+              {
+                "name": "expected-words",
+                "ns": "https://github.com/heyvaldemar/kubernetes-oscal-evidence/ns",
+                "value": "admitted"
+              }
+            ],
+            "collected": "2026-11-01T23:19:29+00:00",
+            "remarks": "admitted",
+            "relevant-evidence": [
+              {
+                "href": "https://github.com/heyvaldemar/kubernetes-air-gapped-ai-agent/blob/v1.8.0/tests/e2e/plants/model-signed.yaml",
+                "description": "The planted pod, as the flagship ships it at v1.8.0"
+              }
+            ]
           },
           {
             "uuid": "ff978fd4-16bb-5d8f-b680-314a0909d98e",
@@ -175,7 +281,7 @@
                 "value": "every model in the AI-BOM declares only licences the site allows"
               }
             ],
-            "collected": "2026-11-01T22:21:29+00:00",
+            "collected": "2026-11-01T23:19:29+00:00",
             "remarks": "refused by verify-models: Policy verify-models failed: every model in the AI-BOM declares only licences the site allows (Apache-2.0, MIT)",
             "relevant-evidence": [
               {
@@ -233,7 +339,7 @@
                 "value": "every model in the AI-BOM declares only licences the site allows"
               }
             ],
-            "collected": "2026-11-01T22:21:29+00:00",
+            "collected": "2026-11-01T23:19:29+00:00",
             "remarks": "refused by verify-models: Policy verify-models failed: every model in the AI-BOM declares only licences the site allows (Apache-2.0, MIT)",
             "relevant-evidence": [
               {
@@ -291,7 +397,7 @@
                 "value": "every model in the AI-BOM declares only licences the site allows"
               }
             ],
-            "collected": "2026-11-01T22:21:29+00:00",
+            "collected": "2026-11-01T23:19:29+00:00",
             "remarks": "refused by verify-models: Policy verify-models failed: every model in the AI-BOM declares only licences the site allows (Apache-2.0, MIT)",
             "relevant-evidence": [
               {
@@ -349,7 +455,7 @@
                 "value": "names each licence by its SPDX id, with no expression"
               }
             ],
-            "collected": "2026-11-01T22:21:29+00:00",
+            "collected": "2026-11-01T23:19:29+00:00",
             "remarks": "refused by verify-models: Policy verify-models failed: the model's AI-BOM names each licence by its SPDX id, with no expression and no nested component (scripts/mlbom.py concludes an expression to ids)",
             "relevant-evidence": [
               {
@@ -397,7 +503,7 @@
                 "value": "admitted"
               }
             ],
-            "collected": "2026-11-01T22:21:29+00:00",
+            "collected": "2026-11-01T23:19:29+00:00",
             "remarks": "admitted",
             "relevant-evidence": [
               {
@@ -412,16 +518,70 @@
             {
               "include-controls": [
                 {
+                  "control-id": "PS.3.2"
+                },
+                {
                   "control-id": "PW.4.4"
                 }
               ]
             }
           ]
         },
-        "start": "2026-11-01T17:21:29.70867-05:00",
+        "start": "2026-11-01T18:19:29.505804-05:00",
         "title": "NIST SP 800-218 SSDF v1.1: the admission controls of kubernetes-air-gapped-ai-agent v1.8.0",
-        "uuid": "5f721d7a-8674-4f9f-b689-48d679132b18",
+        "uuid": "5a599d4c-83d8-4c1f-8a12-279160c1d69d",
         "findings": [
+          {
+            "uuid": "399cae5d-c327-5197-a5b7-74b775b423fe",
+            "title": "PS.3.2: satisfied",
+            "description": "Kyverno reported every running pod passing verify-models, and every test that proves it did what the mapping says (model-nobom, model-signed).",
+            "props": [
+              {
+                "name": "control",
+                "ns": "https://github.com/heyvaldemar/kubernetes-oscal-evidence/ns",
+                "value": "PS.3.2"
+              },
+              {
+                "name": "judged-by",
+                "ns": "https://github.com/heyvaldemar/kubernetes-oscal-evidence/ns",
+                "value": "scripts/evidence.py"
+              },
+              {
+                "name": "matrix-row",
+                "ns": "https://github.com/heyvaldemar/kubernetes-oscal-evidence/ns",
+                "value": "PS.3.2"
+              },
+              {
+                "name": "matrix-row",
+                "ns": "https://github.com/heyvaldemar/kubernetes-oscal-evidence/ns",
+                "value": "LLM04:2025"
+              },
+              {
+                "name": "c2p-verdict",
+                "ns": "https://github.com/heyvaldemar/kubernetes-oscal-evidence/ns",
+                "value": "no finding"
+              }
+            ],
+            "target": {
+              "type": "statement-id",
+              "target-id": "statement_PS.3.2",
+              "status": {
+                "state": "satisfied",
+                "reason": "pass"
+              }
+            },
+            "related-observations": [
+              {
+                "observation-uuid": "e8536c8e-908d-4aec-883d-14f31f0bddb4"
+              },
+              {
+                "observation-uuid": "6aa9369a-d714-598b-a15b-50e0c03571ba"
+              },
+              {
+                "observation-uuid": "57965008-d4ab-51f2-af30-9bc9a7eb8a18"
+              }
+            ]
+          },
           {
             "uuid": "1c175632-0b47-5c74-b0a9-1f9c0ae55f09",
             "title": "PW.4.4: satisfied",
@@ -436,6 +596,16 @@
                 "name": "judged-by",
                 "ns": "https://github.com/heyvaldemar/kubernetes-oscal-evidence/ns",
                 "value": "scripts/evidence.py"
+              },
+              {
+                "name": "matrix-row",
+                "ns": "https://github.com/heyvaldemar/kubernetes-oscal-evidence/ns",
+                "value": "PW.4.4"
+              },
+              {
+                "name": "matrix-row",
+                "ns": "https://github.com/heyvaldemar/kubernetes-oscal-evidence/ns",
+                "value": "LLM03:2025"
               },
               {
                 "name": "c2p-verdict",
@@ -453,7 +623,7 @@
             },
             "related-observations": [
               {
-                "observation-uuid": "0da7c8fc-cca2-4abb-8b4c-a2ed9435d7ce"
+                "observation-uuid": "e8536c8e-908d-4aec-883d-14f31f0bddb4"
               },
               {
                 "observation-uuid": "ff978fd4-16bb-5d8f-b680-314a0909d98e"
@@ -475,6 +645,6 @@
         ]
       }
     ],
-    "uuid": "d3b2f5aa-64e2-43b8-a968-276c53cb8177"
+    "uuid": "afc24659-c1db-452a-8589-8432c32f3d95"
   }
 }

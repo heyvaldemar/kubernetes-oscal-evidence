@@ -8,12 +8,21 @@
 # the work the control's statement asks for, and each says what it leaves
 # out. Nothing here is a claim that a system meets a framework.
 #
+# It rests on the published control-to-test matrix (heyvaldemar/fleet-ops
+# docs/control-evidence.md, shown at heyvaldemar.com/evidence): every
+# control here names the matrix row it is the machine-readable form of, and
+# scripts/component.py refuses a row the pinned matrix does not have. SSDF
+# controls are matrix rows themselves; an SP 800-53 or AI RMF control is
+# here only where it maps onto a row the matrix already has. The matrix's
+# OWASP rows have no OSCAL catalog to point at, so they are named on the
+# controls that map onto them, not mapped on their own.
+#
 # The policies and the planted pods are the flagship's, read from its
-# signed release (flagship.lock). The catalogs are NIST's own OSCAL,
-# pinned by commit and sha256 (catalogs.lock).
+# signed release (flagship.lock). The catalogs are NIST's own OSCAL, and
+# they and the matrix are pinned by commit and sha256 (catalogs.lock).
 
 # The mapping's own version and date, written into the component definition.
-version: 1.0.0
+version: 1.1.0
 last_modified: "2026-11-01T00:00:00+00:00"
 
 frameworks:
@@ -71,6 +80,8 @@ rules:
       may not tolerate the node's taint, tolerate every taint, or name a node
       when it is created.
     posture: none
+    # No row of the matrix carries it, so no control here rests on it; its
+    # tests still run, and the gate still needs them to pass.
     why: >-
       Its third rule applies only when a pod is created. Kyverno's background
       scan evaluates every stored pod as if it were being created, and every
@@ -106,14 +117,44 @@ tests:
   ordinary-pod: {outcome: admitted}
 
 controls:
+  - framework: nist_ssdf
+    control: PS.3.2
+    matrix: [PS.3.2, "LLM04:2025"]
+    rules: [verify-models]
+    proven_by: [model-nobom, model-signed]
+    implementation: >-
+      Models: a CycloneDX 1.6 AI-BOM per model, attested with the operator's
+      key and required at admission; a model with none is refused. It names
+      each model by publisher, revision and sha256.
+    not_covered: >-
+      The release archives carry no SBOM, and the flagship's third-party
+      images get none (the matrix row says the same).
+
+  - framework: nist_ssdf
+    control: PW.4.4
+    matrix: [PW.4.4, "LLM03:2025"]
+    rules: [verify-models]
+    proven_by: [model-unlicensed, model-licence-mixed, model-licence-second, model-licence-expression, model-licence-concluded]
+    implementation: >-
+      Models: the licence is read from the signed AI-BOM at admission and
+      held to the site's list (Apache-2.0, MIT), every model and every
+      licence entry, by SPDX id.
+    not_covered: >-
+      The images half of the matrix row (signature, provenance, SBOM and a
+      scan, checked at admission) is kubernetes-supply-chain-admission's;
+      here images are held to the bundle's digests, not to those. No check
+      for known vulnerabilities in a model.
+
   - framework: nist_800_53
     control: cm-14
-    rules: [verify-models]
-    proven_by: [model-unsigned, model-stranger, model-signed]
+    matrix: ["LLM03:2025"]
+    rules: [verify-models, models-need-kyverno]
+    proven_by: [model-unsigned, model-stranger, kyverno-away, model-signed]
     implementation: >-
-      A pod in a namespace for verified models mounts model weights only if
-      the image's signature verifies with the operator's public key; Kyverno
-      checks it at admission.
+      The model signed with the operator's key, verified offline, by digest,
+      before a pod may mount it; and while Kyverno is away and cannot verify,
+      the API server's own guard refuses every model mount, so nothing is
+      installed unverified.
     not_covered: >-
       Model weights only: container images are held to a list of digests
       (CM-7(5)), not to signatures. The operator's key is a public key
@@ -121,12 +162,13 @@ controls:
 
   - framework: nist_800_53
     control: si-7
+    matrix: ["LLM03:2025", "LLM04:2025"]
     rules: [model-volumes, verify-models]
     proven_by: [volume-elsewhere, model-unsigned, model-stranger, model-signed]
     implementation: >-
-      A model image is named by its digest, so a changed image is a different
-      name, and its signature is verified before it is mounted; a model that
-      fails either is refused.
+      A model is named by digest, so a changed image is a different name;
+      its signature is verified before it is mounted, and model weights come
+      only from the registry's models path, checked by the API server itself.
     not_covered: >-
       Checked when a pod is admitted. The flagship's policy does not check
       running pods again; here Kyverno re-reads them for its reports, which
@@ -134,21 +176,22 @@ controls:
 
   - framework: nist_800_53
     control: sr-4
+    matrix: [PS.3.2, "LLM04:2025"]
     rules: [verify-models]
     proven_by: [model-nobom, model-signed]
     implementation: >-
-      A model is mounted only with an AI-BOM attested with the operator's
-      key: what the model is, where its file came from at which revision, and
-      its sha256.
+      Origins tracked: a model is mounted only with an AI-BOM attested with
+      the operator's key that pins it by publisher, revision and sha256.
     not_covered: >-
       Admission checks that the provenance record is there and signed, not
-      that it is true of the source. Container images carry no provenance
-      check here.
+      that it is true of the source, nor where the training data came from.
+      Container images carry no provenance check here.
 
   - framework: nist_800_53
     control: sr-11
+    matrix: ["LLM03:2025"]
     rules: [carried-images]
-    proven_by: [image-not-carried, volume-not-carried, ordinary-pod]
+    proven_by: [image-not-carried, volume-not-carried, model-signed]
     implementation: >-
       An image the signed bundle did not carry is refused, whoever made the
       pod and however the image reached the cluster: containers, init and
@@ -160,8 +203,9 @@ controls:
 
   - framework: nist_800_53
     control: cm-7.5
+    matrix: ["LLM03:2025"]
     rules: [carried-images]
-    proven_by: [image-by-tag, image-not-carried, ordinary-pod]
+    proven_by: [image-by-tag, image-not-carried, model-signed]
     implementation: >-
       Deny-all, permit-by-exception: the exceptions are the digests the
       signed bundle carried, the policy's parameter. An image named by tag
@@ -170,45 +214,9 @@ controls:
       Part (c), reviewing the list of authorized software, is a person's
       work. kube-system and local-path-storage are exempt.
 
-  - framework: nist_800_53
-    control: sc-24
-    rules: [models-need-kyverno]
-    proven_by: [kyverno-away]
-    implementation: >-
-      With Kyverno's admission controller at zero replicas and its webhook
-      gone, the API server's own policy refuses every model mount: the
-      failure is an outage, not an open door.
-    not_covered: >-
-      Model mounts only. Other pods are admitted while Kyverno is away; their
-      images are still held to the bundle by carried-images, which needs no
-      Kyverno.
-
-  - framework: nist_800_53
-    control: ac-6
-    rules: [egress-node]
-    proven_by: [egress-toleration, egress-tolerate-all, egress-node-name, ordinary-pod]
-    implementation: >-
-      Only the gateway may run on the one node with a way out of the cluster:
-      a pod elsewhere may not tolerate that node's taint, tolerate every
-      taint, or name the node and skip the scheduler.
-    not_covered: >-
-      Where pods run, not what they may do there. Judged by admission tests
-      alone: Kyverno's reports cannot judge this policy (rules.egress-node.why).
-
-  - framework: nist_ssdf
-    control: PW.4.4
-    rules: [verify-models]
-    proven_by: [model-unlicensed, model-licence-mixed, model-licence-second, model-licence-expression, model-licence-concluded]
-    implementation: >-
-      Every model a pod mounts has an AI-BOM in which every model declares
-      only licences the site allows (Apache-2.0, MIT), named by SPDX id;
-      checked at admission.
-    not_covered: >-
-      Licence, signature and provenance record only: no check for known
-      vulnerabilities in the model or in the server that loads it.
-
   - framework: nist_ai_rmf
     control: MANAGE_3.1
+    matrix: ["LLM03:2025"]
     rules: [verify-models]
     proven_by: [model-unsigned, model-nobom, model-unlicensed, model-signed]
     implementation: >-

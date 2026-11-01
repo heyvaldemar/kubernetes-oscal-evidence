@@ -23,17 +23,13 @@
       "cm-7.5": {
         "state": "satisfied",
         "why": []
-      },
-      "sc-24": {
-        "state": "satisfied",
-        "why": []
-      },
-      "ac-6": {
-        "state": "satisfied",
-        "why": []
       }
     },
     "nist_ssdf": {
+      "PS.3.2": {
+        "state": "satisfied",
+        "why": []
+      },
       "PW.4.4": {
         "state": "satisfied",
         "why": []

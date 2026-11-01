@@ -16,9 +16,10 @@ Exits 0 when none of these, 1 when any, 2 when the evidence cannot be read:
 a missing or unreadable document is a failure, never a pass.
 
 With --plant, the run was broken on purpose (README, "The plants"), and the
-gate must catch it for the planted reason: it exits 0 only if the evidence
-fails and every control resting on the planted policy is among the failures.
-A plant the gate lets through exits 1.
+gate must catch it for the planted reason: it exits 0 only if every control
+resting on the planted policy is not satisfied and at least one admission
+test that policy must refuse failed. A plant the gate lets through, or
+catches only for some other reason, exits 1.
 """
 import argparse
 import json
@@ -78,13 +79,15 @@ def judge(mapping, found, failed_tests):
 
 
 def planted(mapping, plant):
-    """The controls a plant must turn not satisfied."""
+    """The controls a plant must turn not satisfied, and the tests of which at least one must fail."""
     kind, _, policy = plant.partition(":")
     if kind == "phantom-mapping":
         policy = "verify-models"
     if kind not in ("remove", "audit", "phantom-mapping") or policy not in mapping["rules"]:
         raise SystemExit(f"unknown plant {plant}")
-    return {(c["framework"], c["control"]) for c in mapping["controls"] if policy in c["rules"]}
+    controls = {(c["framework"], c["control"]) for c in mapping["controls"] if policy in c["rules"]}
+    tests = {t for t, spec in mapping["tests"].items() if policy in spec.get("by", [])}
+    return controls, tests
 
 
 def main():
@@ -108,14 +111,18 @@ def main():
           f"{len(failed_tests)} admission test(s) failed")
     if not args.plant:
         sys.exit(1 if failures else 0)
-    must = planted(mapping, args.plant)
+    must, its_tests = planted(mapping, args.plant)
     caught = {(f, w) for f, w, _ in failures}
     missed = sorted(must - caught)
-    if failures and not missed:
-        print(f"== plant {args.plant} caught: every control resting on it is not satisfied "
-              f"({', '.join(sorted(c for _, c in must))})")
+    failed_own = sorted(its_tests & set(failed_tests))
+    if not missed and failed_own:
+        print(f"== plant {args.plant} caught: "
+              + (f"every control resting on it is not satisfied ({', '.join(sorted(c for _, c in must))}), and "
+                 if must else "no control rests on it, and ")
+              + f"its own tests failed ({', '.join(failed_own)})")
         sys.exit(0)
-    print(f"== plant {args.plant} NOT caught: still satisfied: {missed or 'nothing failed at all'}")
+    print(f"== plant {args.plant} NOT caught: "
+          + (f"still satisfied: {missed}" if missed else "none of the tests its policy must refuse failed"))
     sys.exit(1)
 
 

@@ -237,7 +237,8 @@ def main():
                                 ("Kyverno reported every running pod passing "
                                  + ", ".join(posture) + ", and " if posture else "")
                                 + f"every test that proves it did what the mapping says ({', '.join(c['proven_by'])})."),
-                "props": [prop("control", c["control"]), prop("judged-by", "scripts/evidence.py"),
+                "props": [prop("control", c["control"]), prop("judged-by", "scripts/evidence.py")]
+                         + [prop("matrix-row", r) for r in c.get("matrix", [])] + [
                           prop("c2p-verdict", "not-satisfied" if f"{c['control']}_smt" in c2p_failed
                                else ("no finding" if posture else "not assessed by C2P (no Kyverno check)"))],
                 "target": {"type": "statement-id", "target-id": smt[c["control"]],

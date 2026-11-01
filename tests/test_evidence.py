@@ -124,7 +124,8 @@ class Decide(unittest.TestCase):
         self.ok_tests = {t: (True, "ok") for t in MAPPING["tests"]}
         self.subject = {"title": "Pod inference/model-server",
                         "props": [{"name": "result", "ns": evidence.TRESTLE_NS, "value": "pass"}]}
-        self.by_rule = {"verify-models": [{"uuid": "u", "subjects": [self.subject]}]}
+        self.by_rule = {"verify-models": [{"uuid": "u", "subjects": [self.subject]}],
+                        "models-need-kyverno": [{"uuid": "v", "subjects": [self.subject]}]}
 
     def decide(self, c2p_failed=(), by_rule=None, tests=None):
         return evidence.decide(self.control, MAPPING["rules"], set(c2p_failed),
@@ -137,37 +138,42 @@ class Decide(unittest.TestCase):
         self.assertTrue(self.decide(c2p_failed={"cm-14_smt"}))
 
     def test_no_pod_reported_is_not_satisfied(self):
-        self.assertTrue(self.decide(by_rule={"verify-models": [{"uuid": "u", "subjects": []}]}))
+        self.assertTrue(self.decide(by_rule=dict(self.by_rule, **{"verify-models": [{"uuid": "u", "subjects": []}]})))
         self.assertTrue(self.decide(by_rule={}))
 
     def test_a_failed_pod_is_not_satisfied(self):
         bad = copy.deepcopy(self.subject)
         bad["props"][0]["value"] = "fail"
-        self.assertTrue(self.decide(by_rule={"verify-models": [{"uuid": "u", "subjects": [self.subject, bad]}]}))
+        self.assertTrue(self.decide(by_rule=dict(self.by_rule, **{"verify-models": [{"uuid": "u", "subjects": [self.subject, bad]}]})))
 
     def test_an_errored_pod_is_not_satisfied(self):
         bad = copy.deepcopy(self.subject)
         bad["props"][0]["value"] = "error"
-        self.assertTrue(self.decide(by_rule={"verify-models": [{"uuid": "u", "subjects": [bad]}]}))
+        self.assertTrue(self.decide(by_rule=dict(self.by_rule, **{"verify-models": [{"uuid": "u", "subjects": [bad]}]})))
 
     def test_a_failed_test_is_not_satisfied(self):
         tests = dict(self.ok_tests, **{"model-stranger": (False, "admitted")})
         self.assertTrue(self.decide(tests=tests))
 
     def test_no_posture_rule_rests_on_tests_alone(self):
-        ac6 = next(c for c in MAPPING["controls"] if c["control"] == "ac-6")
-        self.assertEqual(evidence.decide(ac6, MAPPING["rules"], set(), {}, self.ok_tests)[0], [])
+        # egress-node: Kyverno cannot report it, so its tests are all there is.
+        control = {"control": "x-1", "rules": ["egress-node"],
+                   "proven_by": ["egress-toleration", "egress-tolerate-all", "egress-node-name", "ordinary-pod"]}
+        self.assertEqual(evidence.decide(control, MAPPING["rules"], set(), {}, self.ok_tests)[0], [])
         tests = dict(self.ok_tests, **{"egress-toleration": (False, "admitted")})
-        self.assertTrue(evidence.decide(ac6, MAPPING["rules"], set(), {}, tests)[0])
+        self.assertTrue(evidence.decide(control, MAPPING["rules"], set(), {}, tests)[0])
 
 
 class Mapping(unittest.TestCase):
-    """A mapping that names what does not exist is refused before anything runs."""
+    """A mapping that names what does not exist is refused before anything runs, each for its own reason."""
 
-    def mutated(self, edit):
+    def errors(self, edit):
         m = copy.deepcopy(MAPPING)
         edit(m)
-        return component.check_mapping(m)
+        return "\n".join(component.check_mapping(m))
+
+    def control(self, m, cid):
+        return next(c for c in m["controls"] if c["control"] == cid)
 
     def test_the_committed_mapping_is_clean(self):
         self.assertEqual(component.check_mapping(MAPPING), [])
@@ -183,23 +189,38 @@ class Mapping(unittest.TestCase):
     def test_a_test_that_does_not_exist(self):
         def edit(m):
             m["tests"]["model-unsigend"] = m["tests"]["model-unsigned"]
-            m["controls"][0]["proven_by"].append("model-unsigend")
-        self.assertTrue(self.mutated(edit))
+            self.control(m, "cm-14")["proven_by"].append("model-unsigend")
+        self.assertIn("no such planted pod", self.errors(edit))
 
     def test_a_control_not_in_the_catalog(self):
         def edit(m):
-            m["controls"][0]["control"] = "cm-99"
-        self.assertTrue(self.mutated(edit))
+            self.control(m, "cm-14")["control"] = "cm-99"
+        self.assertIn("not a control in NIST_SP-800-53_rev5_catalog.json", self.errors(edit))
 
     def test_a_control_never_shown_a_violation(self):
         def edit(m):
-            m["controls"][0]["proven_by"] = ["model-signed"]
-        self.assertTrue(self.mutated(edit))
+            self.control(m, "cm-14")["proven_by"] = ["model-signed"]
+        self.assertIn("no test that must be refused", self.errors(edit))
 
     def test_a_test_credited_to_a_policy_that_does_not_refuse_it(self):
         def edit(m):
-            m["controls"][0]["proven_by"].append("image-by-tag")
-        self.assertTrue(self.mutated(edit))
+            self.control(m, "cm-14")["proven_by"].append("image-by-tag")
+        self.assertIn("not by this control's rules", self.errors(edit))
+
+    def test_a_matrix_row_that_does_not_exist(self):
+        def edit(m):
+            self.control(m, "cm-14")["matrix"] = ["LLM11:2025"]
+        self.assertIn("is not in the pinned control-to-test matrix", self.errors(edit))
+
+    def test_a_control_on_no_matrix_row(self):
+        def edit(m):
+            self.control(m, "sr-11")["matrix"] = []
+        self.assertIn("names no row of the control-to-test matrix", self.errors(edit))
+
+    def test_an_ssdf_control_that_is_not_its_own_row(self):
+        def edit(m):
+            self.control(m, "PW.4.4")["matrix"] = ["LLM03:2025"]
+        self.assertIn("must name its own", self.errors(edit))
 
 
 class Gate(unittest.TestCase):
@@ -240,8 +261,8 @@ class Gate(unittest.TestCase):
         self.assertEqual(self.run_gate(), 1)
 
     def test_a_control_with_no_finding(self):
-        self.edit_finding("nist_800_53", "sc-24", lambda f: False)
-        self.assertEqual(self.run_gate(says="FAIL nist_800_53 sc-24: 0 findings"), 1)
+        self.edit_finding("nist_800_53", "sr-11", lambda f: False)
+        self.assertEqual(self.run_gate(says="FAIL nist_800_53 sr-11: 0 findings"), 1)
 
     def test_a_failed_test(self):
         v = json.load(open(self.dir / "verdict.json"))
@@ -260,19 +281,49 @@ class Gate(unittest.TestCase):
     def test_a_plant_not_caught(self):
         self.assertEqual(self.run_gate("--plant", "remove:verify-models"), 1)
 
-    def test_a_plant_caught(self):
+    def fail_test(self, name):
+        v = json.load(open(self.dir / "verdict.json"))
+        v["tests"][name] = {"passed": False, "why": "admitted; it must be refused"}
+        json.dump(v, open(self.dir / "verdict.json", "w"))
+
+    def fail_controls_of(self, policy):
         for c in MAPPING["controls"]:
-            if "verify-models" in c["rules"]:
+            if policy in c["rules"]:
                 def edit(f):
                     f["target"]["status"]["state"] = "not-satisfied"
                 self.edit_finding(c["framework"], c["control"], edit)
-        self.assertEqual(self.run_gate("--plant", "remove:verify-models"), 0)
+
+    def test_a_plant_caught(self):
+        self.fail_controls_of("verify-models")
+        self.fail_test("model-unsigned")
+        self.assertEqual(self.run_gate("--plant", "remove:verify-models", says="caught"), 0)
 
     def test_a_plant_caught_for_another_reason(self):
-        def edit(f):
-            f["target"]["status"]["state"] = "not-satisfied"
-        self.edit_finding("nist_800_53", "ac-6", edit)
+        self.fail_controls_of("carried-images")
+        self.fail_test("image-by-tag")
         self.assertEqual(self.run_gate("--plant", "remove:verify-models"), 1)
+
+    def test_a_plant_whose_own_tests_all_passed(self):
+        # Every control on verify-models down, but nothing it must refuse got in:
+        # the gate failed for some other reason than the plant.
+        self.fail_controls_of("verify-models")
+        self.fail_test("image-by-tag")
+        self.assertEqual(self.run_gate("--plant", "remove:verify-models"), 1)
+
+    def test_a_plant_with_a_control_still_satisfied(self):
+        # The policy's own test failed, but one control resting on it is still
+        # called satisfied: the evidence missed what the plant broke.
+        self.fail_controls_of("verify-models")
+        self.fail_test("model-unsigned")
+        def edit(f):
+            f["target"]["status"]["state"] = "satisfied"
+        self.edit_finding("nist_ssdf", "PW.4.4", edit)
+        self.assertEqual(self.run_gate("--plant", "remove:verify-models", says="still satisfied"), 1)
+
+    def test_a_plant_no_control_rests_on(self):
+        self.assertEqual(self.run_gate("--plant", "remove:egress-node"), 1)
+        self.fail_test("egress-toleration")
+        self.assertEqual(self.run_gate("--plant", "remove:egress-node", says="no control rests on it"), 0)
 
 
 if __name__ == "__main__":

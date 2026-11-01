@@ -4,23 +4,23 @@
       "resources": [
         {
           "title": "ApiVersion: v1, Kind: Pod, Namespace: default, Name: ordinary-pod",
-          "uuid": "fd577d0e-eb99-4534-b8c9-3febe1df768d"
-        },
-        {
-          "title": "ApiVersion: v1, Kind: Pod, Namespace: inference, Name: model-server-cf9b6f49-jjdlc",
-          "uuid": "e78b5b25-3d6e-41a5-bea7-fb623d2b662f"
+          "uuid": "d0ecc070-283b-4e2b-85be-b0ddfdd26e58"
         },
         {
           "title": "ApiVersion: v1, Kind: Pod, Namespace: kyverno, Name: kyverno-reports-controller-86d59886fd-p6l72",
-          "uuid": "6795773a-94cc-4205-a5ad-f1d25d0e04a9"
+          "uuid": "d5a4821b-4528-4fb1-8a15-df2ff43e5b6e"
         },
         {
           "title": "ApiVersion: v1, Kind: Pod, Namespace: kyverno, Name: kyverno-background-controller-594f76ccb6-xt9rr",
-          "uuid": "50b308bb-8e76-4caa-8fc4-3fbec2dc9074"
+          "uuid": "7ddbce02-001f-46e9-9b58-3327077968ca"
         },
         {
           "title": "ApiVersion: v1, Kind: Pod, Namespace: kyverno, Name: kyverno-cleanup-controller-b8b66b769-w8vfs",
-          "uuid": "812ee924-e166-4179-b922-7fcf820d2413"
+          "uuid": "98061e3f-922e-4360-b31f-a60d60410f3c"
+        },
+        {
+          "title": "ApiVersion: v1, Kind: Pod, Namespace: inference, Name: model-server-cf9b6f49-jjdlc",
+          "uuid": "d97e49b0-e3de-4f7a-b6a7-750d2bb179c4"
         }
       ]
     },
@@ -29,7 +29,7 @@
     },
     "metadata": {
       "title": "Admission controls of kubernetes-air-gapped-ai-agent v1.8.0: NIST SP 800-53 Rev. 5.2.0, one run",
-      "last-modified": "2026-11-01T22:21:29+00:00",
+      "last-modified": "2026-11-01T23:19:29+00:00",
       "version": "unreleased",
       "oscal-version": "1.1.3",
       "props": [
@@ -66,7 +66,84 @@
         "description": "OSCAL Assessment Result For Task \"Automated Assessment\"",
         "observations": [
           {
-            "collected": "2026-11-01T22:21:29.514171Z",
+            "collected": "2026-11-01T23:19:29.321821Z",
+            "description": "Observation of check model-volumes",
+            "methods": [
+              "TEST-AUTOMATED",
+              "TEST"
+            ],
+            "origins": [
+              {
+                "actors": [
+                  {
+                    "actor-uuid": "196fb59b-56c0-56ab-b38c-b8fe9a063fd1",
+                    "type": "tool"
+                  }
+                ],
+                "related-tasks": [
+                  {
+                    "subjects": [
+                      {
+                        "include-subjects": [
+                          {
+                            "subject-uuid": "7649ce44-0101-5987-aa8a-a49c0ad31c1d",
+                            "type": "component"
+                          }
+                        ],
+                        "type": "component"
+                      }
+                    ],
+                    "task-uuid": "1e5cdbb9-a757-4df4-9c1f-5519825a6319"
+                  }
+                ]
+              }
+            ],
+            "props": [
+              {
+                "name": "assessment-rule-id",
+                "ns": "https://oscal-compass.github.io/compliance-trestle/schemas/oscal",
+                "value": "model-volumes"
+              },
+              {
+                "name": "assessment-check-id",
+                "ns": "https://oscal-compass.github.io/compliance-trestle/schemas/oscal",
+                "value": "model-volumes"
+              }
+            ],
+            "subjects": [
+              {
+                "props": [
+                  {
+                    "name": "resource-id",
+                    "ns": "https://oscal-compass.github.io/compliance-trestle/schemas/oscal",
+                    "value": "ad5d88fb-dd5b-4210-b468-75f5da8f0276"
+                  },
+                  {
+                    "name": "result",
+                    "ns": "https://oscal-compass.github.io/compliance-trestle/schemas/oscal",
+                    "value": "pass"
+                  },
+                  {
+                    "name": "evaluated-on",
+                    "ns": "https://oscal-compass.github.io/compliance-trestle/schemas/oscal",
+                    "value": "2026-11-01 23:19:29.321821 +0000 UTC"
+                  },
+                  {
+                    "name": "reason",
+                    "ns": "https://oscal-compass.github.io/compliance-trestle/schemas/oscal",
+                    "value": "pass; Kyverno gave no message"
+                  }
+                ],
+                "subject-uuid": "d97e49b0-e3de-4f7a-b6a7-750d2bb179c4",
+                "title": "ApiVersion: v1, Kind: Pod, Namespace: inference, Name: model-server-cf9b6f49-jjdlc",
+                "type": "resource"
+              }
+            ],
+            "title": "model-volumes",
+            "uuid": "d1a8c851-493c-4dcb-8c4d-e91c1f0b007d"
+          },
+          {
+            "collected": "2026-11-01T23:19:29.321822Z",
             "description": "Observation of check carried-images",
             "methods": [
               "TEST-AUTOMATED",
@@ -93,7 +170,7 @@
                         "type": "component"
                       }
                     ],
-                    "task-uuid": "f592250c-ca04-47df-9e61-a69089bf5200"
+                    "task-uuid": "1e5cdbb9-a757-4df4-9c1f-5519825a6319"
                   }
                 ]
               }
@@ -126,7 +203,7 @@
                   {
                     "name": "evaluated-on",
                     "ns": "https://oscal-compass.github.io/compliance-trestle/schemas/oscal",
-                    "value": "2026-11-01 22:21:29.514171 +0000 UTC"
+                    "value": "2026-11-01 23:19:29.321822 +0000 UTC"
                   },
                   {
                     "name": "reason",
@@ -134,7 +211,7 @@
                     "value": "pass; Kyverno gave no message"
                   }
                 ],
-                "subject-uuid": "fd577d0e-eb99-4534-b8c9-3febe1df768d",
+                "subject-uuid": "d0ecc070-283b-4e2b-85be-b0ddfdd26e58",
                 "title": "ApiVersion: v1, Kind: Pod, Namespace: default, Name: ordinary-pod",
                 "type": "resource"
               },
@@ -153,7 +230,7 @@
                   {
                     "name": "evaluated-on",
                     "ns": "https://oscal-compass.github.io/compliance-trestle/schemas/oscal",
-                    "value": "2026-11-01 22:21:29.514172 +0000 UTC"
+                    "value": "2026-11-01 23:19:29.321822 +0000 UTC"
                   },
                   {
                     "name": "reason",
@@ -161,7 +238,7 @@
                     "value": "pass; Kyverno gave no message"
                   }
                 ],
-                "subject-uuid": "e78b5b25-3d6e-41a5-bea7-fb623d2b662f",
+                "subject-uuid": "d97e49b0-e3de-4f7a-b6a7-750d2bb179c4",
                 "title": "ApiVersion: v1, Kind: Pod, Namespace: inference, Name: model-server-cf9b6f49-jjdlc",
                 "type": "resource"
               },
@@ -180,7 +257,7 @@
                   {
                     "name": "evaluated-on",
                     "ns": "https://oscal-compass.github.io/compliance-trestle/schemas/oscal",
-                    "value": "2026-11-01 22:21:29.514172 +0000 UTC"
+                    "value": "2026-11-01 23:19:29.321823 +0000 UTC"
                   },
                   {
                     "name": "reason",
@@ -188,7 +265,7 @@
                     "value": "pass; Kyverno gave no message"
                   }
                 ],
-                "subject-uuid": "6795773a-94cc-4205-a5ad-f1d25d0e04a9",
+                "subject-uuid": "d5a4821b-4528-4fb1-8a15-df2ff43e5b6e",
                 "title": "ApiVersion: v1, Kind: Pod, Namespace: kyverno, Name: kyverno-reports-controller-86d59886fd-p6l72",
                 "type": "resource"
               },
@@ -207,7 +284,7 @@
                   {
                     "name": "evaluated-on",
                     "ns": "https://oscal-compass.github.io/compliance-trestle/schemas/oscal",
-                    "value": "2026-11-01 22:21:29.514173 +0000 UTC"
+                    "value": "2026-11-01 23:19:29.321823 +0000 UTC"
                   },
                   {
                     "name": "reason",
@@ -215,7 +292,7 @@
                     "value": "pass; Kyverno gave no message"
                   }
                 ],
-                "subject-uuid": "50b308bb-8e76-4caa-8fc4-3fbec2dc9074",
+                "subject-uuid": "7ddbce02-001f-46e9-9b58-3327077968ca",
                 "title": "ApiVersion: v1, Kind: Pod, Namespace: kyverno, Name: kyverno-background-controller-594f76ccb6-xt9rr",
                 "type": "resource"
               },
@@ -234,7 +311,7 @@
                   {
                     "name": "evaluated-on",
                     "ns": "https://oscal-compass.github.io/compliance-trestle/schemas/oscal",
-                    "value": "2026-11-01 22:21:29.514173 +0000 UTC"
+                    "value": "2026-11-01 23:19:29.321824 +0000 UTC"
                   },
                   {
                     "name": "reason",
@@ -242,16 +319,16 @@
                     "value": "pass; Kyverno gave no message"
                   }
                 ],
-                "subject-uuid": "812ee924-e166-4179-b922-7fcf820d2413",
+                "subject-uuid": "98061e3f-922e-4360-b31f-a60d60410f3c",
                 "title": "ApiVersion: v1, Kind: Pod, Namespace: kyverno, Name: kyverno-cleanup-controller-b8b66b769-w8vfs",
                 "type": "resource"
               }
             ],
             "title": "carried-images",
-            "uuid": "391226e6-64e3-44ea-b898-47a1a0dbc77e"
+            "uuid": "fae502cd-15c4-458e-a676-b0bbe6a6cd50"
           },
           {
-            "collected": "2026-11-01T22:21:29.514175Z",
+            "collected": "2026-11-01T23:19:29.321824Z",
             "description": "Observation of check models-need-kyverno",
             "methods": [
               "TEST-AUTOMATED",
@@ -278,7 +355,7 @@
                         "type": "component"
                       }
                     ],
-                    "task-uuid": "f592250c-ca04-47df-9e61-a69089bf5200"
+                    "task-uuid": "1e5cdbb9-a757-4df4-9c1f-5519825a6319"
                   }
                 ]
               }
@@ -311,7 +388,7 @@
                   {
                     "name": "evaluated-on",
                     "ns": "https://oscal-compass.github.io/compliance-trestle/schemas/oscal",
-                    "value": "2026-11-01 22:21:29.514175 +0000 UTC"
+                    "value": "2026-11-01 23:19:29.321824 +0000 UTC"
                   },
                   {
                     "name": "reason",
@@ -319,16 +396,16 @@
                     "value": "pass; Kyverno gave no message"
                   }
                 ],
-                "subject-uuid": "e78b5b25-3d6e-41a5-bea7-fb623d2b662f",
+                "subject-uuid": "d97e49b0-e3de-4f7a-b6a7-750d2bb179c4",
                 "title": "ApiVersion: v1, Kind: Pod, Namespace: inference, Name: model-server-cf9b6f49-jjdlc",
                 "type": "resource"
               }
             ],
             "title": "models-need-kyverno",
-            "uuid": "3a5ccc04-63c8-40cf-ae43-f48afcec52e9"
+            "uuid": "21151f6a-8d0e-431f-a33e-894cbf2fc949"
           },
           {
-            "collected": "2026-11-01T22:21:29.514175Z",
+            "collected": "2026-11-01T23:19:29.32182Z",
             "description": "Observation of check verify-models",
             "methods": [
               "TEST-AUTOMATED",
@@ -355,7 +432,7 @@
                         "type": "component"
                       }
                     ],
-                    "task-uuid": "f592250c-ca04-47df-9e61-a69089bf5200"
+                    "task-uuid": "1e5cdbb9-a757-4df4-9c1f-5519825a6319"
                   }
                 ]
               }
@@ -388,7 +465,7 @@
                   {
                     "name": "evaluated-on",
                     "ns": "https://oscal-compass.github.io/compliance-trestle/schemas/oscal",
-                    "value": "2026-11-01 22:21:29.514175 +0000 UTC"
+                    "value": "2026-11-01 23:19:29.32182 +0000 UTC"
                   },
                   {
                     "name": "reason",
@@ -396,90 +473,13 @@
                     "value": "success"
                   }
                 ],
-                "subject-uuid": "e78b5b25-3d6e-41a5-bea7-fb623d2b662f",
+                "subject-uuid": "d97e49b0-e3de-4f7a-b6a7-750d2bb179c4",
                 "title": "ApiVersion: v1, Kind: Pod, Namespace: inference, Name: model-server-cf9b6f49-jjdlc",
                 "type": "resource"
               }
             ],
             "title": "verify-models",
-            "uuid": "8e95ea61-996e-4cfa-9985-0545324c310f"
-          },
-          {
-            "collected": "2026-11-01T22:21:29.514177Z",
-            "description": "Observation of check model-volumes",
-            "methods": [
-              "TEST-AUTOMATED",
-              "TEST"
-            ],
-            "origins": [
-              {
-                "actors": [
-                  {
-                    "actor-uuid": "196fb59b-56c0-56ab-b38c-b8fe9a063fd1",
-                    "type": "tool"
-                  }
-                ],
-                "related-tasks": [
-                  {
-                    "subjects": [
-                      {
-                        "include-subjects": [
-                          {
-                            "subject-uuid": "7649ce44-0101-5987-aa8a-a49c0ad31c1d",
-                            "type": "component"
-                          }
-                        ],
-                        "type": "component"
-                      }
-                    ],
-                    "task-uuid": "f592250c-ca04-47df-9e61-a69089bf5200"
-                  }
-                ]
-              }
-            ],
-            "props": [
-              {
-                "name": "assessment-rule-id",
-                "ns": "https://oscal-compass.github.io/compliance-trestle/schemas/oscal",
-                "value": "model-volumes"
-              },
-              {
-                "name": "assessment-check-id",
-                "ns": "https://oscal-compass.github.io/compliance-trestle/schemas/oscal",
-                "value": "model-volumes"
-              }
-            ],
-            "subjects": [
-              {
-                "props": [
-                  {
-                    "name": "resource-id",
-                    "ns": "https://oscal-compass.github.io/compliance-trestle/schemas/oscal",
-                    "value": "ad5d88fb-dd5b-4210-b468-75f5da8f0276"
-                  },
-                  {
-                    "name": "result",
-                    "ns": "https://oscal-compass.github.io/compliance-trestle/schemas/oscal",
-                    "value": "pass"
-                  },
-                  {
-                    "name": "evaluated-on",
-                    "ns": "https://oscal-compass.github.io/compliance-trestle/schemas/oscal",
-                    "value": "2026-11-01 22:21:29.514178 +0000 UTC"
-                  },
-                  {
-                    "name": "reason",
-                    "ns": "https://oscal-compass.github.io/compliance-trestle/schemas/oscal",
-                    "value": "pass; Kyverno gave no message"
-                  }
-                ],
-                "subject-uuid": "e78b5b25-3d6e-41a5-bea7-fb623d2b662f",
-                "title": "ApiVersion: v1, Kind: Pod, Namespace: inference, Name: model-server-cf9b6f49-jjdlc",
-                "type": "resource"
-              }
-            ],
-            "title": "model-volumes",
-            "uuid": "a8719011-3886-4d55-a798-a56f2115a4c9"
+            "uuid": "c51d1e16-b511-4b83-bf14-f3e149ab7019"
           },
           {
             "uuid": "0691d479-f8de-5a7f-ad07-e530ac52f5d8",
@@ -517,6 +517,11 @@
               {
                 "name": "assessment-rule-id",
                 "ns": "https://oscal-compass.github.io/compliance-trestle/schemas/oscal",
+                "value": "models-need-kyverno"
+              },
+              {
+                "name": "assessment-rule-id",
+                "ns": "https://oscal-compass.github.io/compliance-trestle/schemas/oscal",
                 "value": "verify-models"
               },
               {
@@ -535,7 +540,7 @@
                 "value": "signed with the operator's key"
               }
             ],
-            "collected": "2026-11-01T22:21:29+00:00",
+            "collected": "2026-11-01T23:19:29+00:00",
             "remarks": "refused by verify-models: Policy verify-models failed: model weights are signed with the operator's key",
             "relevant-evidence": [
               {
@@ -580,6 +585,11 @@
               {
                 "name": "assessment-rule-id",
                 "ns": "https://oscal-compass.github.io/compliance-trestle/schemas/oscal",
+                "value": "models-need-kyverno"
+              },
+              {
+                "name": "assessment-rule-id",
+                "ns": "https://oscal-compass.github.io/compliance-trestle/schemas/oscal",
                 "value": "verify-models"
               },
               {
@@ -598,11 +608,74 @@
                 "value": "signed with the operator's key"
               }
             ],
-            "collected": "2026-11-01T22:21:29+00:00",
+            "collected": "2026-11-01T23:19:29+00:00",
             "remarks": "refused by verify-models: Policy verify-models failed: model weights are signed with the operator's key",
             "relevant-evidence": [
               {
                 "href": "https://github.com/heyvaldemar/kubernetes-air-gapped-ai-agent/blob/v1.8.0/tests/e2e/plants/model-stranger.yaml",
+                "description": "The planted pod, as the flagship ships it at v1.8.0"
+              }
+            ]
+          },
+          {
+            "uuid": "4b67c153-db6a-5e5d-9c0c-198ee8a82a56",
+            "title": "Admission test: kyverno-away",
+            "description": "Kyverno's admission controller at zero replicas: the signed model is refused, and admitted again once Kyverno is back",
+            "methods": [
+              "TEST"
+            ],
+            "props": [
+              {
+                "name": "test",
+                "ns": "https://github.com/heyvaldemar/kubernetes-oscal-evidence/ns",
+                "value": "kyverno-away"
+              },
+              {
+                "name": "expected-outcome",
+                "ns": "https://github.com/heyvaldemar/kubernetes-oscal-evidence/ns",
+                "value": "refused"
+              },
+              {
+                "name": "verdict",
+                "ns": "https://github.com/heyvaldemar/kubernetes-oscal-evidence/ns",
+                "value": "pass"
+              },
+              {
+                "name": "refused-by-expected",
+                "ns": "https://github.com/heyvaldemar/kubernetes-oscal-evidence/ns",
+                "value": "models-need-kyverno"
+              },
+              {
+                "name": "assessment-rule-id",
+                "ns": "https://oscal-compass.github.io/compliance-trestle/schemas/oscal",
+                "value": "models-need-kyverno"
+              },
+              {
+                "name": "assessment-rule-id",
+                "ns": "https://oscal-compass.github.io/compliance-trestle/schemas/oscal",
+                "value": "verify-models"
+              },
+              {
+                "name": "admitted",
+                "ns": "https://github.com/heyvaldemar/kubernetes-oscal-evidence/ns",
+                "value": "false"
+              },
+              {
+                "name": "refused-by",
+                "ns": "https://github.com/heyvaldemar/kubernetes-oscal-evidence/ns",
+                "value": "models-need-kyverno"
+              },
+              {
+                "name": "expected-words",
+                "ns": "https://github.com/heyvaldemar/kubernetes-oscal-evidence/ns",
+                "value": "no params found for policy binding with `Deny` parameterNotFoundAction"
+              }
+            ],
+            "collected": "2026-11-01T23:19:29+00:00",
+            "remarks": "refused by models-need-kyverno: failed to configure binding: no params found for policy binding with `Deny` parameterNotFoundAction",
+            "relevant-evidence": [
+              {
+                "href": "https://github.com/heyvaldemar/kubernetes-air-gapped-ai-agent/blob/v1.8.0/tests/e2e/gameday.sh (step 1)",
                 "description": "The planted pod, as the flagship ships it at v1.8.0"
               }
             ]
@@ -633,7 +706,17 @@
               {
                 "name": "assessment-rule-id",
                 "ns": "https://oscal-compass.github.io/compliance-trestle/schemas/oscal",
+                "value": "carried-images"
+              },
+              {
+                "name": "assessment-rule-id",
+                "ns": "https://oscal-compass.github.io/compliance-trestle/schemas/oscal",
                 "value": "model-volumes"
+              },
+              {
+                "name": "assessment-rule-id",
+                "ns": "https://oscal-compass.github.io/compliance-trestle/schemas/oscal",
+                "value": "models-need-kyverno"
               },
               {
                 "name": "assessment-rule-id",
@@ -651,7 +734,7 @@
                 "value": "admitted"
               }
             ],
-            "collected": "2026-11-01T22:21:29+00:00",
+            "collected": "2026-11-01T23:19:29+00:00",
             "remarks": "admitted",
             "relevant-evidence": [
               {
@@ -714,7 +797,7 @@
                 "value": "only from registry.boundary.internal:5000/models"
               }
             ],
-            "collected": "2026-11-01T22:21:29+00:00",
+            "collected": "2026-11-01T23:19:29+00:00",
             "remarks": "refused by model-volumes: model weights come only from registry.boundary.internal:5000/models, by digest",
             "relevant-evidence": [
               {
@@ -772,7 +855,7 @@
                 "value": "model weights carry an AI-BOM signed with the operator's key"
               }
             ],
-            "collected": "2026-11-01T22:21:29+00:00",
+            "collected": "2026-11-01T23:19:29+00:00",
             "remarks": "refused by verify-models: Policy verify-models failed: model weights carry an AI-BOM signed with the operator's key",
             "relevant-evidence": [
               {
@@ -830,7 +913,7 @@
                 "value": "one the bundle carried"
               }
             ],
-            "collected": "2026-11-01T22:21:29+00:00",
+            "collected": "2026-11-01T23:19:29+00:00",
             "remarks": "refused by carried-images: every image a pod runs is one the bundle carried",
             "relevant-evidence": [
               {
@@ -888,64 +971,11 @@
                 "value": "one the bundle carried"
               }
             ],
-            "collected": "2026-11-01T22:21:29+00:00",
+            "collected": "2026-11-01T23:19:29+00:00",
             "remarks": "refused by carried-images: every image a pod runs is one the bundle carried",
             "relevant-evidence": [
               {
                 "href": "https://github.com/heyvaldemar/kubernetes-air-gapped-ai-agent/blob/v1.8.0/tests/e2e/plants/volume-not-carried.yaml",
-                "description": "The planted pod, as the flagship ships it at v1.8.0"
-              }
-            ]
-          },
-          {
-            "uuid": "2bf4a8ef-f1bf-5718-9e0b-101f15643de9",
-            "title": "Admission test: ordinary-pod",
-            "description": "the control: the same pod with no toleration and no node named",
-            "methods": [
-              "TEST"
-            ],
-            "props": [
-              {
-                "name": "test",
-                "ns": "https://github.com/heyvaldemar/kubernetes-oscal-evidence/ns",
-                "value": "ordinary-pod"
-              },
-              {
-                "name": "expected-outcome",
-                "ns": "https://github.com/heyvaldemar/kubernetes-oscal-evidence/ns",
-                "value": "admitted"
-              },
-              {
-                "name": "verdict",
-                "ns": "https://github.com/heyvaldemar/kubernetes-oscal-evidence/ns",
-                "value": "pass"
-              },
-              {
-                "name": "assessment-rule-id",
-                "ns": "https://oscal-compass.github.io/compliance-trestle/schemas/oscal",
-                "value": "carried-images"
-              },
-              {
-                "name": "assessment-rule-id",
-                "ns": "https://oscal-compass.github.io/compliance-trestle/schemas/oscal",
-                "value": "egress-node"
-              },
-              {
-                "name": "admitted",
-                "ns": "https://github.com/heyvaldemar/kubernetes-oscal-evidence/ns",
-                "value": "true"
-              },
-              {
-                "name": "expected-words",
-                "ns": "https://github.com/heyvaldemar/kubernetes-oscal-evidence/ns",
-                "value": "admitted"
-              }
-            ],
-            "collected": "2026-11-01T22:21:29+00:00",
-            "remarks": "admitted",
-            "relevant-evidence": [
-              {
-                "href": "https://github.com/heyvaldemar/kubernetes-air-gapped-ai-agent/blob/v1.8.0/tests/e2e/plants-frontier/ordinary-pod.yaml",
                 "description": "The planted pod, as the flagship ships it at v1.8.0"
               }
             ]
@@ -999,7 +1029,7 @@
                 "value": "named by digest"
               }
             ],
-            "collected": "2026-11-01T22:21:29+00:00",
+            "collected": "2026-11-01T23:19:29+00:00",
             "remarks": "refused by carried-images: every image a pod runs is named by digest",
             "relevant-evidence": [
               {
@@ -1007,242 +1037,17 @@
                 "description": "The planted pod, as the flagship ships it at v1.8.0"
               }
             ]
-          },
-          {
-            "uuid": "4b67c153-db6a-5e5d-9c0c-198ee8a82a56",
-            "title": "Admission test: kyverno-away",
-            "description": "Kyverno's admission controller at zero replicas: the signed model is refused, and admitted again once Kyverno is back",
-            "methods": [
-              "TEST"
-            ],
-            "props": [
-              {
-                "name": "test",
-                "ns": "https://github.com/heyvaldemar/kubernetes-oscal-evidence/ns",
-                "value": "kyverno-away"
-              },
-              {
-                "name": "expected-outcome",
-                "ns": "https://github.com/heyvaldemar/kubernetes-oscal-evidence/ns",
-                "value": "refused"
-              },
-              {
-                "name": "verdict",
-                "ns": "https://github.com/heyvaldemar/kubernetes-oscal-evidence/ns",
-                "value": "pass"
-              },
-              {
-                "name": "refused-by-expected",
-                "ns": "https://github.com/heyvaldemar/kubernetes-oscal-evidence/ns",
-                "value": "models-need-kyverno"
-              },
-              {
-                "name": "assessment-rule-id",
-                "ns": "https://oscal-compass.github.io/compliance-trestle/schemas/oscal",
-                "value": "models-need-kyverno"
-              },
-              {
-                "name": "admitted",
-                "ns": "https://github.com/heyvaldemar/kubernetes-oscal-evidence/ns",
-                "value": "false"
-              },
-              {
-                "name": "refused-by",
-                "ns": "https://github.com/heyvaldemar/kubernetes-oscal-evidence/ns",
-                "value": "models-need-kyverno"
-              },
-              {
-                "name": "expected-words",
-                "ns": "https://github.com/heyvaldemar/kubernetes-oscal-evidence/ns",
-                "value": "no params found for policy binding with `Deny` parameterNotFoundAction"
-              }
-            ],
-            "collected": "2026-11-01T22:21:29+00:00",
-            "remarks": "refused by models-need-kyverno: failed to configure binding: no params found for policy binding with `Deny` parameterNotFoundAction",
-            "relevant-evidence": [
-              {
-                "href": "https://github.com/heyvaldemar/kubernetes-air-gapped-ai-agent/blob/v1.8.0/tests/e2e/gameday.sh (step 1)",
-                "description": "The planted pod, as the flagship ships it at v1.8.0"
-              }
-            ]
-          },
-          {
-            "uuid": "4ae1b99e-7e5a-5de3-bc23-b80871ca6df8",
-            "title": "Admission test: egress-toleration",
-            "description": "a pod outside the gateway's namespace that tolerates the egress node's taint",
-            "methods": [
-              "TEST"
-            ],
-            "props": [
-              {
-                "name": "test",
-                "ns": "https://github.com/heyvaldemar/kubernetes-oscal-evidence/ns",
-                "value": "egress-toleration"
-              },
-              {
-                "name": "expected-outcome",
-                "ns": "https://github.com/heyvaldemar/kubernetes-oscal-evidence/ns",
-                "value": "refused"
-              },
-              {
-                "name": "verdict",
-                "ns": "https://github.com/heyvaldemar/kubernetes-oscal-evidence/ns",
-                "value": "pass"
-              },
-              {
-                "name": "refused-by-expected",
-                "ns": "https://github.com/heyvaldemar/kubernetes-oscal-evidence/ns",
-                "value": "egress-node"
-              },
-              {
-                "name": "assessment-rule-id",
-                "ns": "https://oscal-compass.github.io/compliance-trestle/schemas/oscal",
-                "value": "egress-node"
-              },
-              {
-                "name": "admitted",
-                "ns": "https://github.com/heyvaldemar/kubernetes-oscal-evidence/ns",
-                "value": "false"
-              },
-              {
-                "name": "refused-by",
-                "ns": "https://github.com/heyvaldemar/kubernetes-oscal-evidence/ns",
-                "value": "egress-node"
-              },
-              {
-                "name": "expected-words",
-                "ns": "https://github.com/heyvaldemar/kubernetes-oscal-evidence/ns",
-                "value": "may not tolerate its taint"
-              }
-            ],
-            "collected": "2026-11-01T22:21:29+00:00",
-            "remarks": "refused by egress-node: only the gateway runs on the egress node; a pod outside namespace gateway may not tolerate its taint",
-            "relevant-evidence": [
-              {
-                "href": "https://github.com/heyvaldemar/kubernetes-air-gapped-ai-agent/blob/v1.8.0/tests/e2e/plants-frontier/egress-toleration.yaml",
-                "description": "The planted pod, as the flagship ships it at v1.8.0"
-              }
-            ]
-          },
-          {
-            "uuid": "c09aeef1-9b4e-5b30-b4ee-3020b5fb517b",
-            "title": "Admission test: egress-tolerate-all",
-            "description": "a pod outside the gateway's namespace that tolerates every taint",
-            "methods": [
-              "TEST"
-            ],
-            "props": [
-              {
-                "name": "test",
-                "ns": "https://github.com/heyvaldemar/kubernetes-oscal-evidence/ns",
-                "value": "egress-tolerate-all"
-              },
-              {
-                "name": "expected-outcome",
-                "ns": "https://github.com/heyvaldemar/kubernetes-oscal-evidence/ns",
-                "value": "refused"
-              },
-              {
-                "name": "verdict",
-                "ns": "https://github.com/heyvaldemar/kubernetes-oscal-evidence/ns",
-                "value": "pass"
-              },
-              {
-                "name": "refused-by-expected",
-                "ns": "https://github.com/heyvaldemar/kubernetes-oscal-evidence/ns",
-                "value": "egress-node"
-              },
-              {
-                "name": "assessment-rule-id",
-                "ns": "https://oscal-compass.github.io/compliance-trestle/schemas/oscal",
-                "value": "egress-node"
-              },
-              {
-                "name": "admitted",
-                "ns": "https://github.com/heyvaldemar/kubernetes-oscal-evidence/ns",
-                "value": "false"
-              },
-              {
-                "name": "refused-by",
-                "ns": "https://github.com/heyvaldemar/kubernetes-oscal-evidence/ns",
-                "value": "egress-node"
-              },
-              {
-                "name": "expected-words",
-                "ns": "https://github.com/heyvaldemar/kubernetes-oscal-evidence/ns",
-                "value": "may not tolerate every taint"
-              }
-            ],
-            "collected": "2026-11-01T22:21:29+00:00",
-            "remarks": "refused by egress-node: a pod outside namespace gateway may not tolerate every taint, the egress node's among them",
-            "relevant-evidence": [
-              {
-                "href": "https://github.com/heyvaldemar/kubernetes-air-gapped-ai-agent/blob/v1.8.0/tests/e2e/plants-frontier/egress-tolerate-all.yaml",
-                "description": "The planted pod, as the flagship ships it at v1.8.0"
-              }
-            ]
-          },
-          {
-            "uuid": "c251c0aa-76e4-5ee5-aa8d-b4256fa21acb",
-            "title": "Admission test: egress-node-name",
-            "description": "a pod that names the egress node and skips the scheduler and its taint",
-            "methods": [
-              "TEST"
-            ],
-            "props": [
-              {
-                "name": "test",
-                "ns": "https://github.com/heyvaldemar/kubernetes-oscal-evidence/ns",
-                "value": "egress-node-name"
-              },
-              {
-                "name": "expected-outcome",
-                "ns": "https://github.com/heyvaldemar/kubernetes-oscal-evidence/ns",
-                "value": "refused"
-              },
-              {
-                "name": "verdict",
-                "ns": "https://github.com/heyvaldemar/kubernetes-oscal-evidence/ns",
-                "value": "pass"
-              },
-              {
-                "name": "refused-by-expected",
-                "ns": "https://github.com/heyvaldemar/kubernetes-oscal-evidence/ns",
-                "value": "egress-node"
-              },
-              {
-                "name": "assessment-rule-id",
-                "ns": "https://oscal-compass.github.io/compliance-trestle/schemas/oscal",
-                "value": "egress-node"
-              },
-              {
-                "name": "admitted",
-                "ns": "https://github.com/heyvaldemar/kubernetes-oscal-evidence/ns",
-                "value": "false"
-              },
-              {
-                "name": "refused-by",
-                "ns": "https://github.com/heyvaldemar/kubernetes-oscal-evidence/ns",
-                "value": "egress-node"
-              },
-              {
-                "name": "expected-words",
-                "ns": "https://github.com/heyvaldemar/kubernetes-oscal-evidence/ns",
-                "value": "may not name its node"
-              }
-            ],
-            "collected": "2026-11-01T22:21:29+00:00",
-            "remarks": "refused by egress-node: a pod may not name its node and skip the scheduler, which is how a taint is passed by",
-            "relevant-evidence": [
-              {
-                "href": "https://github.com/heyvaldemar/kubernetes-air-gapped-ai-agent/blob/v1.8.0/tests/e2e/plants-frontier/egress-node-name.yaml",
-                "description": "The planted pod, as the flagship ships it at v1.8.0"
-              }
-            ]
           }
         ],
         "reviewed-controls": {
           "control-selections": [
+            {
+              "include-controls": [
+                {
+                  "control-id": "si-7"
+                }
+              ]
+            },
             {
               "include-controls": [
                 {
@@ -1256,14 +1061,7 @@
             {
               "include-controls": [
                 {
-                  "control-id": "sc-24"
-                }
-              ]
-            },
-            {
-              "include-controls": [
-                {
-                  "control-id": "ac-6"
+                  "control-id": "cm-14"
                 }
               ]
             },
@@ -1279,24 +1077,17 @@
                   "control-id": "sr-4"
                 }
               ]
-            },
-            {
-              "include-controls": [
-                {
-                  "control-id": "si-7"
-                }
-              ]
             }
           ]
         },
-        "start": "2026-11-01T17:21:29.514681-05:00",
+        "start": "2026-11-01T18:19:29.322732-05:00",
         "title": "NIST SP 800-53 Rev. 5.2.0: the admission controls of kubernetes-air-gapped-ai-agent v1.8.0",
-        "uuid": "004dcde7-cd4d-4e8f-b31e-a3c957d998d1",
+        "uuid": "bdcf9f5c-24f4-4d45-9462-03bf58adf773",
         "findings": [
           {
             "uuid": "c7e5f4e1-a10e-5022-8b00-b35e169d6ca1",
             "title": "cm-14: satisfied",
-            "description": "Kyverno reported every running pod passing verify-models, and every test that proves it did what the mapping says (model-unsigned, model-stranger, model-signed).",
+            "description": "Kyverno reported every running pod passing verify-models, models-need-kyverno, and every test that proves it did what the mapping says (model-unsigned, model-stranger, kyverno-away, model-signed).",
             "props": [
               {
                 "name": "control",
@@ -1307,6 +1098,11 @@
                 "name": "judged-by",
                 "ns": "https://github.com/heyvaldemar/kubernetes-oscal-evidence/ns",
                 "value": "scripts/evidence.py"
+              },
+              {
+                "name": "matrix-row",
+                "ns": "https://github.com/heyvaldemar/kubernetes-oscal-evidence/ns",
+                "value": "LLM03:2025"
               },
               {
                 "name": "c2p-verdict",
@@ -1324,13 +1120,19 @@
             },
             "related-observations": [
               {
-                "observation-uuid": "8e95ea61-996e-4cfa-9985-0545324c310f"
+                "observation-uuid": "c51d1e16-b511-4b83-bf14-f3e149ab7019"
+              },
+              {
+                "observation-uuid": "21151f6a-8d0e-431f-a33e-894cbf2fc949"
               },
               {
                 "observation-uuid": "0691d479-f8de-5a7f-ad07-e530ac52f5d8"
               },
               {
                 "observation-uuid": "b9ec3062-77a4-5453-9ac1-cc8e7eff29a5"
+              },
+              {
+                "observation-uuid": "4b67c153-db6a-5e5d-9c0c-198ee8a82a56"
               },
               {
                 "observation-uuid": "57965008-d4ab-51f2-af30-9bc9a7eb8a18"
@@ -1353,6 +1155,16 @@
                 "value": "scripts/evidence.py"
               },
               {
+                "name": "matrix-row",
+                "ns": "https://github.com/heyvaldemar/kubernetes-oscal-evidence/ns",
+                "value": "LLM03:2025"
+              },
+              {
+                "name": "matrix-row",
+                "ns": "https://github.com/heyvaldemar/kubernetes-oscal-evidence/ns",
+                "value": "LLM04:2025"
+              },
+              {
                 "name": "c2p-verdict",
                 "ns": "https://github.com/heyvaldemar/kubernetes-oscal-evidence/ns",
                 "value": "no finding"
@@ -1368,10 +1180,10 @@
             },
             "related-observations": [
               {
-                "observation-uuid": "a8719011-3886-4d55-a798-a56f2115a4c9"
+                "observation-uuid": "d1a8c851-493c-4dcb-8c4d-e91c1f0b007d"
               },
               {
-                "observation-uuid": "8e95ea61-996e-4cfa-9985-0545324c310f"
+                "observation-uuid": "c51d1e16-b511-4b83-bf14-f3e149ab7019"
               },
               {
                 "observation-uuid": "f98416ac-7761-5600-b1f5-9b14980f2846"
@@ -1403,6 +1215,16 @@
                 "value": "scripts/evidence.py"
               },
               {
+                "name": "matrix-row",
+                "ns": "https://github.com/heyvaldemar/kubernetes-oscal-evidence/ns",
+                "value": "PS.3.2"
+              },
+              {
+                "name": "matrix-row",
+                "ns": "https://github.com/heyvaldemar/kubernetes-oscal-evidence/ns",
+                "value": "LLM04:2025"
+              },
+              {
                 "name": "c2p-verdict",
                 "ns": "https://github.com/heyvaldemar/kubernetes-oscal-evidence/ns",
                 "value": "no finding"
@@ -1418,7 +1240,7 @@
             },
             "related-observations": [
               {
-                "observation-uuid": "8e95ea61-996e-4cfa-9985-0545324c310f"
+                "observation-uuid": "c51d1e16-b511-4b83-bf14-f3e149ab7019"
               },
               {
                 "observation-uuid": "6aa9369a-d714-598b-a15b-50e0c03571ba"
@@ -1431,7 +1253,7 @@
           {
             "uuid": "de3767ab-1697-5166-8e1c-9a6487c03b73",
             "title": "sr-11: satisfied",
-            "description": "Kyverno reported every running pod passing carried-images, and every test that proves it did what the mapping says (image-not-carried, volume-not-carried, ordinary-pod).",
+            "description": "Kyverno reported every running pod passing carried-images, and every test that proves it did what the mapping says (image-not-carried, volume-not-carried, model-signed).",
             "props": [
               {
                 "name": "control",
@@ -1442,6 +1264,11 @@
                 "name": "judged-by",
                 "ns": "https://github.com/heyvaldemar/kubernetes-oscal-evidence/ns",
                 "value": "scripts/evidence.py"
+              },
+              {
+                "name": "matrix-row",
+                "ns": "https://github.com/heyvaldemar/kubernetes-oscal-evidence/ns",
+                "value": "LLM03:2025"
               },
               {
                 "name": "c2p-verdict",
@@ -1459,7 +1286,7 @@
             },
             "related-observations": [
               {
-                "observation-uuid": "391226e6-64e3-44ea-b898-47a1a0dbc77e"
+                "observation-uuid": "fae502cd-15c4-458e-a676-b0bbe6a6cd50"
               },
               {
                 "observation-uuid": "f8c69711-4cd0-50c5-8dfe-fe90ca4d69d3"
@@ -1468,14 +1295,14 @@
                 "observation-uuid": "ab0a07a8-c7fa-588c-b13a-057ea42aae25"
               },
               {
-                "observation-uuid": "2bf4a8ef-f1bf-5718-9e0b-101f15643de9"
+                "observation-uuid": "57965008-d4ab-51f2-af30-9bc9a7eb8a18"
               }
             ]
           },
           {
             "uuid": "d2bc1ccb-683a-5b29-8dac-45e8fe3547f4",
             "title": "cm-7.5: satisfied",
-            "description": "Kyverno reported every running pod passing carried-images, and every test that proves it did what the mapping says (image-by-tag, image-not-carried, ordinary-pod).",
+            "description": "Kyverno reported every running pod passing carried-images, and every test that proves it did what the mapping says (image-by-tag, image-not-carried, model-signed).",
             "props": [
               {
                 "name": "control",
@@ -1486,6 +1313,11 @@
                 "name": "judged-by",
                 "ns": "https://github.com/heyvaldemar/kubernetes-oscal-evidence/ns",
                 "value": "scripts/evidence.py"
+              },
+              {
+                "name": "matrix-row",
+                "ns": "https://github.com/heyvaldemar/kubernetes-oscal-evidence/ns",
+                "value": "LLM03:2025"
               },
               {
                 "name": "c2p-verdict",
@@ -1503,7 +1335,7 @@
             },
             "related-observations": [
               {
-                "observation-uuid": "391226e6-64e3-44ea-b898-47a1a0dbc77e"
+                "observation-uuid": "fae502cd-15c4-458e-a676-b0bbe6a6cd50"
               },
               {
                 "observation-uuid": "a30c8d9b-21af-5f50-9702-b55936819699"
@@ -1512,95 +1344,13 @@
                 "observation-uuid": "f8c69711-4cd0-50c5-8dfe-fe90ca4d69d3"
               },
               {
-                "observation-uuid": "2bf4a8ef-f1bf-5718-9e0b-101f15643de9"
-              }
-            ]
-          },
-          {
-            "uuid": "a6bc361e-03c1-5352-81f6-4efe24733d71",
-            "title": "sc-24: satisfied",
-            "description": "Kyverno reported every running pod passing models-need-kyverno, and every test that proves it did what the mapping says (kyverno-away).",
-            "props": [
-              {
-                "name": "control",
-                "ns": "https://github.com/heyvaldemar/kubernetes-oscal-evidence/ns",
-                "value": "sc-24"
-              },
-              {
-                "name": "judged-by",
-                "ns": "https://github.com/heyvaldemar/kubernetes-oscal-evidence/ns",
-                "value": "scripts/evidence.py"
-              },
-              {
-                "name": "c2p-verdict",
-                "ns": "https://github.com/heyvaldemar/kubernetes-oscal-evidence/ns",
-                "value": "no finding"
-              }
-            ],
-            "target": {
-              "type": "statement-id",
-              "target-id": "sc-24_smt",
-              "status": {
-                "state": "satisfied",
-                "reason": "pass"
-              }
-            },
-            "related-observations": [
-              {
-                "observation-uuid": "3a5ccc04-63c8-40cf-ae43-f48afcec52e9"
-              },
-              {
-                "observation-uuid": "4b67c153-db6a-5e5d-9c0c-198ee8a82a56"
-              }
-            ]
-          },
-          {
-            "uuid": "3b1f45f1-ac04-5246-ad8b-d14be945064d",
-            "title": "ac-6: satisfied",
-            "description": "every test that proves it did what the mapping says (egress-toleration, egress-tolerate-all, egress-node-name, ordinary-pod).",
-            "props": [
-              {
-                "name": "control",
-                "ns": "https://github.com/heyvaldemar/kubernetes-oscal-evidence/ns",
-                "value": "ac-6"
-              },
-              {
-                "name": "judged-by",
-                "ns": "https://github.com/heyvaldemar/kubernetes-oscal-evidence/ns",
-                "value": "scripts/evidence.py"
-              },
-              {
-                "name": "c2p-verdict",
-                "ns": "https://github.com/heyvaldemar/kubernetes-oscal-evidence/ns",
-                "value": "not assessed by C2P (no Kyverno check)"
-              }
-            ],
-            "target": {
-              "type": "statement-id",
-              "target-id": "ac-6_smt",
-              "status": {
-                "state": "satisfied",
-                "reason": "pass"
-              }
-            },
-            "related-observations": [
-              {
-                "observation-uuid": "4ae1b99e-7e5a-5de3-bc23-b80871ca6df8"
-              },
-              {
-                "observation-uuid": "c09aeef1-9b4e-5b30-b4ee-3020b5fb517b"
-              },
-              {
-                "observation-uuid": "c251c0aa-76e4-5ee5-aa8d-b4256fa21acb"
-              },
-              {
-                "observation-uuid": "2bf4a8ef-f1bf-5718-9e0b-101f15643de9"
+                "observation-uuid": "57965008-d4ab-51f2-af30-9bc9a7eb8a18"
               }
             ]
           }
         ]
       }
     ],
-    "uuid": "201a23c4-799a-4dff-ae88-d0c01f04ea0b"
+    "uuid": "ee659ee2-9850-4e95-8c5f-0c21ce00dd3b"
   }
 }

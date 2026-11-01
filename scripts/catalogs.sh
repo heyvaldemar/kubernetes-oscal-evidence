@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# catalogs.sh - NIST's OSCAL catalogs that catalogs.lock pins, into
-# .cache/catalogs, each refused unless its sha256 is the pinned one.
+# catalogs.sh - NIST's OSCAL catalogs and the control-to-test matrix that
+# catalogs.lock pins, into .cache/catalogs, each refused unless its sha256 is
+# the pinned one.
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 OUT="$ROOT/.cache/catalogs"
@@ -13,4 +14,4 @@ while read -r file url sum; do
   got="$(sha256 "$OUT/$file")"
   [ "$got" = "$sum" ] || { echo "$file is $got; catalogs.lock pins $sum" >&2; rm -f "$OUT/$file"; exit 1; }
 done <"$ROOT/catalogs.lock"
-echo "== NIST catalogs pinned by catalogs.lock, checked: $(awk '!/^#/ && NF {print $1}' "$ROOT/catalogs.lock" | tr '\n' ' ')"
+echo "== catalogs.lock, every file checked: $(awk '!/^#/ && NF {print $1}' "$ROOT/catalogs.lock" | tr '\n' ' ')"
