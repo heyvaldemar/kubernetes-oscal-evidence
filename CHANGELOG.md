@@ -4,6 +4,10 @@ All notable changes to this project are documented in this file. The format is b
 
 ## [Unreleased]
 
+### Changed
+
+- The control-to-test matrix is pinned at fleet-ops 90e4459, where the LLM03:2025 row says which of the flagship's policies makes each of its twelve refusals, after this repository's `remove:model-volumes` plant showed that verify-models alone admits a model volume from outside the models path. The rows the mapping names are unchanged; v1.1.0's evidence names the earlier pin, 95e3429.
+
 ## [1.1.0] - 2026-11-01
 
 ### Changed

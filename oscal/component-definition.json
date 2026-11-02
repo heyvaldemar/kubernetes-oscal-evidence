@@ -8,7 +8,7 @@
       "oscal-version": "1.2.1",
       "links": [
         {
-          "href": "https://raw.githubusercontent.com/heyvaldemar/fleet-ops/95e34294b69dd54ffa90fe2bcce542b6745ed267/docs/control-evidence.md",
+          "href": "https://raw.githubusercontent.com/heyvaldemar/fleet-ops/90e44597b1f3ac96d9ea3605eeaca47cdf4d8e35/docs/control-evidence.md",
           "rel": "reference",
           "text": "The control-to-test matrix each implemented requirement names a row of"
         }
