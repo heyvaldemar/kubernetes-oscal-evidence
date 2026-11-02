@@ -83,7 +83,7 @@ A gate that has never failed proves nothing. Every push runs the whole thing sev
 
 | Plant | What it breaks | Not satisfied | Tests failed |
 |---|---|---|---|
-| `remove:verify-models` | The signature policy is never applied | all 8: the guard then refuses every model, the signed control pod with them | 9 of 19 |
+| `remove:verify-models` | The signature policy is never applied | all 8: the guard then refuses every model, the signed control pod with them | 9 or 11 of 19 |
 | `audit:verify-models` | The signature policy records instead of refusing, and a model nobody signed runs | PS.3.2, PW.4.4, CM-14, SI-7, SR-4, MANAGE 3.1 | 7 |
 | `phantom-mapping` | The mapping names `verify-model-signatures`, a policy the flagship does not have | PS.3.2, PW.4.4, CM-14, SI-7, SR-4, MANAGE 3.1 | 7 |
 | `remove:carried-images` | No list of carried digests | SR-11, CM-7(5) | 3 |
@@ -91,7 +91,7 @@ A gate that has never failed proves nothing. Every push runs the whole thing sev
 | `remove:models-need-kyverno` | No guard while Kyverno is away | CM-14 | 1 |
 | `remove:egress-node` | Nothing keeps pods off the egress node | none rests on it | 3 |
 
-Each was caught in [run 41361749143](https://github.com/heyvaldemar/kubernetes-oscal-evidence/actions/runs/41361749143), and for its own reason: a plant passes only if a pod the broken policy must refuse got in. Three of them say more than that the gate works:
+Each was caught in [run 41361749143](https://github.com/heyvaldemar/kubernetes-oscal-evidence/actions/runs/41361749143), and for its own reason: a plant passes only if a pod the broken policy must refuse got in. The controls each plant breaks are the same in every run. One count is not: with verify-models gone, `model-by-tag` and `volume-elsewhere` are refused by the guard and by a second native policy at once, and the API server names only one of them, not always the same one. When it names the guard, those two tests fail as well: 9 failed tests in runs [41361749143](https://github.com/heyvaldemar/kubernetes-oscal-evidence/actions/runs/41361749143), [41362793471](https://github.com/heyvaldemar/kubernetes-oscal-evidence/actions/runs/41362793471) and [41364822342](https://github.com/heyvaldemar/kubernetes-oscal-evidence/actions/runs/41364822342), 11 in [41358080026](https://github.com/heyvaldemar/kubernetes-oscal-evidence/actions/runs/41358080026) and the tag's [41363728342](https://github.com/heyvaldemar/kubernetes-oscal-evidence/actions/runs/41363728342). Three of them say more than that the gate works:
 
 - **`audit:verify-models` is the PolicyReport path.** With the policy recording rather than refusing, the unsigned model ran, Kyverno's report said "fail" for its pod, and C2P turned that into its own not-satisfied finding. The other plants reach the gate through missing reports and failed tests; this one through a report that names a violation.
 - **`phantom-mapping` is refused twice.** The mapping check stops it before anything runs. Built anyway, the run refuses it on its own: Kyverno reports `verify-models`, nothing reports `verify-model-signatures`, and every test is refused by a policy the mapping does not name.
@@ -115,7 +115,7 @@ It does not prove:
 Each release carries the run's evidence beside its source: `kubernetes-oscal-evidence-<tag>-evidence.tar.gz`, its Sigstore bundle, and its SLSA provenance. The evidence was made by a run of the Evidence workflow on the tag itself, and nothing in this repository needs to be trusted to check it.
 
 ```sh
-TAG=v1.0.0
+TAG=$(gh release view -R heyvaldemar/kubernetes-oscal-evidence --json tagName -q .tagName)
 NAME=kubernetes-oscal-evidence-$TAG-evidence
 gh release download "$TAG" -R heyvaldemar/kubernetes-oscal-evidence -p "$NAME.*"
 ```
