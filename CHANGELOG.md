@@ -4,6 +4,11 @@ All notable changes to this project are documented in this file. The format is b
 
 ## [Unreleased]
 
+### Added
+
+- Live status, as the account's other reference repositories keep it. With `E2E_RESULTS` set, the gate writes what it decided: a judged run gets one check per control and per admission test and three measured lines (controls satisfied, planted pods refused, control pods admitted), a plant's run one check, whether it was caught, and evidence it cannot read one failed check. Every Evidence job uploads them (`e2e-results-*`), and `.github/workflows/status.yml` rewrites the `status` branch after each run on main with the last 30 days: green days, the streak, the latest run's checks and measurements (`scripts/status.py`, read from GitHub's API). A release's run on its tag is not read. The README's second row of badges reads the branch.
+- Two changes to the gate's new output, each caught: a status record that calls a failed check passed, and one that counts every planted pod refused whatever got in. 43 tests and 27 changes to the gate's rules now.
+
 ### Changed
 
 - The control-to-test matrix is pinned at fleet-ops 90e4459, where the LLM03:2025 row says which of the flagship's policies makes each of its twelve refusals, after this repository's `remove:model-volumes` plant showed that verify-models alone admits a model volume from outside the models path. The rows the mapping names are unchanged; v1.1.0's evidence names the earlier pin, 95e3429.

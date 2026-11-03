@@ -2,6 +2,13 @@
 
 [![Evidence](https://github.com/heyvaldemar/kubernetes-oscal-evidence/actions/workflows/evidence.yml/badge.svg?branch=main)](https://github.com/heyvaldemar/kubernetes-oscal-evidence/actions/workflows/evidence.yml)
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/heyvaldemar/kubernetes-oscal-evidence/badge)](https://scorecard.dev/viewer/?uri=github.com/heyvaldemar/kubernetes-oscal-evidence)
+[![evidence, last 30 days](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Fheyvaldemar%2Fkubernetes-oscal-evidence%2Fstatus%2Fbadge-days.json)](https://github.com/heyvaldemar/kubernetes-oscal-evidence/blob/status/status.json)
+[![checks](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Fheyvaldemar%2Fkubernetes-oscal-evidence%2Fstatus%2Fbadge-checks.json)](https://github.com/heyvaldemar/kubernetes-oscal-evidence/blob/status/status.json)
+[![controls satisfied](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Fheyvaldemar%2Fkubernetes-oscal-evidence%2Fstatus%2Fbadge-controls-satisfied.json)](https://github.com/heyvaldemar/kubernetes-oscal-evidence/blob/status/status.json)
+[![planted pods refused](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Fheyvaldemar%2Fkubernetes-oscal-evidence%2Fstatus%2Fbadge-planted-pods-refused.json)](https://github.com/heyvaldemar/kubernetes-oscal-evidence/blob/status/status.json)
+[![control pods admitted](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Fheyvaldemar%2Fkubernetes-oscal-evidence%2Fstatus%2Fbadge-control-pods-admitted.json)](https://github.com/heyvaldemar/kubernetes-oscal-evidence/blob/status/status.json)
+
+The second row of badges is not typed by hand: it is the last 30 days of Evidence runs on main, which come with every push and every week, rewritten after each run by [`.github/workflows/status.yml`](.github/workflows/status.yml) into the [`status`](https://github.com/heyvaldemar/kubernetes-oscal-evidence/tree/status) branch. Its checks are the gate's own verdicts on each control, each admission test and each plant.
 
 Out of the box, Kyverno 1.19 wrote no result for the flagship's model-signature policy, not even about the pod it admitted: a CEL policy that can deny skips its admission report ([kyverno#16841](https://github.com/kyverno/kyverno/issues/16841)). An auditor reading the reports would have seen nothing where the cluster's strongest control was working.
 
@@ -97,7 +104,7 @@ Each was caught in [run 41361749143](https://github.com/heyvaldemar/kubernetes-o
 - **`phantom-mapping` is refused twice.** The mapping check stops it before anything runs. Built anyway, the run refuses it on its own: Kyverno reports `verify-models`, nothing reports `verify-model-signatures`, and every test is refused by a policy the mapping does not name.
 - **`remove:model-volumes` admitted the model from elsewhere.** The flagship's verify-models carries the same rule, "model weights come only from registry.boundary.internal:5000/models", and both policies print it. But Kyverno evaluates verify-models only for images that match its own `matchImageReferences` glob, so an image volume from anywhere else never reaches it. model-volumes is the only rule that holds the path, not a second layer.
 
-The gate's own rules are shown their failures too. [`tests/test_evidence.py`](tests/test_evidence.py) runs them on one real run's files, breaking one thing at a time, and [`scripts/mutate.py`](scripts/mutate.py) switches each rule off in a copy of the scripts, from [`tests/plants.tsv`](tests/plants.tsv), and requires a named test to fail. The first time it ran, 4 of 20 changes went unnoticed: one test passed because the changed gate crashed rather than because it judged, one change sat on a branch its test never reached, one rule is backed by the next so that switching it off alone changes nothing, and one test broke the mapping in more ways than the rule it was written for. The tests and the changes were fixed until each change is caught by its own test; 25 are listed now.
+The gate's own rules are shown their failures too. [`tests/test_evidence.py`](tests/test_evidence.py) runs them on one real run's files, breaking one thing at a time, and [`scripts/mutate.py`](scripts/mutate.py) switches each rule off in a copy of the scripts, from [`tests/plants.tsv`](tests/plants.tsv), and requires a named test to fail. The first time it ran, 4 of 20 changes went unnoticed: one test passed because the changed gate crashed rather than because it judged, one change sat on a branch its test never reached, one rule is backed by the next so that switching it off alone changes nothing, and one test broke the mapping in more ways than the rule it was written for. The tests and the changes were fixed until each change is caught by its own test; 27 are listed now.
 
 ## What the evidence proves, and what it does not
 
@@ -166,7 +173,7 @@ It needs Docker, curl, jq, openssl and Python 3.11 or later; everything else is 
 | `flagship.lock`, `catalogs.lock`, `tools.lock`, `requirements.lock` | What is fetched, and the hash it must have |
 | `kind/cluster.yaml` | The flagship's two nodes; CI checks they are the same |
 | `workload/model-server.yaml` | The good workload: a model server shaped like the flagship's |
-| `scripts/` | The run, step by step; `run.sh` is all of it |
+| `scripts/` | The run, step by step; `run.sh` is all of it, and `status.py` writes the `status` branch from its runs |
 | `tests/` | The gate's tests on one real run's files, and `plants.tsv`, each rule of the gate switched off in turn |
 
 ## Questions, bugs and changes

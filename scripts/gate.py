@@ -20,6 +20,15 @@ gate must catch it for the planted reason: it exits 0 only if every control
 resting on the planted policy is not satisfied and at least one admission
 test that policy must refuse failed. A plant the gate lets through, or
 catches only for some other reason, exits 1.
+
+With E2E_RESULTS set, it also writes what it decided there, check by check,
+for scripts/status.py and the branch `status`: {"checks": [{"state",
+"name"}], "measured": [...]}. A run judged on its own has one check per
+control and one per admission test, PASS only where the gate found nothing
+wrong with it, and a measured line each for the controls, the planted pods
+and the control pods. A plant's run has one check, whether the plant was
+caught, since its controls are meant to fail; evidence the gate cannot read
+is one failed check.
 """
 import argparse
 import json
@@ -90,6 +99,43 @@ def planted(mapping, plant):
     return controls, tests
 
 
+def check_state(ok):
+    return "PASS" if ok else "FAIL"
+
+
+def results(mapping, failures, failed_tests):
+    """The gate's verdicts on a run judged on its own, as scripts/status.py reads them."""
+    failed = {(fw, what): why for fw, what, why in failures}
+    checks = []
+    for c in mapping["controls"]:
+        key = (c["framework"], c["control"])
+        checks.append({"state": check_state(key not in failed),
+                       "name": f"{mapping['frameworks'][c['framework']]['title']} {c['control']}: "
+                               f"{failed.get(key, 'satisfied')}"})
+    for test in list(mapping["tests"]) + sorted(set(failed_tests) - set(mapping["tests"])):
+        spec = mapping["tests"].get(test, {})
+        did = "admitted" if spec.get("outcome") == "admitted" else f"refused by {' or '.join(spec.get('by', []))}"
+        checks.append({"state": check_state(test not in failed_tests), "name": f"{test}: {failed_tests.get(test, did)}"})
+    controls = len(mapping["controls"])
+    satisfied = controls - len({k for k in failed if k[0] != "tests"})
+    refused = [t for t, spec in mapping["tests"].items() if spec["outcome"] == "refused"]
+    admitted = [t for t, spec in mapping["tests"].items() if spec["outcome"] == "admitted"]
+    return {"checks": checks, "measured": [
+        f"controls satisfied: {satisfied} of {controls}",
+        f"planted pods refused: {sum(t not in failed_tests for t in refused)} of {len(refused)}",
+        f"control pods admitted: {sum(t not in failed_tests for t in admitted)} of {len(admitted)}",
+    ]}
+
+
+def emit(doc):
+    """Writes the gate's verdicts to $E2E_RESULTS, when it is set."""
+    path = os.environ.get("E2E_RESULTS")
+    if path:
+        with open(path, "w") as f:
+            json.dump(doc, f, indent=2)
+            f.write("\n")
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("evidence")
@@ -102,6 +148,7 @@ def main():
         found, failed_tests = read(args.evidence, mapping)
     except SystemExit as e:
         print(f"gate: {e}", file=sys.stderr)
+        emit({"checks": [{"state": "FAIL", "name": f"the evidence: {e}"}], "measured": []})
         sys.exit(2)
     failures = judge(mapping, found, failed_tests)
     for fw, what, why in failures:
@@ -110,19 +157,23 @@ def main():
     print(f"== {passed} of {len(mapping['controls'])} controls satisfied, "
           f"{len(failed_tests)} admission test(s) failed")
     if not args.plant:
+        emit(results(mapping, failures, failed_tests))
         sys.exit(1 if failures else 0)
     must, its_tests = planted(mapping, args.plant)
     caught = {(f, w) for f, w, _ in failures}
     missed = sorted(must - caught)
     failed_own = sorted(its_tests & set(failed_tests))
     if not missed and failed_own:
-        print(f"== plant {args.plant} caught: "
-              + (f"every control resting on it is not satisfied ({', '.join(sorted(c for _, c in must))}), and "
-                 if must else "no control rests on it, and ")
-              + f"its own tests failed ({', '.join(failed_own)})")
+        why = ("caught: "
+               + (f"every control resting on it is not satisfied ({', '.join(sorted(c for _, c in must))}), and "
+                  if must else "no control rests on it, and ")
+               + f"its own tests failed ({', '.join(failed_own)})")
+        print(f"== plant {args.plant} {why}")
+        emit({"checks": [{"state": check_state(True), "name": f"plant {args.plant}: {why}"}], "measured": []})
         sys.exit(0)
-    print(f"== plant {args.plant} NOT caught: "
-          + (f"still satisfied: {missed}" if missed else "none of the tests its policy must refuse failed"))
+    why = "NOT caught: " + (f"still satisfied: {missed}" if missed else "none of the tests its policy must refuse failed")
+    print(f"== plant {args.plant} {why}")
+    emit({"checks": [{"state": check_state(False), "name": f"plant {args.plant}: {why}"}], "measured": []})
     sys.exit(1)
 
 

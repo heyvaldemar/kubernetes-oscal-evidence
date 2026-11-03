@@ -325,6 +325,68 @@ class Gate(unittest.TestCase):
         self.fail_test("egress-toleration")
         self.assertEqual(self.run_gate("--plant", "remove:egress-node", says="no control rests on it"), 0)
 
+    # What the gate writes to $E2E_RESULTS is what the branch `status` and
+    # heyvaldemar.com show: it must say FAIL wherever the gate did.
+
+    def gate_results(self, *args):
+        out = pathlib.Path(self.tmp) / "e2e-results.json"
+        p = subprocess.run([sys.executable, str(SCRIPTS / "gate.py"), str(self.dir), *args],
+                           capture_output=True, text=True, env=dict(os.environ, E2E_RESULTS=str(out)))
+        return p.returncode, json.load(open(out))
+
+    def counts(self):
+        tests = MAPPING["tests"].values()
+        return (len(MAPPING["controls"]), sum(t["outcome"] == "refused" for t in tests),
+                sum(t["outcome"] == "admitted" for t in tests))
+
+    def test_results_of_the_real_run(self):
+        code, doc = self.gate_results()
+        controls, refused, admitted = self.counts()
+        self.assertEqual(code, 0)
+        self.assertEqual(len(doc["checks"]), controls + len(MAPPING["tests"]))
+        self.assertEqual({c["state"] for c in doc["checks"]}, {"PASS"})
+        self.assertEqual(doc["measured"], [f"controls satisfied: {controls} of {controls}",
+                                           f"planted pods refused: {refused} of {refused}",
+                                           f"control pods admitted: {admitted} of {admitted}"])
+        for line in doc["measured"]:  # the site folds "X · label: value" lines into a table
+            self.assertNotIn(" · ", line)
+
+    def test_results_name_what_failed(self):
+        def edit(f):
+            f["target"]["status"]["state"] = "not-satisfied"
+        self.edit_finding("nist_ssdf", "PW.4.4", edit)
+        self.fail_test("model-unsigned")
+        code, doc = self.gate_results()
+        self.assertEqual(code, 1)
+        failed = [c["name"] for c in doc["checks"] if c["state"] == "FAIL"]
+        self.assertEqual(len(failed), 2, failed)
+        self.assertTrue(failed[0].startswith("NIST SP 800-218 SSDF v1.1 PW.4.4: not-satisfied"), failed)
+        self.assertTrue(failed[1].startswith("model-unsigned: admitted"), failed)
+
+    def test_results_count_what_failed(self):
+        self.fail_test("model-unsigned")
+        self.fail_test("ordinary-pod")
+        code, doc = self.gate_results()
+        controls, refused, admitted = self.counts()
+        self.assertEqual(code, 1)
+        self.assertEqual(doc["measured"][1:], [f"planted pods refused: {refused - 1} of {refused}",
+                                               f"control pods admitted: {admitted - 1} of {admitted}"])
+
+    def test_results_of_a_plant(self):
+        code, doc = self.gate_results("--plant", "remove:verify-models")
+        self.assertEqual((code, [c["state"] for c in doc["checks"]], doc["measured"]), (1, ["FAIL"], []))
+        self.assertTrue(doc["checks"][0]["name"].startswith("plant remove:verify-models: NOT caught"))
+        self.fail_controls_of("verify-models")
+        self.fail_test("model-unsigned")
+        code, doc = self.gate_results("--plant", "remove:verify-models")
+        self.assertEqual((code, [c["state"] for c in doc["checks"]], doc["measured"]), (0, ["PASS"], []))
+        self.assertTrue(doc["checks"][0]["name"].startswith("plant remove:verify-models: caught"))
+
+    def test_results_when_the_evidence_cannot_be_read(self):
+        (self.dir / "assessment-results-nist_ai_rmf.json").unlink()
+        code, doc = self.gate_results()
+        self.assertEqual((code, [c["state"] for c in doc["checks"]]), (2, ["FAIL"]))
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -12,6 +12,9 @@ name: Evidence
 # plants    the same run broken on purpose, seven ways; each job passes only
 #           if the gate fails for the planted reason
 #
+# Both kinds of run keep the gate's verdicts (e2e-results-*), which
+# status.yml turns into the branch `status` after each run on main.
+#
 # Everything runs on GitHub's hosted runners with no secret: the signature's
 # identity is this workflow's, from GitHub's OIDC token.
 on:
@@ -111,6 +114,8 @@ jobs:
           bash scripts/install-tools.sh >> "$GITHUB_PATH"
 
       - name: Run it, and judge it
+        env:
+          E2E_RESULTS: ${{ runner.temp }}/e2e-results.json
         run: bash scripts/run.sh
 
       - name: What the run showed
@@ -118,6 +123,15 @@ jobs:
         run: |
           [ -f .cache/run/evidence/summary.md ] && cat .cache/run/evidence/summary.md >> "$GITHUB_STEP_SUMMARY"
           [ -f .cache/run/evidence/summary.md ] && cat .cache/run/evidence/summary.md || echo "no evidence was written"
+
+      - name: Keep the gate's verdicts for the status workflow
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: e2e-results-evidence
+          path: ${{ runner.temp }}/e2e-results.json
+          if-no-files-found: ignore
+          retention-days: 30
 
       # A pull request's run is judged, not signed: a pull request from a
       # fork gets no OIDC token, and its evidence is not this repository's.
@@ -255,6 +269,8 @@ jobs:
           bash scripts/install-tools.sh >> "$GITHUB_PATH"
 
       - name: Run it broken, and the gate must catch it
+        env:
+          E2E_RESULTS: ${{ runner.temp }}/e2e-results.json
         run: bash scripts/run.sh
 
       - name: What the run showed
@@ -262,3 +278,18 @@ jobs:
         run: |
           [ -f .cache/run/evidence/summary.md ] && cat .cache/run/evidence/summary.md >> "$GITHUB_STEP_SUMMARY"
           [ -f .cache/run/evidence/summary.md ] && cat .cache/run/evidence/summary.md || echo "no evidence was written"
+
+      # An artifact's name may not hold the plant's colon.
+      - name: Name the gate's verdicts
+        id: results
+        if: always()
+        run: echo "name=e2e-results-plant-${PLANT//:/-}" >> "$GITHUB_OUTPUT"
+
+      - name: Keep the gate's verdicts for the status workflow
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: ${{ steps.results.outputs.name }}
+          path: ${{ runner.temp }}/e2e-results.json
+          if-no-files-found: ignore
+          retention-days: 30

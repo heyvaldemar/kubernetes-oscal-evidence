@@ -26,3 +26,5 @@
 "scripts/component.py"	"            if row not in matrix_rows():\n"	"            if False:\n"	"Mapping.test_a_matrix_row_that_does_not_exist"	"a mapping that names a row the published matrix does not have"
 "scripts/component.py"	"        if not rows:\n"	"        if False:\n"	"Mapping.test_a_control_on_no_matrix_row"	"a control mapped onto no row of the published matrix"
 "scripts/component.py"	"        if c[\"framework\"] == \"nist_ssdf\" and c[\"control\"] not in rows:\n"	"        if False:\n"	"Mapping.test_an_ssdf_control_that_is_not_its_own_row"	"an SSDF control that is not the matrix's own row for it"
+"scripts/gate.py"	"    return \"PASS\" if ok else \"FAIL\"\n"	"    return \"PASS\"\n"	"Gate.test_results_name_what_failed"	"a status record that calls a failed check passed"
+"scripts/gate.py"	"        f\"planted pods refused: {sum(t not in failed_tests for t in refused)} of {len(refused)}\",\n"	"        f\"planted pods refused: {len(refused)} of {len(refused)}\",\n"	"Gate.test_results_count_what_failed"	"a status record that counts every planted pod refused, whatever got in"
