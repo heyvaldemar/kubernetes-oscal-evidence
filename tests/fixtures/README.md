@@ -1,6 +1,6 @@
 # Fixtures
 
-Files from one real run of `scripts/run.sh` on 2026-11-01, on kind on an arm64 Mac, with the flagship at v1.8.0: nothing here is written by hand.
+Files from one real run on 2026-11-01 (`scripts/run.sh` then, `tests/e2e/run.sh` now), on kind on an arm64 Mac, with the flagship at v1.8.0: nothing here is written by hand.
 
 | File | What it is |
 |---|---|

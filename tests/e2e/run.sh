@@ -1,15 +1,19 @@
 #!/usr/bin/env bash
 # run.sh - the whole run, as CI runs it, on this machine: the flagship's
 # policies on kind, its planted pods, Kyverno's reports, C2P and trestle,
-# and the gate. Evidence lands in .cache/run/evidence.
+# and the gate. Evidence lands in .cache/run/evidence. The steps are the
+# scripts in scripts/; this is the order they run in.
 #
 #   PLANT=remove:<policy> | audit:verify-models | phantom-mapping  break it on purpose
-#   KEEP=1  leave the cluster up afterwards
+#   KEEP=1  leave the cluster up afterwards; bash scripts/cluster.sh down is the teardown
+#
+# CI creates the kind cluster in a step of its own first; scripts/cluster.sh
+# finds it and keeps it, and creates it when it is not there.
 #
 # Needs docker, curl, jq, openssl and Python 3.11 or later with
 # requirements.lock installed (python3 -m pip install --require-hashes -r requirements.lock).
 set -euo pipefail
-ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 STATE="$ROOT/.cache/run"
 PLANT="${PLANT:-}"
 export PLANT

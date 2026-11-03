@@ -31,6 +31,29 @@ From the signed evidence of [run 41361749143](https://github.com/heyvaldemar/kub
 
 Every push runs it again. So does a weekly schedule, and so does every release, whose evidence is made by a run on the tag itself.
 
+## How a run goes
+
+```mermaid
+flowchart TD
+  lock["flagship.lock: the flagship's release, by sha256"] --> verify["flagship.sh: sha256, cosign, slsa-verifier"]
+  verify --> cluster["kind with the flagship's two nodes, zot as its registry"]
+  cluster --> policies["Kyverno 1.19.2 and the flagship's five policies (admission.sh)"]
+  policies --> pods["planted pods, the game day, the model server (tests.py)"]
+  pods --> reports["Kyverno's PolicyReports (collect.py)"]
+  mapping["mapping/controls.yaml, on the published matrix"] --> cd["component definition (component.py)"]
+  cd --> c2p["C2P: assessment plans and results"]
+  reports --> c2p
+  c2p --> evidence["evidence.py: one finding per control"]
+  pods --> evidence
+  evidence --> validate["trestle validate"]
+  validate --> gate["gate.py: every control satisfied, every test as mapped"]
+  gate --> sign["cosign keyless, as evidence.yml at this ref"]
+  gate --> status["the status branch: the gate's verdicts"]
+  sign --> release["on a release: SLSA provenance, attached, verified as a stranger would"]
+```
+
+[`tests/e2e/run.sh`](tests/e2e/run.sh) runs it from the flagship's release to the gate, in this order, with the scripts in [`scripts/`](scripts/); the signature, the status branch and the release are steps of the workflows. Nothing from the flagship is read before its archive passes all three checks, and nothing is signed that the gate has not passed: the signing step runs only after the gate exits 0.
+
 ## The controls
 
 This is the machine-readable form of rows that already exist. The account's [control-to-test matrix](https://github.com/heyvaldemar/fleet-ops/blob/90e44597b1f3ac96d9ea3605eeaca47cdf4d8e35/docs/control-evidence.md), shown at [heyvaldemar.com/evidence](https://heyvaldemar.com/evidence/#frameworks-h), maps SLSA, the SSDF, the OWASP Top 10 for LLM Applications and Article 12 of the EU AI Act onto checks, by hand. Every control here names the matrix row it rests on, and [`scripts/component.py`](scripts/component.py) refuses a row the pinned matrix does not have. The SSDF controls are matrix rows themselves. An SP 800-53 or AI RMF control is here only where it maps onto a row the matrix already has; the OWASP rows have no OSCAL catalog to point at, so they are named on the controls that map onto them.
@@ -106,6 +129,8 @@ Each was caught in [run 41361749143](https://github.com/heyvaldemar/kubernetes-o
 
 The gate's own rules are shown their failures too. [`tests/test_evidence.py`](tests/test_evidence.py) runs them on one real run's files, breaking one thing at a time, and [`scripts/mutate.py`](scripts/mutate.py) switches each rule off in a copy of the scripts, from [`tests/plants.tsv`](tests/plants.tsv), and requires a named test to fail. The first time it ran, 4 of 20 changes went unnoticed: one test passed because the changed gate crashed rather than because it judged, one change sat on a branch its test never reached, one rule is backed by the next so that switching it off alone changes nothing, and one test broke the mapping in more ways than the rule it was written for. The tests and the changes were fixed until each change is caught by its own test; 27 are listed now.
 
+The static checks are held to the same rule. [`scripts/validate.sh`](scripts/validate.sh) runs seven of them without a cluster: the mapping against the flagship's release and NIST's catalogs, the cluster's nodes and the model server against the flagship's, every container image by digest, trestle on the committed documents, the gate's tests, and the changes above. [`tests/static/plants.tsv`](tests/static/plants.tsv) breaks them in copies of the repository, 11 ways, and [`tests/static/plant_violations.py`](tests/static/plant_violations.py) requires the named check to fail on each.
+
 ## What the evidence proves, and what it does not
 
 It proves that in one CI run, on a kind cluster built from the flagship's own node image, the flagship's admission policies at a verified release refused every planted pod they exist to refuse, for the reason they exist to refuse it, admitted the control pods, and that Kyverno's reports of the running pods agreed. It proves that the documents saying so were made by this repository's workflow at a named commit, and have not changed since.
@@ -155,14 +180,42 @@ PATH="$PWD/.venv/bin:$PATH" python3 scripts/gate.py evidence
 
 The release workflow ran the same two checks on the files the release now holds, and showed each a copy of the archive with one byte appended, which both refused.
 
-## Run it yourself
+## Quickstart
+
+The whole run, on kind, judged by the gate:
 
 ```sh
 python3 -m venv .venv && .venv/bin/pip install --require-hashes --no-deps -r requirements.lock
-PATH="$PWD/.venv/bin:$PATH" bash scripts/run.sh
+export PATH="$PWD/.venv/bin:$PATH"
+bash tests/e2e/run.sh
 ```
 
-It needs Docker, curl, jq, openssl and Python 3.11 or later; everything else is downloaded and checked by hash. `PLANT=remove:verify-models` (or any plant below) breaks it on purpose, and the gate must catch it. `REGISTRY_PORT=5055` if port 5000 is taken, as macOS takes it for AirPlay.
+It needs Docker, curl, jq, openssl and Python 3.11 or later; everything else is downloaded and checked by hash. The evidence lands in `.cache/run/evidence`, with `summary.md` to read first. `PLANT=remove:verify-models` (or any plant above) breaks it on purpose, and the gate must catch it. `REGISTRY_PORT=5055` if port 5000 is taken, as macOS takes it for AirPlay.
+
+The static checks need no cluster, only the flagship's release and NIST's catalogs:
+
+```sh
+export PATH="$(bash scripts/install-tools.sh):$PATH"
+bash scripts/flagship.sh && bash scripts/catalogs.sh
+bash scripts/validate.sh
+python3 tests/static/plant_violations.py
+```
+
+### Teardown
+
+A run deletes its kind cluster and its registry container once the evidence is written and validated, before the gate judges it. A run that stops before that, or one started with `KEEP=1` to look around with kubectl, leaves both up until:
+
+```sh
+bash scripts/cluster.sh down
+```
+
+What a run downloads stays in `.cache/` (the tools, the flagship's release, the catalogs, the last run's state) and `.venv/`; deleting the two removes the rest.
+
+## What it costs
+
+Runner time, and nothing else. Every job runs on GitHub's hosted `ubuntu-latest` runners, with no cloud account and no stored secret: the signature's identity comes from GitHub's OIDC token, and the cluster is kind on the runner. Run [41573868103](https://github.com/heyvaldemar/kubernetes-oscal-evidence/actions/runs/41573868103) on main took 12 minutes, with nine jobs and about 49 runner-minutes in all, most of them the seven plants; GitHub's timing API reports 0 billable milliseconds for it, as the repository is public. It runs on every push, every week and on each release.
+
+On a machine of your own it costs Docker's room for a two-node kind cluster and the downloads above.
 
 ## Repository
 
@@ -172,9 +225,11 @@ It needs Docker, curl, jq, openssl and Python 3.11 or later; everything else is 
 | `oscal/component-definition.json` | The same mapping as an OSCAL component definition, made by `scripts/component.py` with trestle's models |
 | `flagship.lock`, `catalogs.lock`, `tools.lock`, `requirements.lock` | What is fetched, and the hash it must have |
 | `kind/cluster.yaml` | The flagship's two nodes; CI checks they are the same |
-| `workload/model-server.yaml` | The good workload: a model server shaped like the flagship's |
-| `scripts/` | The run, step by step; `run.sh` is all of it, and `status.py` writes the `status` branch from its runs |
-| `tests/` | The gate's tests on one real run's files, and `plants.tsv`, each rule of the gate switched off in turn |
+| `manifests/model-server.yaml` | The good workload: a model server shaped like the flagship's, held to it by `scripts/validate.sh` |
+| `scripts/` | The run's steps; `validate.sh`, the static checks; `status.py`, which writes the `status` branch from the runs |
+| `tests/e2e/run.sh` | The whole run, as CI runs it |
+| `tests/` | The gate's tests on one real run's files, and `plants.tsv`, each rule of the gate switched off in turn; `static/plants.tsv`, each static check shown its violation |
+| `docs/decisions/` | Why it is built this way, one record per decision |
 
 ## Questions, bugs and changes
 

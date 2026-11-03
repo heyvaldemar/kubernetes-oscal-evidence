@@ -11,7 +11,7 @@ Three things, in this order, all recorded in OUT.json:
    Kyverno is then scaled back and must admit the signed model again.
 
 2. The workloads that run and that PolicyReports describe: the model server
-   (workload/model-server.yaml) and the flagship's ordinary pod beside the
+   (manifests/model-server.yaml) and the flagship's ordinary pod beside the
    egress node. Under PLANT=audit:verify-models, also a server that mounts a
    model nobody signed.
 
@@ -162,7 +162,7 @@ def namespaces():
 
 
 def workloads(subs):
-    template = open(os.path.join(ROOT, "workload/model-server.yaml")).read()
+    template = open(os.path.join(ROOT, "manifests/model-server.yaml")).read()
     servers = [("model-server", subs["@MODEL@"])]
     if PLANT == "audit:verify-models":
         servers.append(("unsigned-server", subs["@UNSIGNED@"]))

@@ -2,13 +2,16 @@ name: Evidence
 
 # THE FLAGSHIP'S ADMISSION CONTROLS, TURNED INTO OSCAL EVIDENCE, ON EVERY PUSH.
 #
-# checks    the scripts' own tests, each rule of the gate switched off in turn
-#           (scripts/mutate.py), the mapping checked against the flagship's
-#           release and NIST's catalogs, shellcheck and actionlint
+# checks    the static checks (scripts/validate.sh): the mapping against the
+#           flagship's release and NIST's catalogs, the cluster and the model
+#           server against the flagship's, images by digest, trestle, the
+#           gate's tests and each of its rules switched off in turn; each
+#           check shown its planted violation (tests/static/plants.tsv);
+#           shellcheck and actionlint
 # evidence  kind with the flagship's policies from its signed release, its
 #           planted pods, Kyverno's PolicyReports, C2P and trestle, the
-#           gate; the evidence signed keyless with cosign, and on a release
-#           attached to it with SLSA provenance
+#           gate (tests/e2e/run.sh); the evidence signed keyless with
+#           cosign, and on a release attached to it with SLSA provenance
 # plants    the same run broken on purpose, seven ways; each job passes only
 #           if the gate fails for the planted reason
 #
@@ -60,28 +63,18 @@ jobs:
           bash scripts/flagship.sh
           bash scripts/catalogs.sh
 
-      - name: The component definition is what the mapping gives, and names nothing that does not exist
-        run: python3 scripts/component.py --check
+      - name: The static checks
+        run: bash scripts/validate.sh
 
-      - name: The cluster is the flagship's two nodes
-        run: |
-          set -euo pipefail
-          nodes() { sed -n '/^nodes:/,$p' "$1" | grep -v '^[[:space:]]*#'; }
-          diff <(nodes kind/cluster.yaml) <(nodes .cache/flagship/src/kind/frontier.yaml)
-          echo "kind/cluster.yaml has the nodes of the flagship's kind/frontier.yaml"
-
-      - name: The gate's tests
-        run: python3 -m unittest discover -s tests -v
-
-      - name: Each rule of the gate switched off in turn, and the tests notice
-        run: python3 scripts/mutate.py
+      - name: Each check, shown its planted violation
+        run: python3 tests/static/plant_violations.py
 
       - name: shellcheck and actionlint, the pinned images
         run: |
           set -euo pipefail
           # shellcheck source=/dev/null
           . <(grep -E '^[A-Z_]+=' ci-images.pins)
-          docker run --rm -v "$PWD:/mnt" -w /mnt "$SHELLCHECK_IMAGE" scripts/*.sh
+          docker run --rm -v "$PWD:/mnt" -w /mnt "$SHELLCHECK_IMAGE" scripts/*.sh tests/e2e/*.sh
           docker run --rm -v "$PWD:/repo" -w /repo "$ACTIONLINT_IMAGE" -color
 
   evidence:
@@ -113,10 +106,15 @@ jobs:
           echo "$PWD/.venv/bin" >> "$GITHUB_PATH"
           bash scripts/install-tools.sh >> "$GITHUB_PATH"
 
+      # tests/e2e/run.sh creates it too when it is not there, as on a
+      # laptop; here it is a step of its own, timed and named in the log.
+      - name: Create the kind cluster, the flagship's two nodes
+        run: kind create cluster --config kind/cluster.yaml --wait 120s
+
       - name: Run it, and judge it
         env:
           E2E_RESULTS: ${{ runner.temp }}/e2e-results.json
-        run: bash scripts/run.sh
+        run: bash tests/e2e/run.sh
 
       - name: What the run showed
         if: always()
@@ -268,10 +266,13 @@ jobs:
           echo "$PWD/.venv/bin" >> "$GITHUB_PATH"
           bash scripts/install-tools.sh >> "$GITHUB_PATH"
 
+      - name: Create the kind cluster, the flagship's two nodes
+        run: kind create cluster --config kind/cluster.yaml --wait 120s
+
       - name: Run it broken, and the gate must catch it
         env:
           E2E_RESULTS: ${{ runner.temp }}/e2e-results.json
-        run: bash scripts/run.sh
+        run: bash tests/e2e/run.sh
 
       - name: What the run showed
         if: always()

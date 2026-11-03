@@ -4,7 +4,7 @@ Run with the packages in requirements.lock, from the repository root:
 
     python3 -m unittest discover -s tests
 
-The fixtures in tests/fixtures/ are one real run's files (scripts/run.sh,
+The fixtures in tests/fixtures/ are one real run's files (tests/e2e/run.sh,
 recorded in tests/fixtures/README.md): Kyverno's reports as the cluster held
 them, the admission tests as the API server answered them, and the evidence
 built from them. Each test copies what it needs and breaks one thing.

@@ -4,9 +4,11 @@
 # image volume by digest. The server is busybox standing in for llama.cpp,
 # and the model is the run's small signed stand-in (scripts/models.sh):
 # admission reads image references, signatures and AI-BOMs, not weights.
-# @MODEL@ and @BUSYBOX@ are filled in by scripts/tests.sh; @NAME@ is the
-# server's name, "model-server", or "unsigned-server" in the plant that
-# mounts a model nobody signed.
+# The busybox is the one the flagship carries (airgap/images.txt at the
+# pinned release), by digest. @MODEL@ is filled in by scripts/tests.py;
+# @NAME@ is the server's name, "model-server", or "unsigned-server" in the
+# plant that mounts a model nobody signed. scripts/validate.sh (workload)
+# holds this file to the flagship's model server and its busybox.
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -28,7 +30,7 @@ spec:
         seccompProfile: {type: RuntimeDefault}
       containers:
         - name: server
-          image: @BUSYBOX@
+          image: docker.io/library/busybox:1.37@sha256:bdf57e528e45e4433820e045b29b4597825a1c9e38353532d90a01445013f82e
           command: [sh, -c, "ls -l /models/model.gguf && exec sleep 86400"]
           resources:
             requests: {cpu: 10m, memory: 16Mi}

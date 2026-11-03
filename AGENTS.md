@@ -12,7 +12,7 @@ A control goes into `mapping/controls.yaml` only where one of the flagship's pol
 
 ## A check is trusted only after it has failed
 
-A new or changed rule in the gate ships with a test in `tests/test_evidence.py` that feeds it what breaks it, and a line in `tests/plants.tsv` that switches the rule off; `scripts/mutate.py` must report it caught. A change to what the cluster run does ships with a plant in the Evidence workflow's matrix if no plant covers it.
+A new or changed rule in the gate ships with a test in `tests/test_evidence.py` that feeds it what breaks it, and a line in `tests/plants.tsv` that switches the rule off; `scripts/mutate.py` must report it caught. A new or changed static check in `scripts/validate.sh` ships with a line in `tests/static/plants.tsv` that breaks what it checks, and `tests/static/plant_violations.py` must report it caught. A change to what the cluster run does ships with a plant in the Evidence workflow's matrix if no plant covers it.
 
 ## C2P and Kyverno as they are
 

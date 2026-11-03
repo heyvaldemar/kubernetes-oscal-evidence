@@ -1,0 +1,15 @@
+# The static checks of scripts/validate.sh, each shown the violation it exists
+# for (tests/static/plant_violations.py): the file, the text it holds, what it
+# becomes, the check that must then fail, and what the change plants. Fields
+# are JSON-encoded, tab-separated.
+"oscal/component-definition.json"	"\"title\": \"Admission controls of kubernetes-air-gapped-ai-agent v1.8.0, mapped to NIST controls\""	"\"title\": \"Admission controls of kubernetes-air-gapped-ai-agent v1.8.0, mapped to NIST controls by hand\""	"component"	"a component definition edited by hand, no longer what the mapping gives"
+"mapping/controls.yaml"	"    rules: [carried-images]\n"	"    rules: [carried-digests]\n"	"component"	"a control resting on a policy the flagship does not have"
+"kind/cluster.yaml"	"      boundary.heyvaldemar.com/egress: anthropic\n"	"      boundary.heyvaldemar.com/egress: gateway\n"	"nodes"	"a worker labelled unlike the flagship's egress node"
+"manifests/model-server.yaml"	"            readOnlyRootFilesystem: true\n"	"            readOnlyRootFilesystem: false\n"	"workload"	"a model server with a writable root filesystem, unlike the flagship's"
+"manifests/model-server.yaml"	"            - {name: model, mountPath: /models, readOnly: true}\n"	"            - {name: model, mountPath: /models}\n"	"workload"	"a model mounted writable"
+"manifests/model-server.yaml"	"docker.io/library/busybox:1.37@sha256:bdf57e528e45e4433820e045b29b4597825a1c9e38353532d90a01445013f82e"	"docker.io/library/busybox:1.37@sha256:0000000000000000000000000000000000000000000000000000000000000000"	"workload"	"a busybox the flagship does not carry"
+"manifests/model-server.yaml"	"docker.io/library/busybox:1.37@sha256:bdf57e528e45e4433820e045b29b4597825a1c9e38353532d90a01445013f82e"	"docker.io/library/busybox:1.37"	"images"	"the model server's image by tag only"
+"ci-images.pins"	"SHELLCHECK_IMAGE=koalaman/shellcheck:v0.11.0@sha256:61862eba1fcf09a484ebcc6feea46f1782532571a34ed51fedf90dd25f925a8d"	"SHELLCHECK_IMAGE=koalaman/shellcheck:v0.11.0"	"images"	"a CI image by tag only"
+"oscal/component-definition.json"	"\"uuid\": \"7649ce44-0101-5987-aa8a-a49c0ad31c1d\""	"\"uuid\": \"7649ce44-admission\""	"trestle"	"a component whose uuid OSCAL's schema refuses"
+"scripts/gate.py"	"        if state != \"satisfied\":\n"	"        if state == \"not satisfied at all\":\n"	"gate"	"a gate that reads past a finding that is not satisfied"
+"scripts/gate.py"	"    missed = sorted(must - caught)\n"	"    missed = sorted(set(must) - caught)\n"	"mutations"	"a gate rule rewritten and its mutation in tests/plants.tsv left behind"
