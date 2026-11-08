@@ -1,0 +1,53 @@
+# Every image Kyverno's chart runs, pinned by digest: the admission controller
+# that verifies other images' signatures should itself be the bytes that were
+# reviewed. Copied from aws-eks-reference-platform, where the pins are watched.
+crds:
+  migration:
+    image:
+      registry: reg.kyverno.io
+      repository: kyverno/kyverno-cli
+      tag: v1.20.0-rc.3@sha256:c90e419788b7e2e88f4e64554f7df952ffd72b80cebc30e2401d7ef03dc8fc89
+upgrade:
+  # Since 1.20 a hook checks for policies Kyverno no longer runs before it
+  # installs or upgrades. It runs the CLI image.
+  legacyPolicyCheck:
+    image:
+      registry: reg.kyverno.io
+      repository: kyverno/kyverno-cli
+      tag: v1.20.0-rc.3@sha256:c90e419788b7e2e88f4e64554f7df952ffd72b80cebc30e2401d7ef03dc8fc89
+webhooksCleanup:
+  image:
+    registry: ghcr.io
+    repository: kyverno/readiness-checker
+    tag: v1.20.0-rc.3@sha256:fdbc751419852bf7f507cb2188a49a7726ffd6f402515d55ad48607b5b38b7e4
+test:
+  image:
+    registry: ghcr.io
+    repository: kyverno/readiness-checker
+    tag: v1.20.0-rc.3@sha256:fdbc751419852bf7f507cb2188a49a7726ffd6f402515d55ad48607b5b38b7e4
+admissionController:
+  initContainer:
+    image:
+      registry: reg.kyverno.io
+      repository: kyverno/kyvernopre
+      tag: v1.20.0-rc.3@sha256:3183bcf56a5bf1dd4317a066f1f9c37e2d5205849b1d7d08467d0d07a840f908
+  container:
+    image:
+      registry: reg.kyverno.io
+      repository: kyverno/kyverno
+      tag: v1.20.0-rc.3@sha256:e424ad787ec392f1efa080b05944ca74e663f78769b3851c74c29885bc9373c1
+backgroundController:
+  image:
+    registry: reg.kyverno.io
+    repository: kyverno/background-controller
+    tag: v1.20.0-rc.3@sha256:ca3d5022c60037522ca86c6f8309aedec15383851b3a3ffa10250478a5387c94
+cleanupController:
+  image:
+    registry: reg.kyverno.io
+    repository: kyverno/cleanup-controller
+    tag: v1.20.0-rc.3@sha256:9a2f0bbc1fd15b61879c9d53a4ebd6459673d75d6ed34e5650d61bbf49b317db
+reportsController:
+  image:
+    registry: reg.kyverno.io
+    repository: kyverno/reports-controller
+    tag: v1.20.0-rc.3@sha256:5326745e0fd409876fa38a73e5705f5761a5599cf262e02783619f50fc8b7505
