@@ -1,0 +1,80 @@
+name: Kyverno 1.20 rc, each reporting setting left out
+
+# Branch kyverno-1.20-rc only, not for main. The evidence run needs three
+# settings before Kyverno 1.19 reports on the flagship's policies (README,
+# "What Kyverno's reports needed"). Each leg leaves one out on Kyverno
+# 1.20.0-rc.3 and records what Kyverno reported; "none" is the control, with
+# all three in place and the same wait.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  measure:
+    name: "Left out: ${{ matrix.off }}"
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        off: [none, background, label, rbac]
+    env:
+      REPORT_SETTING_OFF: ${{ matrix.off != 'none' && matrix.off || '' }}
+      REPORT_WAIT_SECONDS: "300"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install the tools and trestle, each by hash
+        run: |
+          set -euo pipefail
+          python3 -m venv .venv
+          .venv/bin/pip install --quiet --require-hashes --no-deps -r requirements.lock
+          echo "$PWD/.venv/bin" >> "$GITHUB_PATH"
+          bash scripts/install-tools.sh >> "$GITHUB_PATH"
+
+      - name: Create the kind cluster, the flagship's two nodes
+        run: kind create cluster --config kind/cluster.yaml --wait 120s
+
+      - name: The flagship's policies and workloads, one setting left out
+        run: |
+          set -euo pipefail
+          bash scripts/flagship.sh
+          bash scripts/catalogs.sh
+          bash scripts/cluster.sh up
+          bash scripts/models.sh
+          bash scripts/admission.sh
+          python3 scripts/tests.py .cache/run/admission-tests.json
+          python3 scripts/collect.py .cache/run/reports
+
+      - name: What Kyverno reported, by policy
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import collections, json
+          polr = json.load(open(".cache/run/reports/raw/policyreports.json"))
+          seen = collections.Counter()
+          for r in polr["items"]:
+              scope = r.get("scope", {})
+              for x in r.get("results") or []:
+                  seen[(x.get("policy"), x.get("result"), "%s/%s" % (scope.get("namespace", ""), scope.get("name", "")))] += 1
+          print("%d PolicyReports, %d results" % (len(polr["items"]), sum(seen.values())))
+          for (policy, result, where), n in sorted(seen.items()):
+              print("  %-22s %-5s %s" % (policy, result, where))
+          for policy in ("verify-models", "model-volumes", "carried-images", "models-need-kyverno"):
+              print("%-22s %d results" % (policy, sum(n for (p, _, _), n in seen.items() if p == policy)))
+          PY
+          echo "reports controller lines with 'forbidden': $(kubectl --kubeconfig .cache/run/kubeconfig -n kyverno logs deploy/kyverno-reports-controller 2>/dev/null | grep -c forbidden || true)"
+
+      - name: The evidence and the gate on it
+        continue-on-error: true
+        run: |
+          set -euo pipefail
+          python3 scripts/tests.py --probe .cache/run/reporting-probe.json
+          python3 scripts/evidence.py .cache/run/evidence
+          bash scripts/validate.sh .cache/run/evidence
+          python3 scripts/gate.py .cache/run/evidence

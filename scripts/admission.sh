@@ -42,6 +42,10 @@ FLAGSHIP="$ROOT/.cache/flagship/src"
 # same name; the policies and values are still the flagship release's.
 PINS="$ROOT/kyverno-rc"
 PLANT="${PLANT:-}"
+# Branch kyverno-1.20-rc only: REPORT_SETTING_OFF=background|label|rbac leaves
+# one of the three reporting settings out, to measure whether Kyverno 1.20
+# still needs it (.github/workflows/rc-settings.yml).
+OFF="${REPORT_SETTING_OFF:-}"
 export KUBECONFIG="$STATE/kubeconfig"
 say() { printf '== %s\n' "$*"; }
 sha256() { if command -v sha256sum >/dev/null; then sha256sum "$1"; else shasum -a 256 "$1"; fi | cut -d' ' -f1; }
@@ -51,13 +55,14 @@ CHART="$STATE/charts/kyverno-$VERSION.tgz"
 wanted() { [ "$PLANT" != "remove:$1" ]; }
 
 render_verify_models() {
-  python3 -I - "$FLAGSHIP/admission/verify-models.yaml" "$STATE/operator.pub" "$PLANT" <<'PY'
+  python3 -I - "$FLAGSHIP/admission/verify-models.yaml" "$STATE/operator.pub" "$PLANT" "$OFF" <<'PY'
 import sys
-policy, key, plant = open(sys.argv[1]).read(), open(sys.argv[2]).read().strip(), sys.argv[3]
+policy, key, plant, off = open(sys.argv[1]).read(), open(sys.argv[2]).read().strip(), sys.argv[3], sys.argv[4]
 policy = policy.replace("@OPERATOR_KEY@", key.replace("\n", "\n            "))
 background = "  evaluation:\n    background:\n      enabled: false\n"
 assert background in policy, "verify-models no longer sets evaluation.background as this script expects"
-policy = policy.replace(background, background.replace("false", "true"), 1)
+if off != "background":
+    policy = policy.replace(background, background.replace("false", "true"), 1)
 if plant == "audit:verify-models":
     assert "  validationActions: [Deny]\n" in policy
     policy = policy.replace("  validationActions: [Deny]\n", "  validationActions: [Audit]\n", 1)
@@ -87,7 +92,7 @@ say "kyverno $VERSION from the chart the flagship pins, its images by digest"
 kubectl -n kube-system create configmap carried-images --from-file=digests="$STATE/carried-digests.txt" \
   --dry-run=client -o yaml | kubectl apply -f - >/dev/null
 
-kubectl apply -f - >/dev/null <<'YAML'
+[ "$OFF" = rbac ] || kubectl apply -f - >/dev/null <<'YAML'
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
@@ -128,6 +133,7 @@ if wanted models-need-kyverno; then
   kubectl apply -f "$FLAGSHIP/admission/kyverno-guard.yaml" >/dev/null
   applied+=(models-need-kyverno)
 fi
+[ "$OFF" = label ] && REPORTED_VAPS=""
 for p in $REPORTED_VAPS; do
   kubectl get validatingadmissionpolicy "$p" >/dev/null 2>&1 \
     && kubectl label validatingadmissionpolicy "$p" reports.kyverno.io/enabled=true --overwrite >/dev/null
