@@ -5,8 +5,11 @@ name: Kyverno 1.20 rc, each reporting setting left out
 # "What Kyverno's reports needed"). Each leg leaves one out on Kyverno
 # 1.20.0-rc.3 and records what Kyverno reported; "none" is the control, with
 # all three in place and the same wait.
+# A push to the branch starts it: workflow_dispatch needs the file on main.
 on:
-  workflow_dispatch:
+  push:
+    branches: [kyverno-1.20-rc]
+    paths: [.github/workflows/rc-settings.yml, scripts/admission.sh]
 
 permissions:
   contents: read
