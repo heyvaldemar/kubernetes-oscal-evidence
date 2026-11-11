@@ -4,6 +4,10 @@ All notable changes to this project are documented in this file. The format is b
 
 ## [Unreleased]
 
+### Changed
+
+- A refused signature or provenance now carries the verifier's own last line (`scripts/flagship.sh` for the flagship's archive, `scripts/install-tools.sh` for C2P's checksums file). A network fault on the way to Sigstore's TUF mirror ("getting trusted root from TUF") no longer reads like a signature that does not match ("transparency log signature does not match").
+
 ## [1.2.0] - 2026-11-11
 
 ### Added

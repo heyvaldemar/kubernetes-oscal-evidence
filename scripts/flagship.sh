@@ -23,13 +23,19 @@ done
 cd "$OUT/release"
 got="$(sha256 "$NAME.tar.gz")"
 [ "$got" = "$SHA" ] || { echo "$NAME.tar.gz is $got; flagship.lock pins $SHA" >&2; exit 1; }
-cosign verify-blob "$NAME.tar.gz" --bundle "$NAME.tar.gz.sigstore.json" \
+# Each verifier's own last line goes with the refusal: a network fault on the
+# way to Sigstore's TUF mirror and a signature that does not match read alike
+# otherwise.
+last() { printf '%s\n' "$1" | grep -v '^[[:space:]]*$' | tail -n 1; }
+if ! out="$(cosign verify-blob "$NAME.tar.gz" --bundle "$NAME.tar.gz.sigstore.json" \
   --certificate-identity "https://github.com/$REPO/.github/workflows/release-assets.yml@refs/tags/$TAG" \
-  --certificate-oidc-issuer https://token.actions.githubusercontent.com >/dev/null 2>&1 \
-  || { echo "cosign does not verify $NAME.tar.gz as signed by $REPO's release workflow on $TAG" >&2; exit 1; }
-slsa-verifier verify-artifact "$NAME.tar.gz" --provenance-path "$NAME.intoto.jsonl" \
-  --source-uri "github.com/$REPO" --source-tag "$TAG" >/dev/null 2>&1 \
-  || { echo "slsa-verifier does not verify $NAME.tar.gz's provenance for $REPO at $TAG" >&2; exit 1; }
+  --certificate-oidc-issuer https://token.actions.githubusercontent.com 2>&1)"; then
+  echo "cosign does not verify $NAME.tar.gz as signed by $REPO's release workflow on $TAG: $(last "$out")" >&2; exit 1
+fi
+if ! out="$(slsa-verifier verify-artifact "$NAME.tar.gz" --provenance-path "$NAME.intoto.jsonl" \
+  --source-uri "github.com/$REPO" --source-tag "$TAG" 2>&1)"; then
+  echo "slsa-verifier does not verify $NAME.tar.gz's provenance for $REPO at $TAG: $(last "$out")" >&2; exit 1
+fi
 rm -rf "$OUT/src" && mkdir -p "$OUT/src"
 tar -xzf "$NAME.tar.gz" -C "$OUT/src" --strip-components 1
 say "$REPO $TAG: sha256 pinned, signature and provenance verified, unpacked into .cache/flagship/src"

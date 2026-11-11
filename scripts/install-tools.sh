@@ -60,9 +60,12 @@ done <"$ROOT/tools.lock"
   for f in "$C2P_CHECKSUMS" "$C2P_CHECKSUMS.sig" "$C2P_CHECKSUMS.pem"; do
     [ -s "$f" ] || curl -fsSL --retry 3 -o "$f" "$C2P_RELEASE/$f"
   done
-  "$BIN/cosign" verify-blob "$C2P_CHECKSUMS" --signature "$C2P_CHECKSUMS.sig" --certificate "$C2P_CHECKSUMS.pem" \
-    --certificate-identity "$C2P_SIGNER" --certificate-oidc-issuer https://token.actions.githubusercontent.com \
-    >/dev/null 2>&1 || { echo "C2P's checksums file does not verify as signed by $C2P_SIGNER" >&2; exit 1; }
+  # cosign's own last line goes with the refusal, so a network fault does not
+  # read as a bad signature.
+  if ! out="$("$BIN/cosign" verify-blob "$C2P_CHECKSUMS" --signature "$C2P_CHECKSUMS.sig" --certificate "$C2P_CHECKSUMS.pem" \
+    --certificate-identity "$C2P_SIGNER" --certificate-oidc-issuer https://token.actions.githubusercontent.com 2>&1)"; then
+    echo "C2P's checksums file does not verify as signed by $C2P_SIGNER: $(printf '%s\n' "$out" | grep -v '^[[:space:]]*$' | tail -n 1)" >&2; exit 1
+  fi
   while read -r name _ _ url _ sum; do
     case "$name" in c2pcli|kyverno-plugin) ;; *) continue ;; esac
     awk -v s="$sum" -v f="$(basename "$url")" '$1 == s && $2 == f { found = 1 } END { exit !found }' "$C2P_CHECKSUMS" \
