@@ -120,12 +120,14 @@ class Decide(unittest.TestCase):
     """A control is satisfied only on Kyverno's reports, C2P's verdict and its tests together."""
 
     def setUp(self):
-        self.control = next(c for c in MAPPING["controls"] if c["control"] == "cm-14")
+        # sr-11 rests on three policies Kyverno reports on, the most of any control.
+        self.control = next(c for c in MAPPING["controls"] if c["control"] == "sr-11")
         self.ok_tests = {t: (True, "ok") for t in MAPPING["tests"]}
         self.subject = {"title": "Pod inference/model-server",
                         "props": [{"name": "result", "ns": evidence.TRESTLE_NS, "value": "pass"}]}
         self.by_rule = {"verify-models": [{"uuid": "u", "subjects": [self.subject]}],
-                        "models-need-kyverno": [{"uuid": "v", "subjects": [self.subject]}]}
+                        "models-need-kyverno": [{"uuid": "v", "subjects": [self.subject]}],
+                        "carried-images": [{"uuid": "w", "subjects": [self.subject]}]}
 
     def decide(self, c2p_failed=(), by_rule=None, tests=None):
         return evidence.decide(self.control, MAPPING["rules"], set(c2p_failed),
@@ -135,7 +137,7 @@ class Decide(unittest.TestCase):
         self.assertEqual(self.decide(), [])
 
     def test_c2p_not_satisfied_is_never_overruled(self):
-        self.assertTrue(self.decide(c2p_failed={"cm-14_smt"}))
+        self.assertTrue(self.decide(c2p_failed={"sr-11_smt"}))
 
     def test_no_pod_reported_is_not_satisfied(self):
         self.assertTrue(self.decide(by_rule=dict(self.by_rule, **{"verify-models": [{"uuid": "u", "subjects": []}]})))
@@ -189,27 +191,27 @@ class Mapping(unittest.TestCase):
     def test_a_test_that_does_not_exist(self):
         def edit(m):
             m["tests"]["model-unsigend"] = m["tests"]["model-unsigned"]
-            self.control(m, "cm-14")["proven_by"].append("model-unsigend")
+            self.control(m, "si-7")["proven_by"].append("model-unsigend")
         self.assertIn("no such planted pod", self.errors(edit))
 
     def test_a_control_not_in_the_catalog(self):
         def edit(m):
-            self.control(m, "cm-14")["control"] = "cm-99"
+            self.control(m, "si-7")["control"] = "cm-99"
         self.assertIn("not a control in NIST_SP-800-53_rev5_catalog.json", self.errors(edit))
 
     def test_a_control_never_shown_a_violation(self):
         def edit(m):
-            self.control(m, "cm-14")["proven_by"] = ["model-signed"]
+            self.control(m, "si-7")["proven_by"] = ["model-signed"]
         self.assertIn("no test that must be refused", self.errors(edit))
 
     def test_a_test_credited_to_a_policy_that_does_not_refuse_it(self):
         def edit(m):
-            self.control(m, "cm-14")["proven_by"].append("image-by-tag")
+            self.control(m, "si-7")["proven_by"].append("image-by-tag")
         self.assertIn("not by this control's rules", self.errors(edit))
 
     def test_a_matrix_row_that_does_not_exist(self):
         def edit(m):
-            self.control(m, "cm-14")["matrix"] = ["LLM11:2025"]
+            self.control(m, "si-7")["matrix"] = ["LLM11:2025"]
         self.assertIn("is not in the pinned control-to-test matrix", self.errors(edit))
 
     def test_a_control_on_no_matrix_row(self):

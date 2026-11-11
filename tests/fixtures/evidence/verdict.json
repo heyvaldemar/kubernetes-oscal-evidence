@@ -4,10 +4,6 @@
   "flagship": "heyvaldemar/kubernetes-air-gapped-ai-agent v1.8.0",
   "frameworks": {
     "nist_800_53": {
-      "cm-14": {
-        "state": "satisfied",
-        "why": []
-      },
       "si-7": {
         "state": "satisfied",
         "why": []

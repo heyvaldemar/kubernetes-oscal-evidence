@@ -22,8 +22,8 @@
 # they and the matrix are pinned by commit and sha256 (catalogs.lock).
 
 # The mapping's own version and date, written into the component definition.
-version: 1.1.0
-last_modified: "2026-11-01T00:00:00+00:00"
+version: 1.2.0
+last_modified: "2026-11-11T00:00:00+00:00"
 
 frameworks:
   nist_800_53:
@@ -145,20 +145,12 @@ controls:
       here images are held to the bundle's digests, not to those. No check
       for known vulnerabilities in a model.
 
-  - framework: nist_800_53
-    control: cm-14
-    matrix: ["LLM03:2025"]
-    rules: [verify-models, models-need-kyverno]
-    proven_by: [model-unsigned, model-stranger, kyverno-away, model-signed]
-    implementation: >-
-      The model signed with the operator's key, verified offline, by digest,
-      before a pod may mount it; and while Kyverno is away and cannot verify,
-      the API server's own guard refuses every model mount, so nothing is
-      installed unverified.
-    not_covered: >-
-      Model weights only: container images are held to a list of digests
-      (CM-7(5)), not to signatures. The operator's key is a public key
-      written into the policy, with no certificate and no transparency log.
+  # CM-14 Signed Components is not mapped (it was until 1.1.0). It asks for a
+  # signature verified "using a certificate that is recognized and approved
+  # by the organization", and the flagship verifies its model against a raw
+  # public key written into the policy: no certificate. The flagship's own
+  # docs/compliance.md says the same and lets SR-11 carry the evidence; so
+  # does this mapping.
 
   - framework: nist_800_53
     control: si-7
@@ -190,16 +182,21 @@ controls:
   - framework: nist_800_53
     control: sr-11
     matrix: ["LLM03:2025"]
-    rules: [carried-images]
-    proven_by: [image-not-carried, volume-not-carried, model-signed]
+    rules: [carried-images, verify-models, models-need-kyverno]
+    proven_by: [image-not-carried, volume-not-carried, model-unsigned, model-stranger, kyverno-away, model-signed]
     implementation: >-
       An image the signed bundle did not carry is refused, whoever made the
       pod and however the image reached the cluster: containers, init and
-      ephemeral containers, and image volumes.
+      ephemeral containers, and image volumes. A model is mounted only when
+      its signature verifies offline, by digest, against the operator's key;
+      while Kyverno is away and cannot verify, the API server's own guard
+      refuses every model mount.
     not_covered: >-
       Part (b), reporting counterfeit components to anyone, is not done.
-      kube-system and local-path-storage are exempt: their images come with
-      the node image.
+      The operator's key is a public key written into the policy, with no
+      certificate and no transparency log, and container images are held to
+      the bundle's digests, not to signatures. kube-system and
+      local-path-storage are exempt: their images come with the node image.
 
   - framework: nist_800_53
     control: cm-7.5

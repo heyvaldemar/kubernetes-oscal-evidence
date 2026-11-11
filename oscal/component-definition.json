@@ -3,8 +3,8 @@
     "uuid": "4630cfda-eac1-595b-84fd-9dff9a59bca3",
     "metadata": {
       "title": "Admission controls of kubernetes-air-gapped-ai-agent v1.8.0, mapped to NIST controls",
-      "last-modified": "2026-11-01T00:00:00+00:00",
-      "version": "1.1.0",
+      "last-modified": "2026-11-11T00:00:00+00:00",
+      "version": "1.2.0",
       "oscal-version": "1.2.1",
       "links": [
         {
@@ -187,49 +187,6 @@
             ],
             "implemented-requirements": [
               {
-                "uuid": "64383010-fd11-5af5-a6aa-62854c772e0d",
-                "control-id": "cm-14",
-                "description": "The model signed with the operator's key, verified offline, by digest, before a pod may mount it; and while Kyverno is away and cannot verify, the API server's own guard refuses every model mount, so nothing is installed unverified.",
-                "props": [
-                  {
-                    "name": "Rule_Id",
-                    "ns": "https://oscal-compass.github.io/compliance-trestle/schemas/oscal/cd",
-                    "value": "verify-models"
-                  },
-                  {
-                    "name": "Rule_Id",
-                    "ns": "https://oscal-compass.github.io/compliance-trestle/schemas/oscal/cd",
-                    "value": "models-need-kyverno"
-                  },
-                  {
-                    "name": "proven-by",
-                    "ns": "https://github.com/heyvaldemar/kubernetes-oscal-evidence/ns",
-                    "value": "model-unsigned"
-                  },
-                  {
-                    "name": "proven-by",
-                    "ns": "https://github.com/heyvaldemar/kubernetes-oscal-evidence/ns",
-                    "value": "model-stranger"
-                  },
-                  {
-                    "name": "proven-by",
-                    "ns": "https://github.com/heyvaldemar/kubernetes-oscal-evidence/ns",
-                    "value": "kyverno-away"
-                  },
-                  {
-                    "name": "proven-by",
-                    "ns": "https://github.com/heyvaldemar/kubernetes-oscal-evidence/ns",
-                    "value": "model-signed"
-                  },
-                  {
-                    "name": "matrix-row",
-                    "ns": "https://github.com/heyvaldemar/kubernetes-oscal-evidence/ns",
-                    "value": "LLM03:2025"
-                  }
-                ],
-                "remarks": "Not covered: Model weights only: container images are held to a list of digests (CM-7(5)), not to signatures. The operator's key is a public key written into the policy, with no certificate and no transparency log."
-              },
-              {
                 "uuid": "ab912471-4d28-5aa0-99ad-77f808ccee16",
                 "control-id": "si-7",
                 "description": "A model is named by digest, so a changed image is a different name; its signature is verified before it is mounted, and model weights come only from the registry's models path, checked by the API server itself.",
@@ -313,12 +270,22 @@
               {
                 "uuid": "ed7b6741-a1b7-519d-9001-40838deada00",
                 "control-id": "sr-11",
-                "description": "An image the signed bundle did not carry is refused, whoever made the pod and however the image reached the cluster: containers, init and ephemeral containers, and image volumes.",
+                "description": "An image the signed bundle did not carry is refused, whoever made the pod and however the image reached the cluster: containers, init and ephemeral containers, and image volumes. A model is mounted only when its signature verifies offline, by digest, against the operator's key; while Kyverno is away and cannot verify, the API server's own guard refuses every model mount.",
                 "props": [
                   {
                     "name": "Rule_Id",
                     "ns": "https://oscal-compass.github.io/compliance-trestle/schemas/oscal/cd",
                     "value": "carried-images"
+                  },
+                  {
+                    "name": "Rule_Id",
+                    "ns": "https://oscal-compass.github.io/compliance-trestle/schemas/oscal/cd",
+                    "value": "verify-models"
+                  },
+                  {
+                    "name": "Rule_Id",
+                    "ns": "https://oscal-compass.github.io/compliance-trestle/schemas/oscal/cd",
+                    "value": "models-need-kyverno"
                   },
                   {
                     "name": "proven-by",
@@ -333,6 +300,21 @@
                   {
                     "name": "proven-by",
                     "ns": "https://github.com/heyvaldemar/kubernetes-oscal-evidence/ns",
+                    "value": "model-unsigned"
+                  },
+                  {
+                    "name": "proven-by",
+                    "ns": "https://github.com/heyvaldemar/kubernetes-oscal-evidence/ns",
+                    "value": "model-stranger"
+                  },
+                  {
+                    "name": "proven-by",
+                    "ns": "https://github.com/heyvaldemar/kubernetes-oscal-evidence/ns",
+                    "value": "kyverno-away"
+                  },
+                  {
+                    "name": "proven-by",
+                    "ns": "https://github.com/heyvaldemar/kubernetes-oscal-evidence/ns",
                     "value": "model-signed"
                   },
                   {
@@ -341,7 +323,7 @@
                     "value": "LLM03:2025"
                   }
                 ],
-                "remarks": "Not covered: Part (b), reporting counterfeit components to anyone, is not done. kube-system and local-path-storage are exempt: their images come with the node image."
+                "remarks": "Not covered: Part (b), reporting counterfeit components to anyone, is not done. The operator's key is a public key written into the policy, with no certificate and no transparency log, and container images are held to the bundle's digests, not to signatures. kube-system and local-path-storage are exempt: their images come with the node image."
               },
               {
                 "uuid": "bf2023c8-b46e-59bd-ab5a-2455a7ebe3be",

@@ -58,20 +58,19 @@ flowchart TD
 
 This is the machine-readable form of rows that already exist. The account's [control-to-test matrix](https://github.com/heyvaldemar/fleet-ops/blob/90e44597b1f3ac96d9ea3605eeaca47cdf4d8e35/docs/control-evidence.md), shown at [heyvaldemar.com/evidence](https://heyvaldemar.com/evidence/#frameworks-h), maps SLSA, the SSDF, the OWASP Top 10 for LLM Applications and Article 12 of the EU AI Act onto checks, by hand. Every control here names the matrix row it rests on, and [`scripts/component.py`](scripts/component.py) refuses a row the pinned matrix does not have. The SSDF controls are matrix rows themselves. An SP 800-53 or AI RMF control is here only where it maps onto a row the matrix already has; the OWASP rows have no OSCAL catalog to point at, so they are named on the controls that map onto them.
 
-Eight controls, each carried by a policy the flagship ships and proven by planted pods: pods the policy must refuse, and a control pod it must admit. They are the flagship's e2e check 9, which the matrix's LLM03 row counts as 12 planted pods refused and 2 controls admitted, and its game day step. [`mapping/controls.yaml`](mapping/controls.yaml) has every line in full, with what each control leaves out.
+Seven controls, each carried by a policy the flagship ships and proven by planted pods: pods the policy must refuse, and a control pod it must admit. They are the flagship's e2e check 9, which the matrix's LLM03 row counts as 12 planted pods refused and 2 controls admitted, and its game day step. [`mapping/controls.yaml`](mapping/controls.yaml) has every line in full, with what each control leaves out.
 
 | Framework | Control | Matrix row | Carried by | Proven by |
 |---|---|---|---|---|
 | SSDF v1.1 | PS.3.2 | PS.3.2, LLM04:2025 | verify-models | model-nobom refused; model-signed admitted |
 | SSDF v1.1 | PW.4.4 | PW.4.4, LLM03:2025 | verify-models | model-unlicensed, model-licence-mixed, -second, -expression refused; model-licence-concluded admitted |
-| SP 800-53 Rev. 5.2.0 | CM-14 Signed Components | LLM03:2025 | verify-models, models-need-kyverno | model-unsigned, model-stranger refused; with Kyverno at zero replicas, the signed model refused; model-signed admitted |
 | SP 800-53 Rev. 5.2.0 | SI-7 Software, Firmware, and Information Integrity | LLM03:2025, LLM04:2025 | model-volumes, verify-models | volume-elsewhere, model-unsigned, model-stranger refused; model-signed admitted |
 | SP 800-53 Rev. 5.2.0 | SR-4 Provenance | PS.3.2, LLM04:2025 | verify-models | model-nobom refused; model-signed admitted |
-| SP 800-53 Rev. 5.2.0 | SR-11 Component Authenticity | LLM03:2025 | carried-images | image-not-carried, volume-not-carried refused; model-signed admitted |
+| SP 800-53 Rev. 5.2.0 | SR-11 Component Authenticity | LLM03:2025 | carried-images, verify-models, models-need-kyverno | image-not-carried, volume-not-carried, model-unsigned, model-stranger refused; with Kyverno at zero replicas, the signed model refused; model-signed admitted |
 | SP 800-53 Rev. 5.2.0 | CM-7(5) Authorized Software, allow-by-exception | LLM03:2025 | carried-images | image-by-tag, image-not-carried refused; model-signed admitted |
 | AI RMF 1.0 | MANAGE 3.1 | LLM03:2025 | verify-models | model-unsigned, model-nobom, model-unlicensed refused; model-signed admitted |
 
-**Not mapped.** SSDF PS.2.1 and PS.3.1 ask a producer to make release integrity checkable and to archive each release; no admission policy does that, and the matrix shows them through release signing. Version 1.0.0 also mapped SC-24 Fail in Known State and AC-6 Least Privilege; no matrix row carries either, so 1.1.0 does not. Their tests still run and the gate still needs them to pass: the game day now proves CM-14, and the egress-node pods prove no control. The matrix's gaps stay gaps; nothing here closes one.
+**Not mapped.** SSDF PS.2.1 and PS.3.1 ask a producer to make release integrity checkable and to archive each release; no admission policy does that, and the matrix shows them through release signing. Version 1.0.0 also mapped SC-24 Fail in Known State and AC-6 Least Privilege; no matrix row carries either, so 1.1.0 does not. Their tests still run and the gate still needs them to pass: the game day now proves SR-11, and the egress-node pods prove no control. CM-14 Signed Components was mapped until 1.1.0 and is not since 1.2.0: it asks for a signature verified "using a certificate that is recognized and approved by the organization", and the flagship verifies its model against a raw public key. The flagship's own [compliance page](https://github.com/heyvaldemar/kubernetes-air-gapped-ai-agent/blob/main/docs/compliance.md) says so too and lets SR-11 carry that evidence, and so does this mapping. The matrix's gaps stay gaps; nothing here closes one.
 
 The policies and the planted pods are read from the flagship's v1.8.0 release archive after cosign and slsa-verifier verify it ([`flagship.lock`](flagship.lock)). The catalogs are NIST's own OSCAL, and they and the matrix are pinned by commit and sha256 ([`catalogs.lock`](catalogs.lock)). Every finding names the catalog's own statement id and the matrix rows it rests on.
 
@@ -113,12 +112,12 @@ A gate that has never failed proves nothing. Every push runs the whole thing sev
 
 | Plant | What it breaks | Not satisfied | Tests failed |
 |---|---|---|---|
-| `remove:verify-models` | The signature policy is never applied | all 8: the guard then refuses every model, the signed control pod with them | 9 or 11 of 19 |
-| `audit:verify-models` | The signature policy records instead of refusing, and a model nobody signed runs | PS.3.2, PW.4.4, CM-14, SI-7, SR-4, MANAGE 3.1 | 7 |
-| `phantom-mapping` | The mapping names `verify-model-signatures`, a policy the flagship does not have | PS.3.2, PW.4.4, CM-14, SI-7, SR-4, MANAGE 3.1 | 7 |
+| `remove:verify-models` | The signature policy is never applied | all 7: the guard then refuses every model, the signed control pod with them | 9 or 11 of 19 |
+| `audit:verify-models` | The signature policy records instead of refusing, and a model nobody signed runs | PS.3.2, PW.4.4, SI-7, SR-4, SR-11, MANAGE 3.1 | 7 |
+| `phantom-mapping` | The mapping names `verify-model-signatures`, a policy the flagship does not have | PS.3.2, PW.4.4, SI-7, SR-4, SR-11, MANAGE 3.1 | 7 |
 | `remove:carried-images` | No list of carried digests | SR-11, CM-7(5) | 3 |
 | `remove:model-volumes` | No native check on where model weights come from | SI-7 | 1 |
-| `remove:models-need-kyverno` | No guard while Kyverno is away | CM-14 | 1 |
+| `remove:models-need-kyverno` | No guard while Kyverno is away | SR-11 | 1 |
 | `remove:egress-node` | Nothing keeps pods off the egress node | none rests on it | 3 |
 
 Each was caught in [run 41361749143](https://github.com/heyvaldemar/kubernetes-oscal-evidence/actions/runs/41361749143), and for its own reason: a plant passes only if a pod the broken policy must refuse got in. The controls each plant breaks are the same in every run. One count is not: with verify-models gone, `model-by-tag` and `volume-elsewhere` are refused by the guard and by a second native policy at once, and the API server names only one of them, not always the same one. When it names the guard, those two tests fail as well: 9 failed tests in runs [41361749143](https://github.com/heyvaldemar/kubernetes-oscal-evidence/actions/runs/41361749143), [41362793471](https://github.com/heyvaldemar/kubernetes-oscal-evidence/actions/runs/41362793471) and [41364822342](https://github.com/heyvaldemar/kubernetes-oscal-evidence/actions/runs/41364822342), 11 in [41358080026](https://github.com/heyvaldemar/kubernetes-oscal-evidence/actions/runs/41358080026) and the tag's [41363728342](https://github.com/heyvaldemar/kubernetes-oscal-evidence/actions/runs/41363728342). Three of them say more than that the gate works:

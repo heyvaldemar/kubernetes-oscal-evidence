@@ -14,7 +14,7 @@ Every control in `mapping/controls.yaml` names the matrix row it is the machine-
 ## Consequences
 
 - One mapping of controls to checks, in one place. The OSCAL documents are its machine-readable form and cannot say more than the page does.
-- Two controls left: SC-24 and AC-6 are not mapped since 1.1.0. Their tests still run and must still pass; the game day step now proves CM-14 instead.
+- Two controls left: SC-24 and AC-6 are not mapped since 1.1.0. Their tests still run and must still pass; the game day step now proves CM-14 instead (SR-11 since 1.2.0, [ADR 4](0004-sp-800-53-agrees-with-the-flagships-page.md)).
 - The evidence corrects the matrix, not the other way round. This repository's `remove:model-volumes` plant showed that verify-models alone admits a model volume from outside the models path; the matrix's LLM03:2025 row was rewritten to say which policy makes each refusal, and the pin here moved from 95e3429 to 90e4459 by a commit of its own.
 - The matrix's OWASP rows have no OSCAL catalog to point at. They are named on the controls that map onto them, not mapped on their own.
 

@@ -4,7 +4,7 @@
       "resources": [
         {
           "title": "ApiVersion: v1, Kind: Pod, Namespace: inference, Name: model-server-cf9b6f49-jjdlc",
-          "uuid": "3da12a19-dd61-4b13-88e8-6189e66446dc"
+          "uuid": "cb645166-d036-42e6-8303-04e5cc5a0436"
         }
       ]
     },
@@ -13,7 +13,7 @@
     },
     "metadata": {
       "title": "Admission controls of kubernetes-air-gapped-ai-agent v1.8.0: NIST AI RMF 1.0 (AI 100-1), one run",
-      "last-modified": "2026-11-01T23:19:29+00:00",
+      "last-modified": "2026-11-11T21:16:04+00:00",
       "version": "unreleased",
       "oscal-version": "1.1.3",
       "props": [
@@ -50,7 +50,7 @@
         "description": "OSCAL Assessment Result For Task \"Automated Assessment\"",
         "observations": [
           {
-            "collected": "2026-11-01T23:19:29.64885Z",
+            "collected": "2026-11-11T21:16:05.791691Z",
             "description": "Observation of check verify-models",
             "methods": [
               "TEST-AUTOMATED",
@@ -77,7 +77,7 @@
                         "type": "component"
                       }
                     ],
-                    "task-uuid": "500d2fd3-c322-4bf0-945f-31073bbb703f"
+                    "task-uuid": "3706dfa5-a8f8-461c-a92d-08f75742fb02"
                   }
                 ]
               }
@@ -110,7 +110,7 @@
                   {
                     "name": "evaluated-on",
                     "ns": "https://oscal-compass.github.io/compliance-trestle/schemas/oscal",
-                    "value": "2026-11-01 23:19:29.64885 +0000 UTC"
+                    "value": "2026-11-11 21:16:05.791692 +0000 UTC"
                   },
                   {
                     "name": "reason",
@@ -118,13 +118,13 @@
                     "value": "success"
                   }
                 ],
-                "subject-uuid": "3da12a19-dd61-4b13-88e8-6189e66446dc",
+                "subject-uuid": "cb645166-d036-42e6-8303-04e5cc5a0436",
                 "title": "ApiVersion: v1, Kind: Pod, Namespace: inference, Name: model-server-cf9b6f49-jjdlc",
                 "type": "resource"
               }
             ],
             "title": "verify-models",
-            "uuid": "63981548-350f-4ecb-9fce-5ea9449dab6b"
+            "uuid": "c01dda0b-e9dd-4322-ade1-f94ac8c6656b"
           },
           {
             "uuid": "0691d479-f8de-5a7f-ad07-e530ac52f5d8",
@@ -175,7 +175,7 @@
                 "value": "signed with the operator's key"
               }
             ],
-            "collected": "2026-11-01T23:19:29+00:00",
+            "collected": "2026-11-11T21:16:04+00:00",
             "remarks": "refused by verify-models: Policy verify-models failed: model weights are signed with the operator's key",
             "relevant-evidence": [
               {
@@ -233,7 +233,7 @@
                 "value": "model weights carry an AI-BOM signed with the operator's key"
               }
             ],
-            "collected": "2026-11-01T23:19:29+00:00",
+            "collected": "2026-11-11T21:16:04+00:00",
             "remarks": "refused by verify-models: Policy verify-models failed: model weights carry an AI-BOM signed with the operator's key",
             "relevant-evidence": [
               {
@@ -291,7 +291,7 @@
                 "value": "every model in the AI-BOM declares only licences the site allows"
               }
             ],
-            "collected": "2026-11-01T23:19:29+00:00",
+            "collected": "2026-11-11T21:16:04+00:00",
             "remarks": "refused by verify-models: Policy verify-models failed: every model in the AI-BOM declares only licences the site allows (Apache-2.0, MIT)",
             "relevant-evidence": [
               {
@@ -339,7 +339,7 @@
                 "value": "admitted"
               }
             ],
-            "collected": "2026-11-01T23:19:29+00:00",
+            "collected": "2026-11-11T21:16:04+00:00",
             "remarks": "admitted",
             "relevant-evidence": [
               {
@@ -360,9 +360,9 @@
             }
           ]
         },
-        "start": "2026-11-01T18:19:29.649072-05:00",
+        "start": "2026-11-11T16:16:05.791863-05:00",
         "title": "NIST AI RMF 1.0 (AI 100-1): the admission controls of kubernetes-air-gapped-ai-agent v1.8.0",
-        "uuid": "483fbe3c-6057-4b18-bec3-8adfb4df2f9b",
+        "uuid": "70d6042b-2230-42b0-b29b-01671e52a356",
         "findings": [
           {
             "uuid": "7e8aae3e-c622-5379-b641-b92af3a7b043",
@@ -400,7 +400,7 @@
             },
             "related-observations": [
               {
-                "observation-uuid": "63981548-350f-4ecb-9fce-5ea9449dab6b"
+                "observation-uuid": "c01dda0b-e9dd-4322-ade1-f94ac8c6656b"
               },
               {
                 "observation-uuid": "0691d479-f8de-5a7f-ad07-e530ac52f5d8"
@@ -419,6 +419,6 @@
         ]
       }
     ],
-    "uuid": "34bd545f-63e8-4c68-8b61-933c5656fa69"
+    "uuid": "3c44b16f-0a60-47ba-8528-63ea9aac1be0"
   }
 }
