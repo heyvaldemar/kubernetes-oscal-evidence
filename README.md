@@ -16,11 +16,11 @@ This repository brings the admission policies of [kubernetes-air-gapped-ai-agent
 
 ## What one run shows
 
-From the signed evidence of [run 41361749143](https://github.com/heyvaldemar/kubernetes-oscal-evidence/actions/runs/41361749143), on commit e31a998, the flagship at v1.8.0:
+From the signed evidence of [run 43101983853](https://github.com/heyvaldemar/kubernetes-oscal-evidence/actions/runs/43101983853), on commit 219383e, the flagship at v1.8.0:
 
 | | |
 |---|---|
-| Controls | 8 of 8 satisfied: 2 SSDF rows of the matrix, and 5 from SP 800-53 Rev. 5.2.0 and 1 from the AI RMF on the matrix's rows |
+| Controls | 7 of 7 satisfied: 2 SSDF rows of the matrix, and 4 from SP 800-53 Rev. 5.2.0 and 1 from the AI RMF on the matrix's rows |
 | Admission tests | 19 recorded: 16 planted pods refused, each by the policy the mapping names and with the flagship's own expected words, and 3 control pods admitted |
 | The game day | Kyverno's admission controller scaled to zero: its webhook configuration went with it, and the API server's own guard refused the signed model |
 | Kyverno's reports | 6 PolicyReports, 9 results, every one a pass: the model server passed all four reported policies; the ordinary pod and Kyverno's four pods passed carried-images |
@@ -120,7 +120,7 @@ A gate that has never failed proves nothing. Every push runs the whole thing sev
 | `remove:models-need-kyverno` | No guard while Kyverno is away | SR-11 | 1 |
 | `remove:egress-node` | Nothing keeps pods off the egress node | none rests on it | 3 |
 
-Each was caught in [run 41361749143](https://github.com/heyvaldemar/kubernetes-oscal-evidence/actions/runs/41361749143), and for its own reason: a plant passes only if a pod the broken policy must refuse got in. The controls each plant breaks are the same in every run. One count is not: with verify-models gone, `model-by-tag` and `volume-elsewhere` are refused by the guard and by a second native policy at once, and the API server names only one of them, not always the same one. When it names the guard, those two tests fail as well: 9 failed tests in runs [41361749143](https://github.com/heyvaldemar/kubernetes-oscal-evidence/actions/runs/41361749143), [41362793471](https://github.com/heyvaldemar/kubernetes-oscal-evidence/actions/runs/41362793471) and [41364822342](https://github.com/heyvaldemar/kubernetes-oscal-evidence/actions/runs/41364822342), 11 in [41358080026](https://github.com/heyvaldemar/kubernetes-oscal-evidence/actions/runs/41358080026) and the tag's [41363728342](https://github.com/heyvaldemar/kubernetes-oscal-evidence/actions/runs/41363728342). Three of them say more than that the gate works:
+Each was caught in [run 41361749143](https://github.com/heyvaldemar/kubernetes-oscal-evidence/actions/runs/41361749143), and with 1.2.0's mapping in [run 43101983853](https://github.com/heyvaldemar/kubernetes-oscal-evidence/actions/runs/43101983853), each for its own reason: a plant passes only if a pod the broken policy must refuse got in. The controls each plant breaks are the same in every run. One count is not: with verify-models gone, `model-by-tag` and `volume-elsewhere` are refused by the guard and by a second native policy at once, and the API server names only one of them, not always the same one. When it names the guard, those two tests fail as well: 9 failed tests in runs [41361749143](https://github.com/heyvaldemar/kubernetes-oscal-evidence/actions/runs/41361749143), [41362793471](https://github.com/heyvaldemar/kubernetes-oscal-evidence/actions/runs/41362793471) and [41364822342](https://github.com/heyvaldemar/kubernetes-oscal-evidence/actions/runs/41364822342), 11 in [41358080026](https://github.com/heyvaldemar/kubernetes-oscal-evidence/actions/runs/41358080026) and the tag's [41363728342](https://github.com/heyvaldemar/kubernetes-oscal-evidence/actions/runs/41363728342). Three of them say more than that the gate works:
 
 - **`audit:verify-models` is the PolicyReport path.** With the policy recording rather than refusing, the unsigned model ran, Kyverno's report said "fail" for its pod, and C2P turned that into its own not-satisfied finding. The other plants reach the gate through missing reports and failed tests; this one through a report that names a violation.
 - **`phantom-mapping` is refused twice.** The mapping check stops it before anything runs. Built anyway, the run refuses it on its own: Kyverno reports `verify-models`, nothing reports `verify-model-signatures`, and every test is refused by a policy the mapping does not name.

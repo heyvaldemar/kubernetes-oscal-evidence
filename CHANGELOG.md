@@ -4,6 +4,8 @@ All notable changes to this project are documented in this file. The format is b
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-11-11
+
 ### Added
 
 - Live status, as the account's other reference repositories keep it. With `E2E_RESULTS` set, the gate writes what it decided: a judged run gets one check per control and per admission test and three measured lines (controls satisfied, planted pods refused, control pods admitted), a plant's run one check, whether it was caught, and evidence it cannot read one failed check. Every Evidence job uploads them (`e2e-results-*`), and `.github/workflows/status.yml` rewrites the `status` branch after each run on main with the last 30 days: green days, the streak, the latest run's checks and measurements (`scripts/status.py`, read from GitHub's API). A release's run on its tag is not read. The README's second row of badges reads the branch.
@@ -43,6 +45,7 @@ All notable changes to this project are documented in this file. The format is b
 - Kyverno 1.19.2 writes no admission report for a CEL policy whose actions include Deny, reports a native policy only when it is labelled, and evaluates every stored pod as if it were being created. The flagship's verify-models is reported here with its background scan on; egress-node is judged by its admission tests alone.
 - Without model-volumes, the flagship admits an image volume from outside the models path: verify-models never sees an image outside its own glob.
 
-[Unreleased]: https://github.com/heyvaldemar/kubernetes-oscal-evidence/compare/v1.1.0...HEAD
+[Unreleased]: https://github.com/heyvaldemar/kubernetes-oscal-evidence/compare/v1.2.0...HEAD
+[1.2.0]: https://github.com/heyvaldemar/kubernetes-oscal-evidence/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/heyvaldemar/kubernetes-oscal-evidence/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/heyvaldemar/kubernetes-oscal-evidence/releases/tag/v1.0.0
