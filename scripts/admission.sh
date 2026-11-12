@@ -37,7 +37,8 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 STATE="$ROOT/.cache/run"
 FLAGSHIP="$ROOT/.cache/flagship/src"
-# Kyverno 1.20.0-rc.5 before GA (branch kyverno-1.20-rc only): the chart and
+# Kyverno 1.20.0 (branch kyverno-1.20-rc only, until a flagship release runs
+# it and flagship.lock moves): the chart and
 # image pins come from kyverno-rc/, copied from the flagship's branch of the
 # same name; the policies and values are still the flagship release's.
 PINS="$ROOT/kyverno-rc"
