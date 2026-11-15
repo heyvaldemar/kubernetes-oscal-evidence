@@ -66,8 +66,10 @@ def main():
                                      "plugin on the API server's answers to a server-side dry run of each "
                                      "running pod, aggregated into one assessment results.")
         c2p = C2P(config)
-        c2p.add_pvp_result(PluginKyvernoCel().generate_pvp_result(RawResult(data=items)))
-        c2p.add_pvp_result(PluginVap().generate_pvp_result(RawResult(data=outcomes)))
+        kyverno = PluginKyvernoCel().generate_pvp_result(RawResult(data=items))
+        api_server = PluginVap().generate_pvp_result(RawResult(data=outcomes))
+        c2p.add_pvp_result(kyverno)
+        c2p.add_pvp_result(api_server)
         ar = c2p.result_to_oscal()
     except Exception as e:  # C2P that cannot produce its results is no evidence
         print(f"C2P failed: {type(e).__name__}: {e}", file=sys.stderr)
@@ -88,8 +90,10 @@ def main():
         f.write(render.render_json(doc))
         f.write("\n")
     observations = ar.results[0].observations or []
-    print(f"== C2P: {len(observations)} observations from two engines, "
-          f"{sum(len(o.subjects or []) for o in observations)} subjects")
+    print(f"== C2P: one assessment results, {len(observations)} observations with "
+          f"{sum(len(o.subjects or []) for o in observations)} subjects: "
+          f"{len(kyverno.observations_by_check or [])} from Kyverno's reports, "
+          f"{len(api_server.observations_by_check or [])} from the API server's dry run")
 
 
 if __name__ == "__main__":

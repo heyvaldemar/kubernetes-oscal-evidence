@@ -5,13 +5,13 @@
       "workload": "inference/deployment/model-server",
       "model": "registry.boundary.internal:5000/models/model@sha256:68a6b16e1e0ee5f302bf9716e0c8568bb222c2ebf53daf1a8bcc1118296c582d",
       "applied": true,
-      "message": "deployment.apps/model-server unchanged",
+      "message": "deployment.apps/model-server created",
       "running": true
     },
     {
       "workload": "default/pod/ordinary-pod",
       "applied": true,
-      "message": "pod/ordinary-pod unchanged",
+      "message": "pod/ordinary-pod created",
       "running": true
     }
   ],
@@ -25,7 +25,7 @@
       "admitted": false,
       "refused_by": "models-need-kyverno",
       "message": "failed to configure binding: no params found for policy binding with `Deny` parameterNotFoundAction",
-      "readmitted_after_seconds": 12
+      "readmitted_after_seconds": 0
     },
     {
       "test": "image-by-tag",

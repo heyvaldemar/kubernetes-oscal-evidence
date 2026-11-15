@@ -16,8 +16,8 @@ A new or changed rule in the gate ships with a test in `tests/test_evidence.py` 
 
 ## C2P and Kyverno as they are
 
-The two changes `scripts/collect.py` makes to Kyverno's reports before C2P reads them, and the three settings `scripts/admission.sh` makes so that Kyverno reports at all, are the whole of what this repository changes in the tools' behaviour. Anything more is written in the README beside the reason, or not done. A gap in either tool is reported upstream by the maintainer, in his own words.
+The three settings `scripts/admission.sh` makes so that Kyverno reports at all are the whole of what this repository changes in the tools' behaviour. C2P reads Kyverno's reports as the cluster holds them, and runs in an environment of its own with the trestle it requires (docs/decisions/0005); two of its declared dependencies that nothing imports are left out there, and `c2p/overrides.txt` says why. Anything more is written in the README beside the reason, or not done. A gap in either tool is reported upstream by the maintainer, in his own words.
 
 ## Pins
 
-The flagship by release and archive sha256, verified with cosign and slsa-verifier. Tools by version and sha256 for each platform. compliance-trestle and its dependencies by hash. NIST's catalogs by commit and sha256. Moving any of them is a commit that says what changed and why, after the Evidence workflow passes on it.
+The flagship by release and archive sha256, verified with cosign and slsa-verifier. Tools by version and sha256 for each platform. compliance-trestle and its dependencies by hash, and C2P, its trestle and its dependencies by hash in `c2p/requirements.lock`, its plugins by sha256 in `c2p/plugins.lock`. NIST's catalogs by commit and sha256. Moving any of them is a commit that says what changed and why, after the Evidence workflow passes on it.

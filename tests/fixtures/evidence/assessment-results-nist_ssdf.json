@@ -1,31 +1,21 @@
 {
   "assessment-results": {
-    "back-matter": {
-      "resources": [
-        {
-          "title": "ApiVersion: v1, Kind: Pod, Namespace: inference, Name: model-server-cf9b6f49-jjdlc",
-          "uuid": "0aa67acb-cd5d-417b-903a-933a8d2fd5bd"
-        }
-      ]
-    },
-    "import-ap": {
-      "href": "c2p/assessment-plan-nist_ssdf.json"
-    },
+    "uuid": "8880b74f-5b45-4403-a321-ac656ca85e12",
     "metadata": {
       "title": "Admission controls of kubernetes-air-gapped-ai-agent v1.8.0: NIST SP 800-218 SSDF v1.1, one run",
-      "last-modified": "2026-11-11T21:16:04+00:00",
+      "last-modified": "2026-11-15T23:39:18+00:00",
       "version": "unreleased",
       "oscal-version": "1.1.3",
       "props": [
         {
           "name": "run",
           "ns": "https://github.com/heyvaldemar/kubernetes-oscal-evidence/ns",
-          "value": "a local run"
+          "value": "https://github.com/heyvaldemar/kubernetes-oscal-evidence/actions/runs/43775335140"
         },
         {
           "name": "commit",
           "ns": "https://github.com/heyvaldemar/kubernetes-oscal-evidence/ns",
-          "value": "local"
+          "value": "f858c3c1aa5cd9f25c31a5026ee406174fe2322c"
         },
         {
           "name": "flagship",
@@ -43,91 +33,101 @@
           "value": "none"
         }
       ],
-      "remarks": "Observations of Kyverno's PolicyReports are C2P's, unchanged. Admission test observations and every finding are written by scripts/evidence.py; c2p/ holds C2P's own plan and results for this framework."
+      "remarks": "Observations of Kyverno's PolicyReports and of the API server's dry run are C2P's, unchanged; each names its check, and so its engine. Admission test observations and every finding are written by scripts/evidence.py; c2p/ holds C2P's own results for both engines and its posture."
+    },
+    "import-ap": {
+      "href": "assessment-plan-nist_ssdf.json"
     },
     "results": [
       {
-        "description": "OSCAL Assessment Result For Task \"Automated Assessment\"",
+        "uuid": "5d868010-f0dd-466a-8ba1-1bdf801dbdac",
+        "title": "NIST SP 800-218 SSDF v1.1: the admission controls of kubernetes-air-gapped-ai-agent v1.8.0",
+        "description": "C2P 1.0.0: its kyverno-cel plugin on Kyverno's PolicyReports, its vap plugin on the API server's answers to a server-side dry run of each running pod, aggregated into one assessment results.",
+        "start": "2026-11-15T23:39:18+00:00",
+        "reviewed-controls": {
+          "control-selections": [
+            {
+              "include-controls": [
+                {
+                  "control-id": "si-7"
+                },
+                {
+                  "control-id": "sr-4"
+                },
+                {
+                  "control-id": "sr-11"
+                },
+                {
+                  "control-id": "cm-7.5"
+                }
+              ]
+            },
+            {
+              "include-controls": [
+                {
+                  "control-id": "PS.3.2"
+                },
+                {
+                  "control-id": "PW.4.4"
+                }
+              ]
+            },
+            {
+              "include-controls": [
+                {
+                  "control-id": "MANAGE_3.1"
+                }
+              ]
+            }
+          ]
+        },
         "observations": [
           {
-            "collected": "2026-11-11T21:16:05.643213Z",
-            "description": "Observation of check verify-models",
-            "methods": [
-              "TEST-AUTOMATED",
-              "TEST"
-            ],
-            "origins": [
-              {
-                "actors": [
-                  {
-                    "actor-uuid": "196fb59b-56c0-56ab-b38c-b8fe9a063fd1",
-                    "type": "tool"
-                  }
-                ],
-                "related-tasks": [
-                  {
-                    "subjects": [
-                      {
-                        "include-subjects": [
-                          {
-                            "subject-uuid": "7649ce44-0101-5987-aa8a-a49c0ad31c1d",
-                            "type": "component"
-                          }
-                        ],
-                        "type": "component"
-                      }
-                    ],
-                    "task-uuid": "d9d1a861-5c7d-4513-b74c-0c4866b45026"
-                  }
-                ]
-              }
-            ],
+            "uuid": "df6b2e47-64c0-4e95-8e43-c96f2144eca7",
+            "title": "verify-models",
+            "description": "verify-models",
             "props": [
               {
                 "name": "assessment-rule-id",
-                "ns": "https://oscal-compass.github.io/compliance-trestle/schemas/oscal",
                 "value": "verify-models"
               },
               {
                 "name": "assessment-check-id",
-                "ns": "https://oscal-compass.github.io/compliance-trestle/schemas/oscal",
                 "value": "verify-models"
               }
             ],
+            "methods": [
+              "TEST-AUTOMATED"
+            ],
             "subjects": [
               {
+                "subject-uuid": "d204e90d-d5cc-4136-9052-fb6851ef867b",
+                "type": "resource",
+                "title": "Pod inference/model-server-cf9b6f49-zctd8",
                 "props": [
                   {
                     "name": "resource-id",
-                    "ns": "https://oscal-compass.github.io/compliance-trestle/schemas/oscal",
-                    "value": "ad5d88fb-dd5b-4210-b468-75f5da8f0276"
+                    "value": "v1/Pod/inference/model-server-cf9b6f49-zctd8"
                   },
                   {
                     "name": "result",
-                    "ns": "https://oscal-compass.github.io/compliance-trestle/schemas/oscal",
                     "value": "pass"
                   },
                   {
                     "name": "evaluated-on",
-                    "ns": "https://oscal-compass.github.io/compliance-trestle/schemas/oscal",
-                    "value": "2026-11-11 21:16:05.643214 +0000 UTC"
+                    "value": "2026-11-15T23:38:53+00:00"
                   },
                   {
                     "name": "reason",
-                    "ns": "https://oscal-compass.github.io/compliance-trestle/schemas/oscal",
                     "value": "success"
                   }
-                ],
-                "subject-uuid": "0aa67acb-cd5d-417b-903a-933a8d2fd5bd",
-                "title": "ApiVersion: v1, Kind: Pod, Namespace: inference, Name: model-server-cf9b6f49-jjdlc",
-                "type": "resource"
+                ]
               }
             ],
-            "title": "verify-models",
-            "uuid": "5a42f279-c2db-4b8b-a994-87b758202f84"
+            "collected": "2026-11-15T23:39:18+00:00"
           },
           {
-            "uuid": "6aa9369a-d714-598b-a15b-50e0c03571ba",
+            "uuid": "715d3945-a0c9-52d2-b4e7-9b88f32074f3",
             "title": "Admission test: model-nobom",
             "description": "model weights signed by the operator, with no AI-BOM",
             "methods": [
@@ -156,7 +156,6 @@
               },
               {
                 "name": "assessment-rule-id",
-                "ns": "https://oscal-compass.github.io/compliance-trestle/schemas/oscal",
                 "value": "verify-models"
               },
               {
@@ -175,7 +174,7 @@
                 "value": "model weights carry an AI-BOM signed with the operator's key"
               }
             ],
-            "collected": "2026-11-11T21:16:04+00:00",
+            "collected": "2026-11-15T23:39:18+00:00",
             "remarks": "refused by verify-models: Policy verify-models failed: model weights carry an AI-BOM signed with the operator's key",
             "relevant-evidence": [
               {
@@ -185,7 +184,7 @@
             ]
           },
           {
-            "uuid": "57965008-d4ab-51f2-af30-9bc9a7eb8a18",
+            "uuid": "ea5cd5b1-2731-524f-8db6-3d89bd0ebad4",
             "title": "Admission test: model-signed",
             "description": "the control: the signed model, by digest",
             "methods": [
@@ -209,7 +208,6 @@
               },
               {
                 "name": "assessment-rule-id",
-                "ns": "https://oscal-compass.github.io/compliance-trestle/schemas/oscal",
                 "value": "verify-models"
               },
               {
@@ -223,7 +221,7 @@
                 "value": "admitted"
               }
             ],
-            "collected": "2026-11-11T21:16:04+00:00",
+            "collected": "2026-11-15T23:39:18+00:00",
             "remarks": "admitted",
             "relevant-evidence": [
               {
@@ -233,7 +231,7 @@
             ]
           },
           {
-            "uuid": "ff978fd4-16bb-5d8f-b680-314a0909d98e",
+            "uuid": "e7d8fe39-69a2-5fd5-bbdb-c8e31c4902a9",
             "title": "Admission test: model-unlicensed",
             "description": "model weights signed by the operator, whose AI-BOM declares a licence the site does not allow",
             "methods": [
@@ -262,7 +260,6 @@
               },
               {
                 "name": "assessment-rule-id",
-                "ns": "https://oscal-compass.github.io/compliance-trestle/schemas/oscal",
                 "value": "verify-models"
               },
               {
@@ -281,7 +278,7 @@
                 "value": "every model in the AI-BOM declares only licences the site allows"
               }
             ],
-            "collected": "2026-11-11T21:16:04+00:00",
+            "collected": "2026-11-15T23:39:18+00:00",
             "remarks": "refused by verify-models: Policy verify-models failed: every model in the AI-BOM declares only licences the site allows (Apache-2.0, MIT)",
             "relevant-evidence": [
               {
@@ -291,7 +288,7 @@
             ]
           },
           {
-            "uuid": "5a365dee-ff7e-5992-a89f-8800a5806358",
+            "uuid": "1ed4b6e2-ccaf-51b4-b8c4-b3625f929306",
             "title": "Admission test: model-licence-mixed",
             "description": "model weights signed by the operator, whose AI-BOM lists Apache-2.0 beside CC-BY-NC-4.0",
             "methods": [
@@ -320,7 +317,6 @@
               },
               {
                 "name": "assessment-rule-id",
-                "ns": "https://oscal-compass.github.io/compliance-trestle/schemas/oscal",
                 "value": "verify-models"
               },
               {
@@ -339,7 +335,7 @@
                 "value": "every model in the AI-BOM declares only licences the site allows"
               }
             ],
-            "collected": "2026-11-11T21:16:04+00:00",
+            "collected": "2026-11-15T23:39:18+00:00",
             "remarks": "refused by verify-models: Policy verify-models failed: every model in the AI-BOM declares only licences the site allows (Apache-2.0, MIT)",
             "relevant-evidence": [
               {
@@ -349,7 +345,7 @@
             ]
           },
           {
-            "uuid": "7a1ce6f7-6bfc-5a33-a55e-ae8a07375237",
+            "uuid": "0a7c25a8-3ca2-5e21-b116-142a43a3cb71",
             "title": "Admission test: model-licence-second",
             "description": "model weights signed by the operator, whose AI-BOM lists a second model with no licence beside the licensed one",
             "methods": [
@@ -378,7 +374,6 @@
               },
               {
                 "name": "assessment-rule-id",
-                "ns": "https://oscal-compass.github.io/compliance-trestle/schemas/oscal",
                 "value": "verify-models"
               },
               {
@@ -397,7 +392,7 @@
                 "value": "every model in the AI-BOM declares only licences the site allows"
               }
             ],
-            "collected": "2026-11-11T21:16:04+00:00",
+            "collected": "2026-11-15T23:39:18+00:00",
             "remarks": "refused by verify-models: Policy verify-models failed: every model in the AI-BOM declares only licences the site allows (Apache-2.0, MIT)",
             "relevant-evidence": [
               {
@@ -407,7 +402,7 @@
             ]
           },
           {
-            "uuid": "cb0e5b6b-ccb9-5d94-bef0-eb96f82c644f",
+            "uuid": "a4e81ac8-02ca-5c9d-85e8-66e8e2151208",
             "title": "Admission test: model-licence-expression",
             "description": "model weights signed by the operator, whose AI-BOM gives its licence as an SPDX expression, Apache-2.0 AND MIT",
             "methods": [
@@ -436,7 +431,6 @@
               },
               {
                 "name": "assessment-rule-id",
-                "ns": "https://oscal-compass.github.io/compliance-trestle/schemas/oscal",
                 "value": "verify-models"
               },
               {
@@ -455,7 +449,7 @@
                 "value": "names each licence by its SPDX id, with no expression"
               }
             ],
-            "collected": "2026-11-11T21:16:04+00:00",
+            "collected": "2026-11-15T23:39:18+00:00",
             "remarks": "refused by verify-models: Policy verify-models failed: the model's AI-BOM names each licence by its SPDX id, with no expression and no nested component (scripts/mlbom.py concludes an expression to ids)",
             "relevant-evidence": [
               {
@@ -465,7 +459,7 @@
             ]
           },
           {
-            "uuid": "5d836d4b-9e7b-5c78-9734-3a492efb98d9",
+            "uuid": "1ba4617f-d7f6-56b7-92f0-355b3e9095a6",
             "title": "Admission test: model-licence-concluded",
             "description": "the control: model weights signed by the operator, declared Apache-2.0 OR CC-BY-NC-4.0 and concluded to Apache-2.0",
             "methods": [
@@ -489,7 +483,6 @@
               },
               {
                 "name": "assessment-rule-id",
-                "ns": "https://oscal-compass.github.io/compliance-trestle/schemas/oscal",
                 "value": "verify-models"
               },
               {
@@ -503,7 +496,7 @@
                 "value": "admitted"
               }
             ],
-            "collected": "2026-11-11T21:16:04+00:00",
+            "collected": "2026-11-15T23:39:18+00:00",
             "remarks": "admitted",
             "relevant-evidence": [
               {
@@ -513,26 +506,9 @@
             ]
           }
         ],
-        "reviewed-controls": {
-          "control-selections": [
-            {
-              "include-controls": [
-                {
-                  "control-id": "PW.4.4"
-                },
-                {
-                  "control-id": "PS.3.2"
-                }
-              ]
-            }
-          ]
-        },
-        "start": "2026-11-11T16:16:05.643948-05:00",
-        "title": "NIST SP 800-218 SSDF v1.1: the admission controls of kubernetes-air-gapped-ai-agent v1.8.0",
-        "uuid": "a0f3baed-c18d-4fe7-9a79-cbfa16257682",
         "findings": [
           {
-            "uuid": "399cae5d-c327-5197-a5b7-74b775b423fe",
+            "uuid": "08d50b11-1be9-5006-90e0-4862d00b1259",
             "title": "PS.3.2: satisfied",
             "description": "Kyverno reported every running pod passing verify-models, and every test that proves it did what the mapping says (model-nobom, model-signed).",
             "props": [
@@ -557,9 +533,14 @@
                 "value": "LLM04:2025"
               },
               {
-                "name": "c2p-verdict",
+                "name": "engine",
                 "ns": "https://github.com/heyvaldemar/kubernetes-oscal-evidence/ns",
-                "value": "no finding"
+                "value": "Kyverno"
+              },
+              {
+                "name": "c2p-posture",
+                "ns": "https://github.com/heyvaldemar/kubernetes-oscal-evidence/ns",
+                "value": "satisfied, 1 of 1 expected checks reported"
               }
             ],
             "target": {
@@ -572,18 +553,18 @@
             },
             "related-observations": [
               {
-                "observation-uuid": "5a42f279-c2db-4b8b-a994-87b758202f84"
+                "observation-uuid": "df6b2e47-64c0-4e95-8e43-c96f2144eca7"
               },
               {
-                "observation-uuid": "6aa9369a-d714-598b-a15b-50e0c03571ba"
+                "observation-uuid": "715d3945-a0c9-52d2-b4e7-9b88f32074f3"
               },
               {
-                "observation-uuid": "57965008-d4ab-51f2-af30-9bc9a7eb8a18"
+                "observation-uuid": "ea5cd5b1-2731-524f-8db6-3d89bd0ebad4"
               }
             ]
           },
           {
-            "uuid": "1c175632-0b47-5c74-b0a9-1f9c0ae55f09",
+            "uuid": "e32e0464-a1b5-55c7-8b5b-f02e075bec2d",
             "title": "PW.4.4: satisfied",
             "description": "Kyverno reported every running pod passing verify-models, and every test that proves it did what the mapping says (model-unlicensed, model-licence-mixed, model-licence-second, model-licence-expression, model-licence-concluded).",
             "props": [
@@ -608,9 +589,14 @@
                 "value": "LLM03:2025"
               },
               {
-                "name": "c2p-verdict",
+                "name": "engine",
                 "ns": "https://github.com/heyvaldemar/kubernetes-oscal-evidence/ns",
-                "value": "no finding"
+                "value": "Kyverno"
+              },
+              {
+                "name": "c2p-posture",
+                "ns": "https://github.com/heyvaldemar/kubernetes-oscal-evidence/ns",
+                "value": "satisfied, 1 of 1 expected checks reported"
               }
             ],
             "target": {
@@ -623,28 +609,27 @@
             },
             "related-observations": [
               {
-                "observation-uuid": "5a42f279-c2db-4b8b-a994-87b758202f84"
+                "observation-uuid": "df6b2e47-64c0-4e95-8e43-c96f2144eca7"
               },
               {
-                "observation-uuid": "ff978fd4-16bb-5d8f-b680-314a0909d98e"
+                "observation-uuid": "e7d8fe39-69a2-5fd5-bbdb-c8e31c4902a9"
               },
               {
-                "observation-uuid": "5a365dee-ff7e-5992-a89f-8800a5806358"
+                "observation-uuid": "1ed4b6e2-ccaf-51b4-b8c4-b3625f929306"
               },
               {
-                "observation-uuid": "7a1ce6f7-6bfc-5a33-a55e-ae8a07375237"
+                "observation-uuid": "0a7c25a8-3ca2-5e21-b116-142a43a3cb71"
               },
               {
-                "observation-uuid": "cb0e5b6b-ccb9-5d94-bef0-eb96f82c644f"
+                "observation-uuid": "a4e81ac8-02ca-5c9d-85e8-66e8e2151208"
               },
               {
-                "observation-uuid": "5d836d4b-9e7b-5c78-9734-3a492efb98d9"
+                "observation-uuid": "1ba4617f-d7f6-56b7-92f0-355b3e9095a6"
               }
             ]
           }
         ]
       }
-    ],
-    "uuid": "d3308393-3b59-4985-8a7f-a7af6c5e3475"
+    ]
   }
 }

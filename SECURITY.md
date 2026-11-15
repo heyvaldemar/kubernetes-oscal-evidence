@@ -23,7 +23,7 @@ The planted pods are broken on purpose: unsigned models, models signed by a key 
 ## Supply chain
 
 - The flagship's policies are read from its signed release only after cosign and slsa-verifier verify it (`flagship.lock`).
-- NIST's catalogs, the command-line tools, C2P and compliance-trestle are pinned by sha256 (`catalogs.lock`, `tools.lock`, `requirements.lock`); C2P's pins are also checked against its publisher's signed checksums.
+- NIST's catalogs, the command-line tools, C2P and compliance-trestle are pinned by sha256 (`catalogs.lock`, `tools.lock`, `requirements.lock`, `c2p/requirements.lock`); C2P's plugins are fetched from the commit its signed v1.0.0 tag names, each file by sha256 (`c2p/plugins.lock`).
 - Actions are pinned by commit SHA and moved by Dependabot, merged only after the Evidence workflow passes.
 - Releases carry a signed source archive with SLSA provenance, and the run's evidence, signed, with its own SLSA provenance.
 

@@ -1,6 +1,6 @@
 # 2. C2P from its release binaries, traced to its publisher's signature
 
-- Status: accepted
+- Status: superseded by [5. C2P 1.0.0 in an environment of its own, with the API server as a second engine](0005-c2p-1-0-beside-its-own-trestle.md), 2026-11-16
 - Date: 2026-11-01 (1.0.0), recorded 2026-11-02
 
 ## Context

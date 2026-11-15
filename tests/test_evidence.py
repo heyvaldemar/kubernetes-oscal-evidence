@@ -103,6 +103,75 @@ class DryRun(unittest.TestCase):
         self.assertNotIn("status", doc)
 
 
+class C2PReads(unittest.TestCase):
+    """C2P 1.0.0, in its own environment, on the recorded run: Kyverno's reports as the cluster held
+    them and the API server's answers, into one assessment results that names each engine."""
+
+    @classmethod
+    def c2p(cls, dry_run, out):
+        reports = pathlib.Path(cls.tmp) / "raw"
+        reports.mkdir(exist_ok=True)
+        shutil.copy(FIX / "policyreports.json", reports / "policyreports.json")
+        (reports / "clusterpolicyreports.json").write_text('{"apiVersion": "v1", "kind": "List", "items": []}')
+        python = ROOT / ".cache" / "c2p" / "bin" / "python"
+        out = pathlib.Path(cls.tmp) / out
+        p = subprocess.run([str(python), "-I", str(ROOT / "scripts" / "c2p.py"), str(ROOT / "oscal" / "component-definition.json"),
+                            str(reports), str(dry_run), str(out)], capture_output=True, text=True)
+        if p.returncode != 0:
+            raise AssertionError(f"C2P failed (scripts/install-tools.sh sets it up): {p.stderr.strip()}")
+        return json.load(open(out / "assessment-results.json")), json.load(open(out / "posture.json"))
+
+    @classmethod
+    def setUpClass(cls):
+        cls.tmp = tempfile.mkdtemp()
+        cls.ar, cls.posture = cls.c2p(FIX / "dry-run.json", "out")
+        silent = pathlib.Path(cls.tmp) / "silent.json"
+        silent.write_text("[]")
+        cls.silent_ar, cls.silent_posture = cls.c2p(silent, "silent")
+
+    @classmethod
+    def tearDownClass(cls):
+        shutil.rmtree(cls.tmp)
+
+    def observations(self):
+        out = {}
+        for o in self.ar["assessment-results"]["results"][0]["observations"]:
+            out[evidence.c2p_prop(o["props"], "assessment-check-id")] = o
+        return out
+
+    def test_every_declared_check_observed(self):
+        declared = {f"vap-{r}" if engine else r for r, spec in MAPPING["rules"].items()
+                    for engine, on in ((False, spec["posture"] == "kyverno"), (True, spec.get("dry_run"))) if on}
+        self.assertEqual(set(self.observations()), declared)
+
+    def test_kyverno_reports_read_as_they_are(self):
+        # What collect.py once changed for v2.0.0-rc.1: a subject for each result, and a reason.
+        for check, o in self.observations().items():
+            self.assertTrue(o["subjects"], check)
+            for s in o["subjects"]:
+                self.assertNotIn("/-", s["title"], check)
+                self.assertTrue(evidence.c2p_prop(s["props"], "reason"), check)
+
+    def test_each_observation_names_its_rule(self):
+        for check, o in self.observations().items():
+            self.assertEqual(evidence.c2p_prop(o["props"], "assessment-rule-id"), check.removeprefix("vap-"))
+
+    def test_c2p_posture_with_an_engine_silent(self):
+        # Why evidence.py does not take C2P's posture alone: with the API server silent,
+        # C2P still calls SI-7, SR-11 and CM-7(5) satisfied, and says so only in coverage.
+        rows = {c["controlId"]: c for comp in self.silent_posture["components"] for c in comp["controls"]}
+        for control, (assessed, expected) in {"si-7": (2, 3), "sr-11": (3, 5), "cm-7.5": (1, 2)}.items():
+            self.assertEqual((rows[control]["state"], rows[control]["coverage"]["assessedChecks"],
+                              rows[control]["coverage"]["expectedChecks"]), ("satisfied", assessed, expected), control)
+
+    def test_the_recorded_run_satisfies_every_control_in_c2p_posture(self):
+        controls = [c for comp in self.posture["components"] for c in comp["controls"]]
+        self.assertEqual({c["controlId"] for c in controls}, {c["control"] for c in MAPPING["controls"]})
+        for c in controls:
+            self.assertEqual((c["state"], c["coverage"]["assessedChecks"]),
+                             ("satisfied", c["coverage"]["expectedChecks"]), c["controlId"])
+
+
 class Tests(unittest.TestCase):
     """An admission test passes only if the right policy refused it, for the right reason."""
 

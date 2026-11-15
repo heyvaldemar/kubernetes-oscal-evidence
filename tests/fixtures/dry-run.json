@@ -1,0 +1,50 @@
+[
+  {
+    "checkId": "vap-model-volumes",
+    "title": "Pod inference/model-server-cf9b6f49-zctd8",
+    "resourceId": "v1/Pod/inference/model-server-cf9b6f49-zctd8",
+    "evaluatedOn": "2026-11-15T23:39:07Z",
+    "props": {
+      "workload": "inference/deployment/model-server",
+      "policy": "model-volumes"
+    },
+    "result": "pass",
+    "reason": "admitted on a server-side dry run; model-volumes refused a planted pod in this run"
+  },
+  {
+    "checkId": "vap-carried-images",
+    "title": "Pod inference/model-server-cf9b6f49-zctd8",
+    "resourceId": "v1/Pod/inference/model-server-cf9b6f49-zctd8",
+    "evaluatedOn": "2026-11-15T23:39:07Z",
+    "props": {
+      "workload": "inference/deployment/model-server",
+      "policy": "carried-images"
+    },
+    "result": "pass",
+    "reason": "admitted on a server-side dry run; carried-images refused a planted pod in this run"
+  },
+  {
+    "checkId": "vap-models-need-kyverno",
+    "title": "Pod inference/model-server-cf9b6f49-zctd8",
+    "resourceId": "v1/Pod/inference/model-server-cf9b6f49-zctd8",
+    "evaluatedOn": "2026-11-15T23:39:07Z",
+    "props": {
+      "workload": "inference/deployment/model-server",
+      "policy": "models-need-kyverno"
+    },
+    "result": "pass",
+    "reason": "admitted on a server-side dry run; models-need-kyverno refused a planted pod in this run"
+  },
+  {
+    "checkId": "vap-carried-images",
+    "title": "Pod default/ordinary-pod",
+    "resourceId": "v1/Pod/default/ordinary-pod",
+    "evaluatedOn": "2026-11-15T23:39:07Z",
+    "props": {
+      "workload": "default/pod/ordinary-pod",
+      "policy": "carried-images"
+    },
+    "result": "pass",
+    "reason": "admitted on a server-side dry run; carried-images refused a planted pod in this run"
+  }
+]

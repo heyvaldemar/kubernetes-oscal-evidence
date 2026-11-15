@@ -5,23 +5,23 @@
       "apiVersion": "wgpolicyk8s.io/v1alpha2",
       "kind": "PolicyReport",
       "metadata": {
-        "creationTimestamp": "2026-11-01T22:19:31Z",
-        "generation": 4,
+        "creationTimestamp": "2026-11-15T23:39:03Z",
+        "generation": 1,
         "labels": {
           "app.kubernetes.io/managed-by": "kyverno"
         },
-        "name": "aa066855-220d-4737-8084-50d7a80ff223",
+        "name": "39ddc1b4-78b7-4dc5-85dc-6d32f08eaaff",
         "namespace": "default",
         "ownerReferences": [
           {
             "apiVersion": "v1",
             "kind": "Pod",
             "name": "ordinary-pod",
-            "uid": "aa066855-220d-4737-8084-50d7a80ff223"
+            "uid": "39ddc1b4-78b7-4dc5-85dc-6d32f08eaaff"
           }
         ],
-        "resourceVersion": "1614",
-        "uid": "e5571fb4-88f0-425d-b507-a46f8c2d56a2"
+        "resourceVersion": "1845",
+        "uid": "1e8216eb-54b9-4674-88ae-1073e18fb0e3"
       },
       "results": [
         {
@@ -36,7 +36,7 @@
           "source": "ValidatingAdmissionPolicy",
           "timestamp": {
             "nanos": 0,
-            "seconds": 1793571604
+            "seconds": 1794785933
           }
         }
       ],
@@ -45,7 +45,7 @@
         "kind": "Pod",
         "name": "ordinary-pod",
         "namespace": "default",
-        "uid": "aa066855-220d-4737-8084-50d7a80ff223"
+        "uid": "39ddc1b4-78b7-4dc5-85dc-6d32f08eaaff"
       },
       "summary": {
         "error": 0,
@@ -59,23 +59,23 @@
       "apiVersion": "wgpolicyk8s.io/v1alpha2",
       "kind": "PolicyReport",
       "metadata": {
-        "creationTimestamp": "2026-11-01T22:19:31Z",
-        "generation": 3,
+        "creationTimestamp": "2026-11-15T23:39:03Z",
+        "generation": 1,
         "labels": {
           "app.kubernetes.io/managed-by": "kyverno"
         },
-        "name": "ad5d88fb-dd5b-4210-b468-75f5da8f0276",
+        "name": "2592e536-0d2a-4e4f-8279-014c28ba02fb",
         "namespace": "inference",
         "ownerReferences": [
           {
             "apiVersion": "v1",
             "kind": "Pod",
-            "name": "model-server-cf9b6f49-jjdlc",
-            "uid": "ad5d88fb-dd5b-4210-b468-75f5da8f0276"
+            "name": "model-server-cf9b6f49-zctd8",
+            "uid": "2592e536-0d2a-4e4f-8279-014c28ba02fb"
           }
         ],
-        "resourceVersion": "1536",
-        "uid": "39fcc573-d5f8-4439-a075-081e58c88fc4"
+        "resourceVersion": "1847",
+        "uid": "db2e57e5-7af5-4dd5-b8f6-b67cf1244146"
       },
       "results": [
         {
@@ -90,7 +90,7 @@
           "source": "ValidatingAdmissionPolicy",
           "timestamp": {
             "nanos": 0,
-            "seconds": 1793571585
+            "seconds": 1794785933
           }
         },
         {
@@ -105,7 +105,7 @@
           "source": "ValidatingAdmissionPolicy",
           "timestamp": {
             "nanos": 0,
-            "seconds": 1793571585
+            "seconds": 1794785933
           }
         },
         {
@@ -120,7 +120,7 @@
           "source": "ValidatingAdmissionPolicy",
           "timestamp": {
             "nanos": 0,
-            "seconds": 1793571585
+            "seconds": 1794785933
           }
         },
         {
@@ -135,16 +135,16 @@
           "source": "KyvernoImageValidatingPolicy",
           "timestamp": {
             "nanos": 0,
-            "seconds": 1793571585
+            "seconds": 1794785933
           }
         }
       ],
       "scope": {
         "apiVersion": "v1",
         "kind": "Pod",
-        "name": "model-server-cf9b6f49-jjdlc",
+        "name": "model-server-cf9b6f49-zctd8",
         "namespace": "inference",
-        "uid": "ad5d88fb-dd5b-4210-b468-75f5da8f0276"
+        "uid": "2592e536-0d2a-4e4f-8279-014c28ba02fb"
       },
       "summary": {
         "error": 0,
@@ -158,23 +158,23 @@
       "apiVersion": "wgpolicyk8s.io/v1alpha2",
       "kind": "PolicyReport",
       "metadata": {
-        "creationTimestamp": "2026-11-01T22:18:25Z",
-        "generation": 4,
+        "creationTimestamp": "2026-11-15T23:38:01Z",
+        "generation": 1,
         "labels": {
           "app.kubernetes.io/managed-by": "kyverno"
         },
-        "name": "15a42155-7b14-48de-8940-d4b2d034700d",
+        "name": "0608a8cc-ba8b-4339-a783-7a70380bb507",
         "namespace": "kyverno",
         "ownerReferences": [
           {
             "apiVersion": "v1",
             "kind": "Pod",
-            "name": "kyverno-reports-controller-86d59886fd-p6l72",
-            "uid": "15a42155-7b14-48de-8940-d4b2d034700d"
+            "name": "kyverno-reports-controller-86d59886fd-zw9xr",
+            "uid": "0608a8cc-ba8b-4339-a783-7a70380bb507"
           }
         ],
-        "resourceVersion": "1534",
-        "uid": "0296a40e-150f-4ddd-9991-8b3df02ae08b"
+        "resourceVersion": "1552",
+        "uid": "f7ab9543-70a9-45de-ba25-a76b0377ed30"
       },
       "results": [
         {
@@ -189,16 +189,16 @@
           "source": "ValidatingAdmissionPolicy",
           "timestamp": {
             "nanos": 0,
-            "seconds": 1793571585
+            "seconds": 1794785871
           }
         }
       ],
       "scope": {
         "apiVersion": "v1",
         "kind": "Pod",
-        "name": "kyverno-reports-controller-86d59886fd-p6l72",
+        "name": "kyverno-reports-controller-86d59886fd-zw9xr",
         "namespace": "kyverno",
-        "uid": "15a42155-7b14-48de-8940-d4b2d034700d"
+        "uid": "0608a8cc-ba8b-4339-a783-7a70380bb507"
       },
       "summary": {
         "error": 0,
@@ -212,23 +212,23 @@
       "apiVersion": "wgpolicyk8s.io/v1alpha2",
       "kind": "PolicyReport",
       "metadata": {
-        "creationTimestamp": "2026-11-01T22:18:25Z",
-        "generation": 4,
+        "creationTimestamp": "2026-11-15T23:38:01Z",
+        "generation": 1,
         "labels": {
           "app.kubernetes.io/managed-by": "kyverno"
         },
-        "name": "94469611-3022-432b-8c35-23a8614a3743",
+        "name": "aa2b741a-9474-40b7-b949-9718211a007f",
         "namespace": "kyverno",
         "ownerReferences": [
           {
             "apiVersion": "v1",
             "kind": "Pod",
-            "name": "kyverno-background-controller-594f76ccb6-xt9rr",
-            "uid": "94469611-3022-432b-8c35-23a8614a3743"
+            "name": "kyverno-background-controller-594f76ccb6-n6gcl",
+            "uid": "aa2b741a-9474-40b7-b949-9718211a007f"
           }
         ],
-        "resourceVersion": "1532",
-        "uid": "9dbd3bbc-2998-4180-9501-62a9975da414"
+        "resourceVersion": "1559",
+        "uid": "bcbad8e1-7e20-4d4c-9dfc-4f4076106441"
       },
       "results": [
         {
@@ -243,16 +243,16 @@
           "source": "ValidatingAdmissionPolicy",
           "timestamp": {
             "nanos": 0,
-            "seconds": 1793571585
+            "seconds": 1794785871
           }
         }
       ],
       "scope": {
         "apiVersion": "v1",
         "kind": "Pod",
-        "name": "kyverno-background-controller-594f76ccb6-xt9rr",
+        "name": "kyverno-background-controller-594f76ccb6-n6gcl",
         "namespace": "kyverno",
-        "uid": "94469611-3022-432b-8c35-23a8614a3743"
+        "uid": "aa2b741a-9474-40b7-b949-9718211a007f"
       },
       "summary": {
         "error": 0,
@@ -266,23 +266,23 @@
       "apiVersion": "wgpolicyk8s.io/v1alpha2",
       "kind": "PolicyReport",
       "metadata": {
-        "creationTimestamp": "2026-11-01T22:18:25Z",
-        "generation": 4,
+        "creationTimestamp": "2026-11-15T23:38:01Z",
+        "generation": 1,
         "labels": {
           "app.kubernetes.io/managed-by": "kyverno"
         },
-        "name": "bccf3461-07cf-4ea9-8a5e-10319fc0812f",
+        "name": "e2bd4108-6c76-4787-bea5-45d15d6e4499",
         "namespace": "kyverno",
         "ownerReferences": [
           {
             "apiVersion": "v1",
             "kind": "Pod",
-            "name": "kyverno-cleanup-controller-b8b66b769-w8vfs",
-            "uid": "bccf3461-07cf-4ea9-8a5e-10319fc0812f"
+            "name": "kyverno-cleanup-controller-b8b66b769-4tdlj",
+            "uid": "e2bd4108-6c76-4787-bea5-45d15d6e4499"
           }
         ],
-        "resourceVersion": "1531",
-        "uid": "7a5919e3-a8f3-44d5-9a4a-0e21c8b0e2ca"
+        "resourceVersion": "1558",
+        "uid": "bdb9ceb1-2707-4f40-b3b0-c61e9109883c"
       },
       "results": [
         {
@@ -297,16 +297,70 @@
           "source": "ValidatingAdmissionPolicy",
           "timestamp": {
             "nanos": 0,
-            "seconds": 1793571585
+            "seconds": 1794785871
           }
         }
       ],
       "scope": {
         "apiVersion": "v1",
         "kind": "Pod",
-        "name": "kyverno-cleanup-controller-b8b66b769-w8vfs",
+        "name": "kyverno-cleanup-controller-b8b66b769-4tdlj",
         "namespace": "kyverno",
-        "uid": "bccf3461-07cf-4ea9-8a5e-10319fc0812f"
+        "uid": "e2bd4108-6c76-4787-bea5-45d15d6e4499"
+      },
+      "summary": {
+        "error": 0,
+        "fail": 0,
+        "pass": 1,
+        "skip": 0,
+        "warn": 0
+      }
+    },
+    {
+      "apiVersion": "wgpolicyk8s.io/v1alpha2",
+      "kind": "PolicyReport",
+      "metadata": {
+        "creationTimestamp": "2026-11-15T23:38:33Z",
+        "generation": 1,
+        "labels": {
+          "app.kubernetes.io/managed-by": "kyverno"
+        },
+        "name": "e62fa299-45b0-420b-9c8b-24f4076cce69",
+        "namespace": "kyverno",
+        "ownerReferences": [
+          {
+            "apiVersion": "v1",
+            "kind": "Pod",
+            "name": "kyverno-admission-controller-759f7dc7df-9l5fv",
+            "uid": "e62fa299-45b0-420b-9c8b-24f4076cce69"
+          }
+        ],
+        "resourceVersion": "1733",
+        "uid": "6ec1a7c0-b5e0-45aa-9f9c-2cb8cea1f4fa"
+      },
+      "results": [
+        {
+          "policy": "carried-images",
+          "properties": {
+            "binding": "carried-images",
+            "process": "background scan"
+          },
+          "result": "pass",
+          "rule": "carried-images",
+          "scored": true,
+          "source": "ValidatingAdmissionPolicy",
+          "timestamp": {
+            "nanos": 0,
+            "seconds": 1794785903
+          }
+        }
+      ],
+      "scope": {
+        "apiVersion": "v1",
+        "kind": "Pod",
+        "name": "kyverno-admission-controller-759f7dc7df-9l5fv",
+        "namespace": "kyverno",
+        "uid": "e62fa299-45b0-420b-9c8b-24f4076cce69"
       },
       "summary": {
         "error": 0,
