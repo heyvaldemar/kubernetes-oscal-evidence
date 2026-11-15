@@ -7,6 +7,7 @@ All notable changes to this project are documented in this file. The format is b
 ### Changed
 
 - A refused signature or provenance now carries the verifier's own last line (`scripts/flagship.sh` for the flagship's archive, `scripts/install-tools.sh` for C2P's checksums file). A network fault on the way to Sigstore's TUF mirror ("getting trusted root from TUF") no longer reads like a signature that does not match ("transparency log signature does not match").
+- compliance-trestle 5.2.1, from 5.2.0. The release of 2026-11-10 fixes a path traversal in the output path of `trestle import` ([oscal-compass/compliance-trestle#2390](https://github.com/oscal-compass/compliance-trestle/pull/2390)). This repository never calls `trestle import`: it builds its documents with trestle's models and runs `trestle init` and `trestle validate`, so the fix changes nothing it runs. The pin moves so that whoever installs from `requirements.lock` gets the fixed release. The two hashes for trestle are the ones PyPI lists and the release's own assets carry, and both files verify against the release's Sigstore bundles, signed by trestle's `python-push.yml` on main. 5.2.1 pins paramiko 5.1.0 and pydantic 2.14.3 exactly, so both move with it, and pydantic-core 2.50.4 with pydantic; no other dependency moved, and every one was published more than three days before the move.
 
 ## [1.2.0] - 2026-11-11
 
