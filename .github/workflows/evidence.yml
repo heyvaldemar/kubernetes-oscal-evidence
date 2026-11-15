@@ -9,10 +9,11 @@ name: Evidence
 #           check shown its planted violation (tests/static/plants.tsv);
 #           shellcheck and actionlint
 # evidence  kind with the flagship's policies from its signed release, its
-#           planted pods, Kyverno's PolicyReports, C2P and trestle, the
-#           gate (tests/e2e/run.sh); the evidence signed keyless with
-#           cosign, and on a release attached to it with SLSA provenance
-# plants    the same run broken on purpose, seven ways; each job passes only
+#           planted pods, Kyverno's PolicyReports, the API server's dry run,
+#           C2P and trestle, the gate (tests/e2e/run.sh); the evidence
+#           signed keyless with cosign, and on a release attached to it with
+#           SLSA provenance
+# plants    the same run broken on purpose, eight ways; each job passes only
 #           if the gate fails for the planted reason
 #
 # Both kinds of run keep the gate's verdicts (e2e-results-*), which
@@ -249,6 +250,7 @@ jobs:
           - remove:egress-node
           - audit:verify-models
           - phantom-mapping
+          - silent:api-server
     env:
       PLANT: ${{ matrix.plant }}
       RUN_ID: ${{ github.run_id }}

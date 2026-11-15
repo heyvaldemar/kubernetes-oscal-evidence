@@ -1,10 +1,12 @@
 #!/usr/bin/env bash
 # run.sh - the whole run, as CI runs it, on this machine: the flagship's
-# policies on kind, its planted pods, Kyverno's reports, C2P and trestle,
-# and the gate. Evidence lands in .cache/run/evidence. The steps are the
-# scripts in scripts/; this is the order they run in.
+# policies on kind, its planted pods, Kyverno's reports, the API server's
+# dry run, C2P and trestle, and the gate. Evidence lands in
+# .cache/run/evidence. The steps are the scripts in scripts/; this is the
+# order they run in.
 #
-#   PLANT=remove:<policy> | audit:verify-models | phantom-mapping  break it on purpose
+#   PLANT=remove:<policy> | audit:verify-models | phantom-mapping | silent:api-server
+#         break it on purpose
 #   KEEP=1  leave the cluster up afterwards; bash scripts/cluster.sh down is the teardown
 #
 # CI creates the kind cluster in a step of its own first; scripts/cluster.sh
@@ -43,10 +45,11 @@ bash scripts/models.sh
 bash scripts/admission.sh
 python3 scripts/tests.py "$STATE/admission-tests.json"
 python3 scripts/collect.py "$STATE/reports"
+python3 scripts/tests.py --dry-run "$STATE/dry-run.json"
 python3 scripts/tests.py --probe "$STATE/reporting-probe.json"
 rm -rf "$STATE/evidence"
 python3 scripts/evidence.py "$STATE/evidence"
-cp "$STATE/admission-tests.json" "$STATE/reporting-probe.json" "$STATE/evidence/"
+cp "$STATE/admission-tests.json" "$STATE/dry-run.json" "$STATE/reporting-probe.json" "$STATE/evidence/"
 cp -R "$STATE/reports/raw" "$STATE/evidence/policyreports"
 bash scripts/validate.sh "$STATE/evidence"
 [ -n "${KEEP:-}" ] || bash scripts/cluster.sh down

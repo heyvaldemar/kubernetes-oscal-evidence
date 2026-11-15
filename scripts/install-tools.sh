@@ -1,17 +1,16 @@
 #!/usr/bin/env bash
 # install-tools.sh [bin-dir] - install the tools in tools.lock for this
-# platform, each checked against its pinned sha256, and prints the directory
-# to put on PATH. Already-installed tools with the right hash are kept.
+# platform, each checked against its pinned sha256, and C2P in an
+# environment of its own; prints the directory to put on PATH. What is
+# already installed with the right hashes is kept.
 #
-# C2P's pins are also traced to its publisher: the release's checksums file
-# must carry a valid cosign signature from OSCAL Compass's release workflow,
-# and must list every C2P hash tools.lock pins.
-#
-# C2P runs its Kyverno plugin only if the plugin's manifest names the
-# binary's sha256. The manifest in the v2.0.0-rc.1 tarballs names
-# 833ce6b7..., which is neither the linux-amd64 nor the darwin-arm64 binary
-# beside it, and c2pcli then stops with "checksums did not match". So the
-# manifest is written here, from the binary this script has just checked.
+# C2P, the Python implementation, goes into .cache/c2p: a virtual
+# environment with compliance-trestle 3.x, every file by hash
+# (c2p/requirements.lock), beside the trestle 5.x the evidence is written
+# with (docs/decisions/0005). Its plugins are not in its wheel; the five
+# files the run imports come from the commit OSCAL Compass's signed v1.0.0
+# tag names, each checked against c2p/plugins.lock. PYTHON names the
+# interpreter for that environment (python3 when unset).
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 BIN="${1:-$ROOT/.cache/bin}"
@@ -22,17 +21,11 @@ case "$(uname -s)-$(uname -m)" in
 esac
 sha256() { if command -v sha256sum >/dev/null; then sha256sum "$1"; else shasum -a 256 "$1"; fi | cut -d' ' -f1; }
 
-C2P_RELEASE=https://github.com/oscal-compass/compliance-to-policy-go/releases/download/v2.0.0-rc.1
-C2P_CHECKSUMS=compliance-to-policy-go_2.0.0-rc.1_checksums.txt
-# The release was signed by a run of this workflow on main, not on the tag;
-# the certificate says so, and this is the identity it carries.
-C2P_SIGNER=https://github.com/oscal-compass/compliance-to-policy-go/.github/workflows/goreleaser-workflow.yml@refs/heads/main
-
-mkdir -p "$BIN/.downloads" "$BIN/c2p-plugins"
+mkdir -p "$BIN/.downloads"
 while read -r name version plat url member sum; do
   case "$name" in ''|'#'*) continue ;; esac
   [ "$plat" = "$platform" ] || continue
-  dest="$BIN/$name"; [ "$name" = kyverno-plugin ] && dest="$BIN/c2p-plugins/$name"
+  dest="$BIN/$name"
   marker="$BIN/.downloads/$name-$version-$plat.sha256"
   if [ -x "$dest" ] && [ "$(cat "$marker" 2>/dev/null)" = "$sum" ]; then
     continue
@@ -53,38 +46,27 @@ while read -r name version plat url member sum; do
   echo "installed $name $version" >&2
 done <"$ROOT/tools.lock"
 
-# C2P's checksums file, its signature and certificate, verified with the
-# cosign just installed; then every C2P pin must be a line of it.
-(
-  cd "$BIN/.downloads"
-  for f in "$C2P_CHECKSUMS" "$C2P_CHECKSUMS.sig" "$C2P_CHECKSUMS.pem"; do
-    [ -s "$f" ] || curl -fsSL --retry 3 -o "$f" "$C2P_RELEASE/$f"
-  done
-  # cosign's own last line goes with the refusal, so a network fault does not
-  # read as a bad signature.
-  if ! out="$("$BIN/cosign" verify-blob "$C2P_CHECKSUMS" --signature "$C2P_CHECKSUMS.sig" --certificate "$C2P_CHECKSUMS.pem" \
-    --certificate-identity "$C2P_SIGNER" --certificate-oidc-issuer https://token.actions.githubusercontent.com 2>&1)"; then
-    echo "C2P's checksums file does not verify as signed by $C2P_SIGNER: $(printf '%s\n' "$out" | grep -v '^[[:space:]]*$' | tail -n 1)" >&2; exit 1
-  fi
-  while read -r name _ _ url _ sum; do
-    case "$name" in c2pcli|kyverno-plugin) ;; *) continue ;; esac
-    awk -v s="$sum" -v f="$(basename "$url")" '$1 == s && $2 == f { found = 1 } END { exit !found }' "$C2P_CHECKSUMS" \
-      || { echo "$(basename "$url") $sum is not in C2P's signed checksums file" >&2; exit 1; }
-  done <"$ROOT/tools.lock"
-)
-
-plugin_sum="$(sha256 "$BIN/c2p-plugins/kyverno-plugin")"
-cat >"$BIN/c2p-plugins/c2p-kyverno-manifest.json" <<EOF
-{
-  "metadata": {"id": "kyverno", "description": "Kyverno PVP Plugin", "version": "0.0.1", "types": ["pvp"]},
-  "executablePath": "kyverno-plugin",
-  "sha256": "$plugin_sum",
-  "configuration": [
-    {"name": "policy-dir", "description": "A directory where kyverno policies are located.", "required": true},
-    {"name": "policy-results-dir", "description": "A directory where policy results are located", "required": true},
-    {"name": "temp-dir", "description": "A temporary directory for policies", "required": true},
-    {"name": "output-dir", "description": "The output directory for policies", "required": false, "default": "."}
-  ]
-}
-EOF
+C2P="$ROOT/.cache/c2p"
+C2P_COMMIT=4023a29aaebc76d548143599d323f4f48fb9c923
+want="$(sha256 "$ROOT/c2p/requirements.lock") $(sha256 "$ROOT/c2p/plugins.lock")"
+if [ "$(cat "$C2P/.installed" 2>/dev/null)" != "$want" ]; then
+  rm -rf "${C2P:?}"
+  "${PYTHON:-python3}" -m venv "$C2P"
+  "$C2P/bin/pip" install --quiet --disable-pip-version-check --require-hashes --no-deps \
+    -r "$ROOT/c2p/requirements.lock" >&2
+  while read -r path sum; do
+    case "$path" in ''|'#'*) continue ;; esac
+    mkdir -p "$C2P/src/$(dirname "$path")"
+    curl -fsSL --retry 3 -o "$C2P/src/$path" \
+      "https://raw.githubusercontent.com/oscal-compass/compliance-to-policy/$C2P_COMMIT/$path"
+    got="$(sha256 "$C2P/src/$path")"
+    if [ "$got" != "$sum" ]; then
+      echo "C2P's $path: sha256 $got, pinned $sum. Not installing." >&2
+      rm -rf "${C2P:?}"
+      exit 1
+    fi
+  done <"$ROOT/c2p/plugins.lock"
+  echo "$want" >"$C2P/.installed"
+  echo "installed C2P 1.0.0 and its plugins in .cache/c2p" >&2
+fi
 echo "$BIN"

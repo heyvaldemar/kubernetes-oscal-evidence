@@ -19,9 +19,12 @@
 #              for it fails (scripts/mutate.py, tests/plants.tsv)
 #
 # validate.sh EVIDENCE_DIR - compliance-trestle's validator over one run's
-# OSCAL documents: the component definition, C2P's assessment plans and the
+# OSCAL documents: the component definition, the assessment plans and the
 # assessment results. tests/e2e/run.sh calls it so, and so does anyone
-# checking a release's evidence (README, "Check it yourself").
+# checking a release's evidence (README, "Check it yourself"). Since 1.3.0
+# the plans and the component definition are in the evidence itself; in
+# 1.1.0's and 1.2.0's the plans are C2P's, under c2p/, and the component
+# definition is this checkout's.
 #
 # With no arguments every static check runs. The flagship's release and
 # NIST's catalogs must be in .cache first (scripts/flagship.sh,
@@ -35,9 +38,10 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 FLAGSHIP=.cache/flagship/src
 
 # trestle_validate DIR [plans]: the component definition, and DIR's
-# assessment results and, with "plans", C2P's assessment plans in DIR/c2p,
-# in a trestle workspace made for the purpose. Any document trestle refuses
-# fails it, and so does a directory with no assessment results.
+# assessment results and, with "plans", its assessment plans (DIR, or
+# DIR/c2p before 1.3.0), in a trestle workspace made for the purpose. Any
+# document trestle refuses fails it, and so does a directory with no
+# assessment results.
 trestle_validate() {
   local evidence ws f n rc
   evidence="$(cd "$1" && pwd)" || return 1
@@ -46,10 +50,14 @@ trestle_validate() {
     cd "$ws" || exit 1
     trestle init >/dev/null || exit 1
     mkdir -p component-definitions/admission
-    cp "$ROOT/oscal/component-definition.json" component-definitions/admission/component-definition.json || exit 1
+    cd_file="$ROOT/oscal/component-definition.json"
+    [ -f "$evidence/component-definition.json" ] && cd_file="$evidence/component-definition.json"
+    cp "$cd_file" component-definitions/admission/component-definition.json || exit 1
     if [ "${2:-}" = plans ]; then
-      for f in "$evidence"/c2p/assessment-plan-*.json; do
-        [ -e "$f" ] || { echo "no assessment plans in $evidence/c2p"; exit 1; }
+      plans=("$evidence"/assessment-plan-*.json)
+      [ -e "${plans[0]}" ] || plans=("$evidence"/c2p/assessment-plan-*.json)
+      for f in "${plans[@]}"; do
+        [ -e "$f" ] || { echo "no assessment plans in $evidence or $evidence/c2p"; exit 1; }
         n="$(basename "$f" .json)"; mkdir -p "assessment-plans/$n"; cp "$f" "assessment-plans/$n/assessment-plan.json" || exit 1
       done
     fi

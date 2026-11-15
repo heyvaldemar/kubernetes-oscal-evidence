@@ -1,0 +1,7 @@
+# C2P 1.0.0 declares two dependencies nothing in it imports: jq==1.6.0 and
+# PyGithub==1.58.0. No module of c2p/, and none of the plugins this
+# repository runs, imports either. jq 1.6.0 has no wheel for Python 3.13 and
+# does not build on it (oscal-compass/compliance-to-policy#38). A marker that
+# never matches leaves both out.
+jq ; sys_platform == "never"
+pygithub ; sys_platform == "never"

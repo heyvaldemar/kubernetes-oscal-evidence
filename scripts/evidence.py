@@ -1,42 +1,49 @@
 #!/usr/bin/env python3
 """evidence.py OUT_DIR - OSCAL assessment results for one run, one file per framework.
 
-For each framework in mapping/controls.yaml:
-
-1. C2P (c2pcli tools cd2ap, then c2pcli result2oscal with its Kyverno plugin)
-   turns the component definition and Kyverno's PolicyReports into an
-   assessment plan and assessment results. Both are kept as C2P wrote them,
-   in OUT_DIR/c2p/.
-2. The results are completed with compliance-trestle's OSCAL models into
+1. C2P 1.0.0 (scripts/c2p.py, in C2P's own environment) turns the component
+   definition, Kyverno's PolicyReports and the API server's answers to the
+   dry run (scripts/tests.py --dry-run) into one assessment results for
+   both engines, and a control-level posture over it. Both are kept as C2P
+   wrote them, in OUT_DIR/c2p/.
+2. For each framework in mapping/controls.yaml, the results are completed
+   with compliance-trestle's OSCAL models into
    OUT_DIR/assessment-results-<framework>.json:
-   - C2P's observations, unchanged: what Kyverno reported about each pod
-     running in the cluster, policy by policy;
+   - C2P's observations for the policies the framework's controls rest on,
+     unchanged: what each engine said about each pod running in the
+     cluster, check by check, and every observation names its check, so
+     its engine;
    - one observation per admission test the framework's controls name: the
      planted pod, what the flagship expects, and what the API server said;
    - one finding per mapped control, with its catalog statement id and a
-     state. C2P writes findings only for controls it judges not satisfied,
-     and names the target "<control>_smt", the 800-53 convention, which is
-     not the statement id in NIST's SSDF and AI RMF catalogs. So the
-     findings here are written by this script, and a control is
-     "satisfied" only when all of these hold:
-       a. C2P made no finding for it;
-       b. every policy that carries it and that Kyverno reports on has at
-          least one pod in the reports, and every result for it is a pass;
+     state. C2P 1.0.0 writes no findings, so the findings are written here,
+     and a control is "satisfied" only when all of these hold:
+       a. C2P's posture calls it satisfied;
+       b. every check the component definition declares for every policy
+          that carries it reported at least one pod, and every result is a
+          pass: Kyverno's report, and for a policy marked dry_run, the API
+          server's dry run as well. C2P's posture calls a control satisfied
+          while one of its expected checks reported nothing, and says so
+          only in its coverage; here that control is not satisfied;
        c. every test that proves it did what mapping/controls.yaml says:
           refused by the named policy, with the flagship's expected words,
           or admitted.
      Anything else is "not-satisfied", and the finding says why. A control
-     C2P calls not satisfied can never be called satisfied here.
+     C2P does not call satisfied can never be called satisfied here.
+   Each document imports an assessment plan written beside it,
+   OUT_DIR/assessment-plan-<framework>.json: C2P 1.0.0 writes none.
 3. Every document is read back by trestle's models before it is written,
    and OUT_DIR/summary.md says what the run showed, control by control.
 
 Exits 2 if C2P fails or a document does not parse: no evidence is a
 failure, never a pass. Judging the results is scripts/gate.py's work.
 """
+import copy
 import datetime
 import json
 import os
 import pathlib
+import shutil
 import subprocess
 import sys
 import uuid
@@ -81,30 +88,62 @@ def prop(name, value, ns=OUR_NS):
     return {"name": name, "ns": ns, "value": str(value)}
 
 
-def trestle_prop(props, name):
-    return next((p["value"] for p in props or [] if p["name"] == name and TRESTLE_NS in p.get("ns", "")), None)
+def c2p_prop(props, name):
+    """A prop C2P wrote. C2P 1.0.0 writes its props with no namespace; v2.0.0-rc.1, the Go
+    implementation, wrote them in trestle's. Never one of this repository's own."""
+    return next((p["value"] for p in props or []
+                 if p["name"] == name and p.get("ns", TRESTLE_NS).startswith(TRESTLE_NS)), None)
 
 
-def run_c2p(fw, cd, reports, c2p_dir, plugins):
-    """C2P's plan and results for one framework, written as C2P writes them."""
-    os.makedirs(os.path.join(c2p_dir, "tmp"), exist_ok=True)
-    config = os.path.join(c2p_dir, "c2p-config.yaml")
-    with open(config, "w") as f:
-        f.write("plugins:\n  kyverno:\n"
-                f"    policy-dir: {os.path.join(ROOT, '.cache', 'flagship', 'src', 'admission')}\n"
-                f"    policy-results-dir: {reports}\n"
-                f"    temp-dir: {os.path.join(c2p_dir, 'tmp')}\n"
-                f"    output-dir: {os.path.join(c2p_dir, 'tmp')}\n")
-    plan, results = f"assessment-plan-{fw}.json", f"assessment-results-{fw}.json"
-    for cmd in (["c2pcli", "tools", "cd2ap", "-d", cd, "-n", fw, "-o", plan],
-                ["c2pcli", "result2oscal", "-c", config, "-p", plugins, "-a", plan, "-o", results]):
-        p = subprocess.run(cmd, cwd=c2p_dir, capture_output=True, text=True)
-        with open(os.path.join(c2p_dir, f"c2p-{fw}.log"), "a") as log:
-            log.write(f"$ {' '.join(cmd)}\n{p.stdout}{p.stderr}\n")
-        if p.returncode != 0:
-            print(f"C2P failed for {fw} ({' '.join(cmd[:2])}); see c2p/c2p-{fw}.log", file=sys.stderr)
-            sys.exit(2)
-    return os.path.join(c2p_dir, plan), os.path.join(c2p_dir, results)
+ENGINES = {"kyverno": "Kyverno", "dry_run": "the API server's dry run"}
+
+
+def checks_of(name, rule):
+    """(engine, check id) for every check the component definition declares for a policy."""
+    out = []
+    if rule["posture"] == "kyverno":
+        out.append((ENGINES["kyverno"], name))
+    if rule.get("dry_run"):
+        out.append((ENGINES["dry_run"], f"vap-{name}"))
+    return out
+
+
+def run_c2p(cd, reports, dry_run, c2p_dir):
+    """C2P's assessment results for both engines, and its posture, written as C2P writes them."""
+    os.makedirs(c2p_dir, exist_ok=True)
+    python = env("C2P_PYTHON", os.path.join(ROOT, ".cache", "c2p", "bin", "python"))
+    cmd = [python, "-I", os.path.join(ROOT, "scripts", "c2p.py"), cd, reports, dry_run, c2p_dir]
+    p = subprocess.run(cmd, capture_output=True, text=True)
+    with open(os.path.join(c2p_dir, "c2p.log"), "w") as log:
+        log.write(f"$ {' '.join(cmd)}\n{p.stdout}{p.stderr}\n")
+    if p.returncode != 0:
+        print(f"C2P failed; see c2p/c2p.log: {(p.stderr.strip().splitlines() or ['no message'])[-1]}", file=sys.stderr)
+        sys.exit(2)
+    print(p.stdout.strip())
+    posture = {}
+    for comp in json.load(open(os.path.join(c2p_dir, "posture.json"))).get("components", []):
+        for c in comp.get("controls", []):
+            posture[c["controlId"]] = {"state": c["state"], "remarks": c.get("remarks", ""),
+                                       "assessed": c["coverage"]["assessedChecks"],
+                                       "expected": c["coverage"]["expectedChecks"]}
+    return json.load(open(os.path.join(c2p_dir, "assessment-results.json"))), posture
+
+
+def assessment_plan(fw, spec, controls, flagship, now):
+    """The plan each framework's results import: the controls reviewed, against the
+    component definition. C2P 1.0.0 writes no assessment plan."""
+    return {"assessment-plan": {
+        "uuid": str(uuid.uuid5(SEED, f"{env('RUN_ID', 'local')}/plan/{fw}")),
+        "metadata": {"title": f"Admission controls of {flagship[0].split('/')[1]} {flagship[1]}: "
+                              f"{spec['title']}, the plan",
+                     "last-modified": now, "version": env("EVIDENCE_VERSION", "unreleased"),
+                     "oscal-version": "1.1.3"},
+        "import-ssp": {"href": "component-definition.json",
+                       "remarks": ("There is no system security plan: the run assesses the flagship's admission "
+                                   "policies as the component definition beside this plan describes them.")},
+        "reviewed-controls": {"control-selections": [
+            {"include-controls": [{"control-id": c["control"]} for c in controls]}]},
+    }}
 
 
 def judge_test(name, spec, recorded):
@@ -123,23 +162,25 @@ def judge_test(name, spec, recorded):
     return True, f"refused by {t['refused_by']}: {t['message']}"
 
 
-def decide(control, rules, c2p_failed, by_rule, tests):
+def decide(control, rules, posture, by_check, tests):
     """Why a control is not satisfied, as a list (empty when it is), and the observations
-    it rests on: C2P's verdict, Kyverno's reports for its policies, and its tests."""
+    it rests on: C2P's posture, every engine's checks for its policies, and its tests."""
     reasons, related = [], []
-    if f"{control['control']}_smt" in c2p_failed:
-        reasons.append("C2P judged it not satisfied")
+    c2p = posture.get(control["control"])
+    if c2p is None:
+        reasons.append("C2P's posture has no row for it")
+    elif c2p["state"] != "satisfied":
+        reasons.append(f"C2P's posture: {c2p['state']} ({c2p['remarks']})")
     for r in control["rules"]:
-        if rules[r]["posture"] != "kyverno":
-            continue
-        obs = by_rule.get(r, [])
-        related += [o["uuid"] for o in obs]
-        subjects = [s for o in obs for s in o.get("subjects") or []]
-        if not subjects:
-            reasons.append(f"Kyverno reported no running pod for {r}")
-        bad = [s["title"] for s in subjects if trestle_prop(s.get("props"), "result") != "pass"]
-        if bad:
-            reasons.append(f"{r} did not pass for {len(bad)} pod(s): {'; '.join(bad)}")
+        for engine, check in checks_of(r, rules[r]):
+            obs = by_check.get(check, [])
+            related += [o["uuid"] for o in obs]
+            subjects = [s for o in obs for s in o.get("subjects") or []]
+            if not subjects:
+                reasons.append(f"{engine} reported no running pod for {r}")
+            bad = [s["title"] for s in subjects if c2p_prop(s.get("props"), "result") != "pass"]
+            if bad:
+                reasons.append(f"{r} did not pass in {engine} for {len(bad)} pod(s): {'; '.join(bad)}")
     for t in control["proven_by"]:
         if not tests[t][0]:
             reasons.append(f"test {t}: {tests[t][1]}")
@@ -157,7 +198,7 @@ def test_observation(name, spec, t, passed, why, rules, collected, flagship):
         "props": [prop("test", name), prop("expected-outcome", spec["outcome"]),
                   prop("verdict", "pass" if passed else "fail")]
                  + [prop("refused-by-expected", r) for r in spec.get("by", [])]
-                 + [{"name": "assessment-rule-id", "ns": TRESTLE_NS, "value": r} for r in rules],
+                 + [{"name": "assessment-rule-id", "value": r} for r in rules],
         "collected": collected,
         "remarks": why,
     }
@@ -175,12 +216,11 @@ def test_observation(name, spec, t, passed, why, rules, collected, flagship):
 
 def main():
     out = os.path.abspath(sys.argv[1])
-    # Absolute paths: C2P runs in the output directory.
     mapping_path = os.path.abspath(env("MAPPING", os.path.join(ROOT, "mapping", "controls.yaml")))
     cd = os.path.abspath(env("COMPONENT_DEFINITION", os.path.join(ROOT, "oscal", "component-definition.json")))
-    reports = os.path.abspath(env("REPORTS", os.path.join(STATE, "reports", "c2p")))
+    reports = os.path.abspath(env("REPORTS", os.path.join(STATE, "reports", "raw")))
+    dry_run = os.path.abspath(env("DRY_RUN", os.path.join(STATE, "dry-run.json")))
     tests_file = os.path.abspath(env("ADMISSION_TESTS", os.path.join(STATE, "admission-tests.json")))
-    plugins = os.path.abspath(env("C2P_PLUGINS", os.path.join(ROOT, ".cache", "bin", "c2p-plugins")))
     m = YAML(typ="safe").load(open(mapping_path))
     run = json.load(open(tests_file))
     recorded = {t["test"]: t for t in run["tests"]}
@@ -191,29 +231,41 @@ def main():
     now = datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds")
     run_url = (f"{env('GITHUB_SERVER_URL')}/{env('GITHUB_REPOSITORY')}/actions/runs/{env('GITHUB_RUN_ID')}"
                if env("GITHUB_RUN_ID") else "a local run")
-    os.makedirs(os.path.join(out, "c2p"), exist_ok=True)
+    os.makedirs(out, exist_ok=True)
+    shutil.copyfile(cd, os.path.join(out, "component-definition.json"))
 
     unmapped = sorted(set(recorded) - set(m["tests"]))
     tests = {name: judge_test(name, spec, recorded) for name, spec in m["tests"].items()}
     for name in unmapped:
         tests[name] = (False, "recorded by the run but not named in mapping/controls.yaml")
 
+    c2p_ar, posture = run_c2p(cd, reports, dry_run, os.path.join(out, "c2p"))
+    c2p_obs = c2p_ar["assessment-results"]["results"][0].get("observations") or []
     verdict = {"run": run_url, "plant": run.get("plant"), "flagship": f"{flagship[0]} {flagship[1]}",
                "frameworks": {}, "tests": {k: {"passed": v[0], "why": v[1]} for k, v in tests.items()},
                "unmapped_tests": unmapped, "workloads": run["workloads"]}
     for fw, spec in m["frameworks"].items():
         controls = [c for c in m["controls"] if c["framework"] == fw]
-        plan_path, c2p_path = run_c2p(fw, cd, reports, os.path.join(out, "c2p"), plugins)
-        AssessmentPlan.oscal_read(pathlib.Path(plan_path))  # C2P's plan must parse as OSCAL
-        ar = json.load(open(c2p_path))
+        fw_rules = {r for c in controls for r in c["rules"]}
+        plan_path = os.path.join(out, f"assessment-plan-{fw}.json")
+        with open(plan_path, "w") as f:
+            json.dump(assessment_plan(fw, spec, controls, flagship, now), f, indent=2, ensure_ascii=False)
+            f.write("\n")
+        try:
+            AssessmentPlan.oscal_read(pathlib.Path(plan_path))
+        except Exception as e:
+            print(f"{plan_path} does not parse as an OSCAL assessment plan: {e}", file=sys.stderr)
+            sys.exit(2)
+        ar = copy.deepcopy(c2p_ar)
         res = ar["assessment-results"]["results"][0]
-        c2p_failed = {f["target"]["target-id"] for f in res.get("findings") or []}
-        by_rule = {}
-        for o in res.get("observations") or []:
-            by_rule.setdefault(trestle_prop(o.get("props"), "assessment-rule-id"), []).append(o)
+        by_check = {}
+        observations = []
+        for o in c2p_obs:
+            if c2p_prop(o.get("props"), "assessment-rule-id") in fw_rules:
+                observations.append(o)
+                by_check.setdefault(c2p_prop(o.get("props"), "assessment-check-id"), []).append(o)
         smt = statement_ids(os.path.join(ROOT, ".cache", "catalogs", spec["catalog"]))
 
-        observations = list(res.get("observations") or [])
         test_obs = {}
         for c in controls:
             for t in c["proven_by"]:
@@ -225,22 +277,25 @@ def main():
 
         findings, states = [], {}
         for c in controls:
-            reasons, related = decide(c, m["rules"], c2p_failed, by_rule, tests)
+            reasons, related = decide(c, m["rules"], posture, by_check, tests)
             related += [test_obs[t]["uuid"] for t in c["proven_by"]]
             state = "not-satisfied" if reasons else "satisfied"
             states[c["control"]] = {"state": state, "why": reasons}
-            posture = [r for r in c["rules"] if m["rules"][r]["posture"] == "kyverno"]
+            engines = sorted({e for r in c["rules"] for e, _ in checks_of(r, m["rules"][r])})
+            c2p = posture.get(c["control"])
             findings.append({
                 "uuid": str(uuid.uuid5(SEED, f"{env('RUN_ID', 'local')}/{fw}/{c['control']}")),
                 "title": f"{c['control']}: {state}",
                 "description": ("; ".join(reasons) if reasons else
-                                ("Kyverno reported every running pod passing "
-                                 + ", ".join(posture) + ", and " if posture else "")
+                                (f"{' and '.join(engines)} reported every running pod passing "
+                                 + ", ".join(r for r in c["rules"] if checks_of(r, m["rules"][r])) + ", and "
+                                 if engines else "")
                                 + f"every test that proves it did what the mapping says ({', '.join(c['proven_by'])})."),
                 "props": [prop("control", c["control"]), prop("judged-by", "scripts/evidence.py")]
-                         + [prop("matrix-row", r) for r in c.get("matrix", [])] + [
-                          prop("c2p-verdict", "not-satisfied" if f"{c['control']}_smt" in c2p_failed
-                               else ("no finding" if posture else "not assessed by C2P (no Kyverno check)"))],
+                         + [prop("matrix-row", r) for r in c.get("matrix", [])]
+                         + [prop("engine", e) for e in engines] + [
+                          prop("c2p-posture", f"{c2p['state']}, {c2p['assessed']} of {c2p['expected']} expected checks "
+                                              "reported" if c2p else "no row")],
                 "target": {"type": "statement-id", "target-id": smt[c["control"]],
                            "status": {"state": state, "reason": "pass" if state == "satisfied" else "fail"}},
                 "related-observations": [{"observation-uuid": u} for u in related],
@@ -256,11 +311,12 @@ def main():
                       prop("flagship", f"{flagship[0]}@{flagship[1]}"),
                       prop("catalog", catalogs[spec["catalog"]]),
                       prop("plant", run.get("plant") or "none")],
-            "remarks": ("Observations of Kyverno's PolicyReports are C2P's, unchanged. Admission test "
-                        "observations and every finding are written by scripts/evidence.py; c2p/ holds "
-                        "C2P's own plan and results for this framework."),
+            "remarks": ("Observations of Kyverno's PolicyReports and of the API server's dry run are C2P's, "
+                        "unchanged; each names its check, and so its engine. Admission test observations and "
+                        "every finding are written by scripts/evidence.py; c2p/ holds C2P's own results for "
+                        "both engines and its posture."),
         }
-        doc["import-ap"] = {"href": f"c2p/assessment-plan-{fw}.json"}
+        doc["import-ap"] = {"href": f"assessment-plan-{fw}.json"}
         res["title"] = f"{spec['title']}: the admission controls of {flagship[0].split('/')[1]} {flagship[1]}"
         res["observations"] = observations
         res["findings"] = findings
@@ -285,11 +341,12 @@ def main():
 def write_summary(out, m, verdict, run_url, flagship):
     lines = [f"# Evidence: {flagship[0]} {flagship[1]}", "",
              f"Run: {run_url}" + (f" (plant: `{verdict['plant']}`)" if verdict["plant"] else ""), "",
-             "| Framework | Control | State | Policies | Tests |", "|---|---|---|---|---|"]
+             "| Framework | Control | State | Policies | Engines | Tests |", "|---|---|---|---|---|---|"]
     for c in m["controls"]:
         s = verdict["frameworks"][c["framework"]][c["control"]]
+        engines = sorted({e for r in c["rules"] for e, _ in checks_of(r, m["rules"][r])})
         lines.append(f"| {m['frameworks'][c['framework']]['title']} | {c['control']} | {s['state']} | "
-                     f"{', '.join(c['rules'])} | {', '.join(c['proven_by'])} |")
+                     f"{', '.join(c['rules'])} | {', '.join(engines) or 'tests only'} | {', '.join(c['proven_by'])} |")
     lines += ["", "## Admission tests", "", "| Test | Passed | What happened |", "|---|---|---|"]
     for name, t in verdict["tests"].items():
         lines.append(f"| {name} | {'yes' if t['passed'] else 'NO'} | {t['why'].replace('|', '/')} |")

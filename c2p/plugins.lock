@@ -1,0 +1,14 @@
+# C2P's plugins are not in its wheel: compliance-to-policy 1.0.0 packages
+# c2p/ only, and the plugins live beside it in the repository, in
+# plugins_public/. scripts/install-tools.sh fetches the five files the run
+# imports from the commit the v1.0.0 tag names, each checked against its
+# sha256 here, into .cache/c2p/src. The tag is OSCAL Compass's, signed, and
+# GitHub verifies the signature; the hashes are the files at that commit.
+#
+# commit  4023a29aaebc76d548143599d323f4f48fb9c923  (tag v1.0.0, 2026-11-10)
+# path  sha256
+plugins_public/plugins/__init__.py b2609805ebbfeba216f024064b14c901d2e8292e3afada40472b87821ea56333
+plugins_public/plugins/policy_report.py f0787f5f23a584f1ad8127eae9bf269f71335791250096ab9df924ed8c4ae0b4
+plugins_public/plugins/policy_template.py d677946396b0b83c86ca67d61718056075b1a305bed6918f26cc3b0e1dbbe1eb
+plugins_public/plugins/kyverno_cel.py 5a66292896c7843a8a7f980f61be18d7f5a8d0e45c9fca022da1cbd08760e4c2
+plugins_public/plugins/vap.py add66394719aa7130e808f0615d294fc58d4d5fde96d4eb0ad21802eca585ed1

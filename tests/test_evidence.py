@@ -33,7 +33,13 @@ import collect  # noqa: E402
 import component  # noqa: E402
 import evidence  # noqa: E402
 import gate  # noqa: E402
+import importlib.util  # noqa: E402
 from ruamel.yaml import YAML  # noqa: E402
+
+# scripts/tests.py, by its path: the name "tests" is this directory's too.
+_spec = importlib.util.spec_from_file_location("admission_tests", SCRIPTS / "tests.py")
+admission_tests = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(admission_tests)
 
 MAPPING = YAML(typ="safe").load(open(ROOT / "mapping" / "controls.yaml"))
 
@@ -43,42 +49,58 @@ def load(name):
 
 
 class Collect(unittest.TestCase):
-    """C2P reads Kyverno's reports only after two changes, and there must be no third."""
+    """Which workloads each policy must have been judged on: the reach both engines share."""
+
+    def test_reach_of_each_policy(self):
+        for rule in ("verify-models", "model-volumes", "models-need-kyverno"):
+            self.assertTrue(collect.reaches(rule, "inference"))
+            self.assertFalse(collect.reaches(rule, "default"), rule)
+        self.assertTrue(collect.reaches("carried-images", "default"))
+        self.assertTrue(collect.reaches("carried-images", "inference"))
+
+
+class DryRun(unittest.TestCase):
+    """The API server's dry run: a pass is an admission the run can stand behind, and nothing else."""
 
     def setUp(self):
-        self.reports = load("policyreports.json")["items"]
+        self.pod = {"metadata": {"name": "model-server-abc", "namespace": "inference", "uid": "u",
+                                 "resourceVersion": "1", "ownerReferences": [{"kind": "ReplicaSet"}],
+                                 "labels": {"app": "model-server"}},
+                    "spec": {"nodeName": "worker", "priority": 0, "containers": [{"name": "c", "image": "i"}]},
+                    "status": {"phase": "Running"}}
 
-    def test_scope_copied_into_each_result(self):
-        for rep in self.reports:
-            out = collect.scoped(rep)
-            for res in out["results"]:
-                self.assertEqual(res["resources"], [rep["scope"]])
+    def outcome(self, answer, seen=("carried-images",), pod=True):
+        return admission_tests.dry_run_outcome("vap-carried-images", "carried-images",
+                                               "inference/deployment/model-server",
+                                               self.pod if pod else None, answer, set(seen), "2026-11-16T00:00:00Z")
 
-    def test_message_filled_where_kyverno_gave_none(self):
-        empty = [r for rep in self.reports for r in rep["results"] if not r.get("message")]
-        self.assertTrue(empty, "the fixture must hold passing results with no message, as Kyverno writes them")
-        for rep in self.reports:
-            for res in collect.scoped(rep)["results"]:
-                self.assertTrue(res["message"].strip())
+    def test_admitted_and_the_policy_seen_refusing_is_a_pass(self):
+        o = self.outcome({"admitted": True, "refused_by": None, "message": "created (server dry run)"})
+        self.assertEqual((o["result"], o["checkId"], o["resourceId"]),
+                         ("pass", "vap-carried-images", "v1/Pod/inference/model-server-abc"))
 
-    def test_nothing_else_changes(self):
-        for rep in self.reports:
-            out = collect.scoped(rep)
-            for before, after in zip(rep["results"], out["results"]):
-                after = dict(after)
-                after.pop("resources")
-                if not before.get("message"):
-                    self.assertEqual(after.pop("message"), f"{before['result']}; Kyverno gave no message")
-                self.assertEqual({k: v for k, v in before.items() if k not in ("resources",)
-                                  and (k != "message" or v)}, after)
-            self.assertEqual({k: v for k, v in rep.items() if k != "results"},
-                             {k: v for k, v in out.items() if k != "results"})
+    def test_admitted_but_the_policy_never_refused(self):
+        # remove:carried-images: no binding, every dry run admitted, and that proves nothing.
+        o = self.outcome({"admitted": True, "refused_by": None, "message": ""}, seen=("verify-models",))
+        self.assertEqual(o["result"], "error")
 
-    def test_input_left_as_it_was(self):
-        before = copy.deepcopy(self.reports)
-        for rep in self.reports:
-            collect.scoped(rep)
-        self.assertEqual(before, self.reports)
+    def test_refused_by_the_policy_is_a_failure(self):
+        o = self.outcome({"admitted": False, "refused_by": "carried-images", "message": "by digest"})
+        self.assertEqual(o["result"], "fail")
+
+    def test_refused_by_another_policy_is_unknown(self):
+        o = self.outcome({"admitted": False, "refused_by": "verify-models", "message": "unsigned"})
+        self.assertEqual(o["result"], "error")
+
+    def test_no_running_pod_is_unknown(self):
+        self.assertEqual(self.outcome({}, pod=False)["result"], "error")
+
+    def test_sent_again_as_a_new_pod(self):
+        doc = json.loads(admission_tests.as_new(self.pod, "model-server-abc-dry-run"))
+        self.assertEqual(doc["metadata"], {"name": "model-server-abc-dry-run", "namespace": "inference",
+                                           "labels": {"app": "model-server"}})
+        self.assertEqual(doc["spec"], {"containers": [{"name": "c", "image": "i"}]})
+        self.assertNotIn("status", doc)
 
 
 class Tests(unittest.TestCase):
@@ -117,53 +139,65 @@ class Tests(unittest.TestCase):
 
 
 class Decide(unittest.TestCase):
-    """A control is satisfied only on Kyverno's reports, C2P's verdict and its tests together."""
+    """A control is satisfied only on every engine's checks, C2P's posture and its tests together."""
 
     def setUp(self):
-        # sr-11 rests on three policies Kyverno reports on, the most of any control.
+        # sr-11 rests on three policies, two of them judged by both engines: the most checks of any control.
         self.control = next(c for c in MAPPING["controls"] if c["control"] == "sr-11")
         self.ok_tests = {t: (True, "ok") for t in MAPPING["tests"]}
-        self.subject = {"title": "Pod inference/model-server",
-                        "props": [{"name": "result", "ns": evidence.TRESTLE_NS, "value": "pass"}]}
-        self.by_rule = {"verify-models": [{"uuid": "u", "subjects": [self.subject]}],
-                        "models-need-kyverno": [{"uuid": "v", "subjects": [self.subject]}],
-                        "carried-images": [{"uuid": "w", "subjects": [self.subject]}]}
+        self.subject = {"title": "Pod inference/model-server", "props": [{"name": "result", "value": "pass"}]}
+        self.by_check = {c: [{"uuid": c, "subjects": [self.subject]}]
+                         for c in ("verify-models", "models-need-kyverno", "carried-images",
+                                   "vap-models-need-kyverno", "vap-carried-images")}
+        self.posture = {"sr-11": {"state": "satisfied", "remarks": "all passing", "assessed": 5, "expected": 5}}
 
-    def decide(self, c2p_failed=(), by_rule=None, tests=None):
-        return evidence.decide(self.control, MAPPING["rules"], set(c2p_failed),
-                               self.by_rule if by_rule is None else by_rule, tests or self.ok_tests)[0]
+    def decide(self, posture=None, by_check=None, tests=None):
+        return evidence.decide(self.control, MAPPING["rules"], self.posture if posture is None else posture,
+                               self.by_check if by_check is None else by_check, tests or self.ok_tests)[0]
+
+    def without(self, check):
+        return {k: v for k, v in self.by_check.items() if k != check}
 
     def test_all_good_is_satisfied(self):
         self.assertEqual(self.decide(), [])
 
-    def test_c2p_not_satisfied_is_never_overruled(self):
-        self.assertTrue(self.decide(c2p_failed={"sr-11_smt"}))
+    def test_c2p_posture_not_satisfied_is_never_overruled(self):
+        for state in ("not-satisfied", "not-assessed"):
+            self.assertTrue(self.decide(posture={"sr-11": dict(self.posture["sr-11"], state=state)}), state)
+        self.assertTrue(self.decide(posture={}))
+
+    def test_an_engine_that_reported_nothing(self):
+        # C2P's posture calls the control satisfied, 4 of 5 expected checks reported.
+        posture = {"sr-11": dict(self.posture["sr-11"], assessed=4)}
+        why = self.decide(posture=posture, by_check=self.without("vap-carried-images"))
+        self.assertEqual(why, ["the API server's dry run reported no running pod for carried-images"])
 
     def test_no_pod_reported_is_not_satisfied(self):
-        self.assertTrue(self.decide(by_rule=dict(self.by_rule, **{"verify-models": [{"uuid": "u", "subjects": []}]})))
-        self.assertTrue(self.decide(by_rule={}))
+        self.assertTrue(self.decide(by_check=dict(self.by_check, **{"verify-models": [{"uuid": "u", "subjects": []}]})))
+        self.assertTrue(self.decide(by_check={}))
 
     def test_a_failed_pod_is_not_satisfied(self):
         bad = copy.deepcopy(self.subject)
         bad["props"][0]["value"] = "fail"
-        self.assertTrue(self.decide(by_rule=dict(self.by_rule, **{"verify-models": [{"uuid": "u", "subjects": [self.subject, bad]}]})))
+        self.assertTrue(self.decide(by_check=dict(self.by_check, **{"vap-carried-images": [{"uuid": "u", "subjects": [self.subject, bad]}]})))
 
     def test_an_errored_pod_is_not_satisfied(self):
         bad = copy.deepcopy(self.subject)
         bad["props"][0]["value"] = "error"
-        self.assertTrue(self.decide(by_rule=dict(self.by_rule, **{"verify-models": [{"uuid": "u", "subjects": [bad]}]})))
+        self.assertTrue(self.decide(by_check=dict(self.by_check, **{"verify-models": [{"uuid": "u", "subjects": [bad]}]})))
 
     def test_a_failed_test_is_not_satisfied(self):
         tests = dict(self.ok_tests, **{"model-stranger": (False, "admitted")})
         self.assertTrue(self.decide(tests=tests))
 
     def test_no_posture_rule_rests_on_tests_alone(self):
-        # egress-node: Kyverno cannot report it, so its tests are all there is.
+        # egress-node: no engine judges it, so its tests are all there is.
         control = {"control": "x-1", "rules": ["egress-node"],
                    "proven_by": ["egress-toleration", "egress-tolerate-all", "egress-node-name", "ordinary-pod"]}
-        self.assertEqual(evidence.decide(control, MAPPING["rules"], set(), {}, self.ok_tests)[0], [])
+        posture = {"x-1": {"state": "satisfied", "remarks": "", "assessed": 0, "expected": 0}}
+        self.assertEqual(evidence.decide(control, MAPPING["rules"], posture, {}, self.ok_tests)[0], [])
         tests = dict(self.ok_tests, **{"egress-toleration": (False, "admitted")})
-        self.assertTrue(evidence.decide(control, MAPPING["rules"], set(), {}, tests)[0])
+        self.assertTrue(evidence.decide(control, MAPPING["rules"], posture, {}, tests)[0])
 
 
 class Mapping(unittest.TestCase):
@@ -218,6 +252,11 @@ class Mapping(unittest.TestCase):
         def edit(m):
             self.control(m, "sr-11")["matrix"] = []
         self.assertIn("names no row of the control-to-test matrix", self.errors(edit))
+
+    def test_dry_run_on_a_policy_the_api_server_does_not_judge(self):
+        def edit(m):
+            m["rules"]["verify-models"]["dry_run"] = True
+        self.assertIn("only a ValidatingAdmissionPolicy answers a dry run", self.errors(edit))
 
     def test_an_ssdf_control_that_is_not_its_own_row(self):
         def edit(m):
@@ -326,6 +365,29 @@ class Gate(unittest.TestCase):
         self.assertEqual(self.run_gate("--plant", "remove:egress-node"), 1)
         self.fail_test("egress-toleration")
         self.assertEqual(self.run_gate("--plant", "remove:egress-node", says="no control rests on it"), 0)
+
+    def silence(self, control_ids, why="the API server's dry run reported no running pod for carried-images"):
+        for c in MAPPING["controls"]:
+            if c["control"] in control_ids:
+                def edit(f):
+                    f["target"]["status"]["state"] = "not-satisfied"
+                    f["description"] = why
+                self.edit_finding(c["framework"], c["control"], edit)
+
+    def test_a_silent_plant_caught(self):
+        self.assertEqual(self.run_gate("--plant", "silent:api-server", says="NOT caught"), 1)
+        self.silence({"si-7", "sr-11", "cm-7.5"})
+        self.assertEqual(self.run_gate("--plant", "silent:api-server", says="caught"), 0)
+
+    def test_a_silent_plant_with_a_control_still_satisfied(self):
+        self.silence({"si-7", "sr-11"})
+        self.assertEqual(self.run_gate("--plant", "silent:api-server", says="still satisfied"), 1)
+
+    def test_a_silent_plant_caught_for_another_reason(self):
+        # Every control on the engine down, but one of them for something else.
+        self.silence({"si-7", "sr-11"})
+        self.silence({"cm-7.5"}, why="test image-by-tag: admitted; it must be refused")
+        self.assertEqual(self.run_gate("--plant", "silent:api-server", says="another reason"), 1)
 
     # What the gate writes to $E2E_RESULTS is what the branch `status` and
     # heyvaldemar.com show: it must say FAIL wherever the gate did.

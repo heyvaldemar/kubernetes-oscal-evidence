@@ -513,7 +513,7 @@
         "uuid": "196fb59b-56c0-56ab-b38c-b8fe9a063fd1",
         "type": "validation",
         "title": "Kyverno",
-        "description": "Kyverno as the policy validation point: its PolicyReports, read by C2P's Kyverno plugin.",
+        "description": "Kyverno as the policy validation point: its PolicyReports, read by C2P's kyverno-cel plugin.",
         "props": [
           {
             "name": "Rule_Id",
@@ -585,6 +585,68 @@
             "name": "Check_Description",
             "ns": "https://oscal-compass.github.io/compliance-trestle/schemas/oscal/cd",
             "value": "Kyverno PolicyReport results for models-need-kyverno on the pods running in the cluster",
+            "remarks": "rule_set_3"
+          }
+        ]
+      },
+      {
+        "uuid": "716eb8aa-06b5-56d4-bfe7-fb3d6140a1a1",
+        "type": "validation",
+        "title": "Kubernetes API server",
+        "description": "The API server as the policy validation point for the ValidatingAdmissionPolicies: its answers to a server-side dry run of each running pod, read by C2P's vap plugin.",
+        "props": [
+          {
+            "name": "Rule_Id",
+            "ns": "https://oscal-compass.github.io/compliance-trestle/schemas/oscal/cd",
+            "value": "model-volumes",
+            "remarks": "rule_set_1"
+          },
+          {
+            "name": "Check_Id",
+            "ns": "https://oscal-compass.github.io/compliance-trestle/schemas/oscal/cd",
+            "value": "vap-model-volumes",
+            "remarks": "rule_set_1"
+          },
+          {
+            "name": "Check_Description",
+            "ns": "https://oscal-compass.github.io/compliance-trestle/schemas/oscal/cd",
+            "value": "The API server's own verdict for model-volumes: each running pod sent again as a server-side dry run",
+            "remarks": "rule_set_1"
+          },
+          {
+            "name": "Rule_Id",
+            "ns": "https://oscal-compass.github.io/compliance-trestle/schemas/oscal/cd",
+            "value": "carried-images",
+            "remarks": "rule_set_2"
+          },
+          {
+            "name": "Check_Id",
+            "ns": "https://oscal-compass.github.io/compliance-trestle/schemas/oscal/cd",
+            "value": "vap-carried-images",
+            "remarks": "rule_set_2"
+          },
+          {
+            "name": "Check_Description",
+            "ns": "https://oscal-compass.github.io/compliance-trestle/schemas/oscal/cd",
+            "value": "The API server's own verdict for carried-images: each running pod sent again as a server-side dry run",
+            "remarks": "rule_set_2"
+          },
+          {
+            "name": "Rule_Id",
+            "ns": "https://oscal-compass.github.io/compliance-trestle/schemas/oscal/cd",
+            "value": "models-need-kyverno",
+            "remarks": "rule_set_3"
+          },
+          {
+            "name": "Check_Id",
+            "ns": "https://oscal-compass.github.io/compliance-trestle/schemas/oscal/cd",
+            "value": "vap-models-need-kyverno",
+            "remarks": "rule_set_3"
+          },
+          {
+            "name": "Check_Description",
+            "ns": "https://oscal-compass.github.io/compliance-trestle/schemas/oscal/cd",
+            "value": "The API server's own verdict for models-need-kyverno: each running pod sent again as a server-side dry run",
             "remarks": "rule_set_3"
           }
         ]

@@ -1,0 +1,15 @@
+# C2P, OSCAL Compass's compliance-to-policy, the Python implementation, and
+# what it needs. It runs in a virtual environment of its own (.cache/c2p),
+# beside the one requirements.lock describes, because it needs
+# compliance-trestle 3.x while the evidence is written with 5.x: C2P 1.0.0
+# declares compliance-trestle~=3.3, does not import with trestle 5.2.1, and
+# fails most of its own framework tests with 4.0.0 (docs/decisions/0005).
+#
+# c2p/requirements.lock is generated from this with hashes for every file:
+#   uv pip compile --universal --python-version 3.13 --generate-hashes \
+#     --exclude-newer 2026-11-13T00:00:00Z --override c2p/overrides.txt \
+#     c2p/requirements.in -o c2p/requirements.lock
+compliance-to-policy==1.0.0
+compliance-trestle==3.12.4
+# C2P's plugins import yaml, and C2P does not declare it.
+pyyaml

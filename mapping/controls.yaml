@@ -40,6 +40,11 @@ frameworks:
 # means Kyverno's PolicyReports describe the running pods for this policy,
 # and C2P turns them into observations. "posture: none" means the reports
 # cannot judge it, and the README says why; it is judged by its tests alone.
+# "dry_run: true" adds a second engine for a ValidatingAdmissionPolicy: the
+# API server's own verdict, each running pod sent again as a server-side dry
+# run (scripts/tests.py --dry-run), which C2P's vap plugin turns into
+# observations beside Kyverno's. A policy with both is satisfied only when
+# both engines reported on its pods and every answer was a pass.
 rules:
   verify-models:
     file: admission/verify-models.yaml
@@ -57,6 +62,7 @@ rules:
       under the registry's models path, by digest, checked by the API server
       itself, so the rule holds while Kyverno is down.
     posture: kyverno
+    dry_run: true
   carried-images:
     file: admission/carried-images.yaml
     kind: Kubernetes ValidatingAdmissionPolicy
@@ -65,6 +71,7 @@ rules:
       image volumes) is named by digest, and the digest is one the signed
       bundle carried; kube-system and local-path-storage excepted.
     posture: kyverno
+    dry_run: true
   models-need-kyverno:
     file: admission/kyverno-guard.yaml
     kind: Kubernetes ValidatingAdmissionPolicy
@@ -72,6 +79,7 @@ rules:
       No model is mounted while Kyverno's webhook for verify-models is
       missing or no longer fails closed.
     posture: kyverno
+    dry_run: true
   egress-node:
     file: admission/egress-node.yaml
     kind: Kubernetes ValidatingAdmissionPolicy

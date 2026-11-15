@@ -18,8 +18,11 @@ a missing or unreadable document is a failure, never a pass.
 With --plant, the run was broken on purpose (README, "The plants"), and the
 gate must catch it for the planted reason: it exits 0 only if every control
 resting on the planted policy is not satisfied and at least one admission
-test that policy must refuse failed. A plant the gate lets through, or
-catches only for some other reason, exits 1.
+test that policy must refuse failed. A plant that silences an engine
+(silent:api-server) breaks no policy, so no test of its own can fail: it is
+caught only if every control resting on a policy that engine judges is not
+satisfied, each because that engine reported nothing. A plant the gate lets
+through, or catches only for some other reason, exits 1.
 
 With E2E_RESULTS set, it also writes what it decided there, check by check,
 for scripts/status.py and the branch `status`: {"checks": [{"state",
@@ -87,9 +90,19 @@ def judge(mapping, found, failed_tests):
     return failures
 
 
+# What a finding says when an engine a plant silenced reported nothing, as
+# scripts/evidence.py writes it.
+SILENT = {"api-server": "the API server's dry run reported no running pod for "}
+
+
 def planted(mapping, plant):
-    """The controls a plant must turn not satisfied, and the tests of which at least one must fail."""
+    """The controls a plant must turn not satisfied, and the tests of which at least one
+    must fail; for a silenced engine, the words each of those controls must say instead."""
     kind, _, policy = plant.partition(":")
+    if kind == "silent" and policy in SILENT:
+        controls = {(c["framework"], c["control"]) for c in mapping["controls"]
+                    if any(mapping["rules"][r].get("dry_run") for r in c["rules"])}
+        return controls, SILENT[policy]
     if kind == "phantom-mapping":
         policy = "verify-models"
     if kind not in ("remove", "audit", "phantom-mapping") or policy not in mapping["rules"]:
@@ -162,6 +175,16 @@ def main():
     must, its_tests = planted(mapping, args.plant)
     caught = {(f, w) for f, w, _ in failures}
     missed = sorted(must - caught)
+    if isinstance(its_tests, str):  # a silenced engine: each control must say so
+        said = {(f, w) for f, w, why in failures if its_tests in why}
+        silent_ok = bool(must) and must <= said
+        why = (f"caught: every control resting on a policy it judges is not satisfied, each because it reported "
+               f"nothing ({', '.join(sorted(c for _, c in must))})" if silent_ok else
+               "NOT caught: " + (f"still satisfied: {missed}" if missed else
+                                 f"not satisfied for another reason: {sorted(must - said)}"))
+        print(f"== plant {args.plant} {why}")
+        emit({"checks": [{"state": check_state(silent_ok), "name": f"plant {args.plant}: {why}"}], "measured": []})
+        sys.exit(0 if silent_ok else 1)
     failed_own = sorted(its_tests & set(failed_tests))
     if not missed and failed_own:
         why = ("caught: "

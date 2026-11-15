@@ -22,6 +22,11 @@ Three things, in this order, all recorded in OUT.json:
 
 This records what happened. Whether it is what each control needs is
 decided by scripts/evidence.py against mapping/controls.yaml.
+
+tests.py --dry-run OUT.json is the second engine: the API server's own
+verdict on the pods that run, for every rule mapping/controls.yaml marks
+`dry_run: true` (dry_run below). tests.py --probe OUT.json measures why
+egress-node is left out of Kyverno's reports (probe below).
 """
 import glob
 import json
@@ -237,9 +242,110 @@ def probe(out):
           + (f" ({record['kyverno_message']})" if found else ""))
 
 
+# What a running pod carries that a new one would not: what the API server and
+# the scheduler wrote, and what its controllers own.
+SERVER_FIELDS = ("uid", "resourceVersion", "generation", "creationTimestamp", "managedFields",
+                 "ownerReferences", "generateName", "selfLink", "finalizers", "deletionTimestamp")
+
+
+def as_new(pod, name):
+    """The pod as it runs, as a new pod named NAME: the spec its owner gave it, without
+    what was written after it was admitted (its node, its status, the priority the
+    admission plugin resolved, which a new pod may not state)."""
+    meta = {k: v for k, v in pod["metadata"].items() if k not in SERVER_FIELDS}
+    meta["name"] = name
+    spec = {k: v for k, v in pod["spec"].items() if k not in ("nodeName", "priority")}
+    return json.dumps({"apiVersion": "v1", "kind": "Pod", "metadata": meta, "spec": spec})
+
+
+def running_pod(workload):
+    """The first running pod of a workload tests.py started, as the cluster holds it."""
+    ns, kind, name = workload.split("/")
+    if kind == "pod":
+        p = kubectl("-n", ns, "get", "pod", name, "-o", "json")
+        return json.loads(p.stdout) if p.returncode == 0 else None
+    sel = json.loads(kubectl("-n", ns, "get", kind, name, "-o", "json", check=True).stdout)["spec"]["selector"]
+    labels = ",".join(f"{k}={v}" for k, v in sel.get("matchLabels", {}).items())
+    pods = json.loads(kubectl("-n", ns, "get", "pods", "-l", labels, "-o", "json", check=True).stdout)["items"]
+    return next((p for p in pods if p.get("status", {}).get("phase") == "Running"), None)
+
+
+def dry_run_outcome(check, rule, workload, pod, answer, seen_refusing, now):
+    """One outcome in the shape C2P's vap plugin reads: pass only when the API server
+    admitted the pod and this run showed the policy refusing a planted pod."""
+    ns, _, name = workload.split("/")
+    pod_name = pod["metadata"]["name"] if pod else name
+    out = {"checkId": check, "title": f"Pod {ns}/{pod_name}", "resourceId": f"v1/Pod/{ns}/{pod_name}",
+           "evaluatedOn": now, "props": {"workload": workload, "policy": rule}}
+    if pod is None:
+        return {**out, "result": "error", "reason": f"no running pod of {workload} to send again"}
+    if answer["admitted"] and rule in seen_refusing:
+        return {**out, "result": "pass",
+                "reason": f"admitted on a server-side dry run; {rule} refused a planted pod in this run"}
+    if answer["admitted"]:
+        return {**out, "result": "error",
+                "reason": f"admitted on a server-side dry run, but {rule} refused no planted pod in this run, "
+                          "so the admission says nothing about it"}
+    if answer["refused_by"] == rule:
+        return {**out, "result": "fail", "reason": f"refused by {rule}: {answer['message']}"}
+    return {**out, "result": "error",
+            "reason": f"refused by {answer['refused_by']} before {rule} was known to agree: {answer['message']}"}
+
+
+def dry_run(out):
+    """The API server's own verdict on each running pod, for every rule marked dry_run.
+
+    Each running workload's pod is sent again, as a new pod under another name,
+    with a server-side dry run: the ValidatingAdmissionPolicies then answer in the
+    API server, as they did when the pod was admitted, and nothing is stored. Kyverno
+    re-evaluates the same policies in its background scan and reports through
+    PolicyReports; this asks the API server instead, so the two engines can
+    disagree. A dry run that is admitted shows only that no policy objected; it is
+    a pass for a policy only when the same run saw that policy refuse a planted pod
+    (the admission tests), so the policy and its binding were working. One outcome
+    per policy and pod, in the shape C2P's vap plugin reads.
+
+    PLANT=silent:api-server writes no outcome at all: the engine says nothing."""
+    from ruamel.yaml import YAML  # the reach of each policy is collect.py's, from the mapping
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import collect
+
+    mapping = YAML(typ="safe").load(open(os.path.join(ROOT, "mapping", "controls.yaml")))
+    run = json.load(open(os.path.join(STATE, "admission-tests.json")))
+    seen_refusing = {t["refused_by"] for t in run["tests"] if not t["admitted"]}
+    now = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+    outcomes = []
+    if PLANT != "silent:api-server":
+        rules = [r for r, spec in mapping["rules"].items() if spec.get("dry_run")]
+        for w in run["workloads"]:
+            if not w.get("running"):
+                continue
+            pod = running_pod(w["workload"])
+            answer = None
+            if pod is not None:
+                p = kubectl("create", "--dry-run=server", "-f", "-",
+                            stdin=as_new(pod, f"{pod['metadata']['name'][:50]}-dry-run"))
+                said = (p.stdout + p.stderr).strip()
+                by, msg = refusal(said) if p.returncode != 0 else (None, said)
+                answer = {"admitted": p.returncode == 0, "refused_by": by, "message": msg}
+            ns = w["workload"].split("/")[0]
+            for rule in rules:
+                if not collect.reaches(rule, ns):
+                    continue
+                outcomes.append(dry_run_outcome(f"vap-{rule}", rule, w["workload"], pod,
+                                                answer or {}, seen_refusing, now))
+    json.dump(outcomes, open(out, "w"), indent=2)
+    print(f"== dry run: {len(outcomes)} outcomes from the API server, "
+          f"{sum(o['result'] == 'pass' for o in outcomes)} pass"
+          + (" (PLANT=silent:api-server: the engine says nothing)" if PLANT == "silent:api-server" else ""))
+
+
 def main():
     if sys.argv[1] == "--probe":
         probe(sys.argv[2])
+        return
+    if sys.argv[1] == "--dry-run":
+        dry_run(sys.argv[2])
         return
     out = sys.argv[1]
     subs = placeholders()
