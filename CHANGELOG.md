@@ -4,6 +4,8 @@ All notable changes to this project are documented in this file. The format is b
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-11-16
+
 ### Added
 
 - A second engine, the API server, for the three native policies that carry controls (model-volumes, carried-images, models-need-kyverno; `dry_run: true` in the mapping). `scripts/tests.py --dry-run` sends each running pod again, as a new pod under another name, with a server-side dry run, and records what the API server answered, in the shape C2P's vap plugin reads. An admission is a pass for a policy only when the same run saw that policy refuse a planted pod; otherwise it is `error`. The component definition gains a validation component, "Kubernetes API server", with the checks `vap-<policy>` ([ADR 5](docs/decisions/0005-c2p-1-0-beside-its-own-trestle.md)).
@@ -62,7 +64,8 @@ All notable changes to this project are documented in this file. The format is b
 - Kyverno 1.19.2 writes no admission report for a CEL policy whose actions include Deny, reports a native policy only when it is labelled, and evaluates every stored pod as if it were being created. The flagship's verify-models is reported here with its background scan on; egress-node is judged by its admission tests alone.
 - Without model-volumes, the flagship admits an image volume from outside the models path: verify-models never sees an image outside its own glob.
 
-[Unreleased]: https://github.com/heyvaldemar/kubernetes-oscal-evidence/compare/v1.2.0...HEAD
+[Unreleased]: https://github.com/heyvaldemar/kubernetes-oscal-evidence/compare/v1.3.0...HEAD
+[1.3.0]: https://github.com/heyvaldemar/kubernetes-oscal-evidence/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/heyvaldemar/kubernetes-oscal-evidence/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/heyvaldemar/kubernetes-oscal-evidence/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/heyvaldemar/kubernetes-oscal-evidence/releases/tag/v1.0.0

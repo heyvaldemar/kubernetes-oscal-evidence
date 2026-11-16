@@ -16,7 +16,7 @@ This repository brings the admission policies of [kubernetes-air-gapped-ai-agent
 
 ## What one run shows
 
-From the signed evidence of [run 43775335140](https://github.com/heyvaldemar/kubernetes-oscal-evidence/actions/runs/43775335140), on commit f858c3c, the flagship at v1.8.0:
+From the signed evidence of [run 43778370491](https://github.com/heyvaldemar/kubernetes-oscal-evidence/actions/runs/43778370491) on main, on commit 44dc967, the flagship at v1.8.0:
 
 | | |
 |---|---|
