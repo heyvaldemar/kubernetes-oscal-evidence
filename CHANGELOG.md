@@ -4,6 +4,10 @@ All notable changes to this project are documented in this file. The format is b
 
 ## [Unreleased]
 
+### Changed
+
+- helm v4.3.2, from v4.3.1, in `tools.lock`, its hashes checked against helm's own checksum files. The release is of 2026-11-13 at 04:53 UTC, and the pin moved no earlier than three days after it.
+
 ## [1.3.0] - 2026-11-16
 
 ### Added
