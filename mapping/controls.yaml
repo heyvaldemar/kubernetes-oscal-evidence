@@ -104,6 +104,11 @@ tests:
   kyverno-away: {outcome: refused, by: [models-need-kyverno]}
   image-by-tag: {outcome: refused, by: [carried-images]}
   image-not-carried: {outcome: refused, by: [carried-images]}
+  # A real Vault image, 2.2.0, the flagship's bundle never carried (it carries
+  # 2.2.2; its ADR 24). Added with Vault in v1.9.0; the matrix pinned here
+  # counts the plants before it, so it proves no control here, and it must
+  # still be refused.
+  vault-not-carried: {outcome: refused, by: [carried-images]}
   volume-not-carried: {outcome: refused, by: [carried-images]}
   # Both native policies refuse a model named by tag, and the API server
   # reports one of them: the test holds the layering, and proves no single

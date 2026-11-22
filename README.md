@@ -38,7 +38,7 @@ Every push runs it again. So does a weekly schedule, and so does every release, 
 flowchart TD
   lock["flagship.lock: the flagship's release, by sha256"] --> verify["flagship.sh: sha256, cosign, slsa-verifier"]
   verify --> cluster["kind with the flagship's two nodes, zot as its registry"]
-  cluster --> policies["Kyverno 1.19.2 and the flagship's five policies (admission.sh)"]
+  cluster --> policies["Kyverno 1.20.0 and the flagship's five policies (admission.sh)"]
   policies --> pods["planted pods, the game day, the model server (tests.py)"]
   pods --> reports["Kyverno's PolicyReports (collect.py)"]
   pods --> dryrun["the API server's dry run of each running pod (tests.py --dry-run)"]
@@ -75,7 +75,7 @@ Seven controls, each carried by a policy the flagship ships and proven by plante
 
 **Not mapped.** SSDF PS.2.1 and PS.3.1 ask a producer to make release integrity checkable and to archive each release; no admission policy does that, and the matrix shows them through release signing. Version 1.0.0 also mapped SC-24 Fail in Known State and AC-6 Least Privilege; no matrix row carries either, so 1.1.0 does not. Their tests still run and the gate still needs them to pass: the game day now proves SR-11, and the egress-node pods prove no control. CM-14 Signed Components was mapped until 1.1.0 and is not since 1.2.0: it asks for a signature verified "using a certificate that is recognized and approved by the organization", and the flagship verifies its model against a raw public key. The flagship's own [compliance page](https://github.com/heyvaldemar/kubernetes-air-gapped-ai-agent/blob/main/docs/compliance.md) says so too and lets SR-11 carry that evidence, and so does this mapping. The matrix's gaps stay gaps; nothing here closes one.
 
-The policies and the planted pods are read from the flagship's v1.8.0 release archive after cosign and slsa-verifier verify it ([`flagship.lock`](flagship.lock)). The catalogs are NIST's own OSCAL, and they and the matrix are pinned by commit and sha256 ([`catalogs.lock`](catalogs.lock)). Every finding names the catalog's own statement id and the matrix rows it rests on.
+The policies and the planted pods are read from the flagship's v1.10.0 release archive after cosign and slsa-verifier verify it ([`flagship.lock`](flagship.lock)), and Kyverno is the version that release pins, 1.20.0 with chart 3.10.0. The catalogs are NIST's own OSCAL, and they and the matrix are pinned by commit and sha256 ([`catalogs.lock`](catalogs.lock)). Every finding names the catalog's own statement id and the matrix rows it rests on.
 
 ## What Kyverno's reports needed
 
@@ -84,6 +84,8 @@ Installed as it ships, the flagship refuses well and reports nothing. Three sett
 1. **A native policy is reported only when it carries the label `reports.kyverno.io/enabled=true`.** Four of the five policies are Kubernetes ValidatingAdmissionPolicies, and the flagship's carry no label. [`scripts/admission.sh`](scripts/admission.sh) adds it to three.
 2. **A CEL policy whose actions include Deny gets no admission report, even for a pod it admits.** In Kyverno 1.19.2, the handlers for ImageValidatingPolicy and ValidatingPolicy decide "blocked" from the policy's actions, not from the outcome (`pkg/webhooks/resource/ivpol/handler.go`, `audit()`), and skip the report when it is set ([kyverno#16841](https://github.com/kyverno/kyverno/issues/16841)). The legacy ClusterPolicy path decides from the outcome. The flagship's verify-models also turns Kyverno's background scan off, so no path reports it at all. Here its background scan is on: Kyverno re-verifies each running pod's model and writes the result. That field, and the operator's public key that the flagship's own install writes in the same way, are the only differences from the flagship's file.
 3. **Kyverno's reports controller cannot read a webhook configuration**, which is the parameter of models-need-kyverno. Without a role that lets it, Kyverno logs "forbidden" and gives up on the report of each pod that policy matches; until the role was added, verify-models never reached the model server's report either. One aggregated ClusterRole grants read.
+
+All three are still needed on Kyverno 1.20.0, which the flagship runs since v1.10.0. [Run 43039211836](https://github.com/heyvaldemar/kubernetes-oscal-evidence/actions/runs/43039211836) left each out in turn on 1.20.0-rc.5, the commit 1.20.0 was released from, and found each still needed.
 
 The fifth policy cannot be reported honestly. Kyverno's background scan evaluates every stored object as if it were being created (`pkg/admissionpolicy/validate.go`, `admission.Create`). egress-node refuses a pod that names its node at creation, and every pod the scheduler placed names its node. So the report says "fail" for pods that broke nothing. Every run measures this again: after the reports are collected, egress-node is reported for a moment on the admitted ordinary pod, and the answer is kept as `reporting-probe.json`. So egress-node is judged by its admission tests alone, and since 1.1.0 no control rests on it.
 

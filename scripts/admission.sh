@@ -20,8 +20,8 @@
 #     reports.kyverno.io/enabled=true; egress-node does not (its posture
 #     cannot be judged from stored pods, mapping/controls.yaml);
 #   - verify-models runs Kyverno's background scan (evaluation.background
-#     true; the flagship ships false), because Kyverno 1.19 writes no
-#     admission report for a CEL policy whose actions include Deny, even
+#     true; the flagship ships false), because Kyverno 1.19 and 1.20 write
+#     no admission report for a CEL policy whose actions include Deny, even
 #     for a pod it admits;
 #   - Kyverno's reports controller may read webhook configurations, which
 #     is the parameter of models-need-kyverno.

@@ -1,9 +1,9 @@
 [
   {
     "checkId": "vap-model-volumes",
-    "title": "Pod inference/model-server-cf9b6f49-zctd8",
-    "resourceId": "v1/Pod/inference/model-server-cf9b6f49-zctd8",
-    "evaluatedOn": "2026-11-15T23:39:07Z",
+    "title": "Pod inference/model-server-7d8cc46cb6-wgdl9",
+    "resourceId": "v1/Pod/inference/model-server-7d8cc46cb6-wgdl9",
+    "evaluatedOn": "2026-11-22T05:13:00Z",
     "props": {
       "workload": "inference/deployment/model-server",
       "policy": "model-volumes"
@@ -13,9 +13,9 @@
   },
   {
     "checkId": "vap-carried-images",
-    "title": "Pod inference/model-server-cf9b6f49-zctd8",
-    "resourceId": "v1/Pod/inference/model-server-cf9b6f49-zctd8",
-    "evaluatedOn": "2026-11-15T23:39:07Z",
+    "title": "Pod inference/model-server-7d8cc46cb6-wgdl9",
+    "resourceId": "v1/Pod/inference/model-server-7d8cc46cb6-wgdl9",
+    "evaluatedOn": "2026-11-22T05:13:00Z",
     "props": {
       "workload": "inference/deployment/model-server",
       "policy": "carried-images"
@@ -25,9 +25,9 @@
   },
   {
     "checkId": "vap-models-need-kyverno",
-    "title": "Pod inference/model-server-cf9b6f49-zctd8",
-    "resourceId": "v1/Pod/inference/model-server-cf9b6f49-zctd8",
-    "evaluatedOn": "2026-11-15T23:39:07Z",
+    "title": "Pod inference/model-server-7d8cc46cb6-wgdl9",
+    "resourceId": "v1/Pod/inference/model-server-7d8cc46cb6-wgdl9",
+    "evaluatedOn": "2026-11-22T05:13:00Z",
     "props": {
       "workload": "inference/deployment/model-server",
       "policy": "models-need-kyverno"
@@ -39,7 +39,7 @@
     "checkId": "vap-carried-images",
     "title": "Pod default/ordinary-pod",
     "resourceId": "v1/Pod/default/ordinary-pod",
-    "evaluatedOn": "2026-11-15T23:39:07Z",
+    "evaluatedOn": "2026-11-22T05:13:00Z",
     "props": {
       "workload": "default/pod/ordinary-pod",
       "policy": "carried-images"

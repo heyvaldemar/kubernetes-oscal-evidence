@@ -1,7 +1,7 @@
 {
-  "run": "https://github.com/heyvaldemar/kubernetes-oscal-evidence/actions/runs/43775335140",
+  "run": "a local run",
   "plant": null,
-  "flagship": "heyvaldemar/kubernetes-air-gapped-ai-agent v1.8.0",
+  "flagship": "heyvaldemar/kubernetes-air-gapped-ai-agent v1.10.0",
   "frameworks": {
     "nist_800_53": {
       "si-7": {
@@ -51,6 +51,10 @@
       "passed": true,
       "why": "refused by carried-images: every image a pod runs is one the bundle carried"
     },
+    "vault-not-carried": {
+      "passed": true,
+      "why": "refused by carried-images: every image a pod runs is one the bundle carried"
+    },
     "volume-not-carried": {
       "passed": true,
       "why": "refused by carried-images: every image a pod runs is one the bundle carried"
@@ -65,15 +69,15 @@
     },
     "model-unsigned": {
       "passed": true,
-      "why": "refused by verify-models: Policy verify-models failed: model weights are signed with the operator's key"
+      "why": "refused by verify-models: Policy verify-models failed: model weights are signed with the operator's key; verification details: image \"registry.boundary.internal:5000/models/plant-unsigned@sha256:3098c45f12b0598a94ebdbd4651503d5594f50f215b74444d9e793acf2ece357\", attestor \"operator\": failed to verify cosign signatures: no signatures found"
     },
     "model-stranger": {
       "passed": true,
-      "why": "refused by verify-models: Policy verify-models failed: model weights are signed with the operator's key"
+      "why": "refused by verify-models: Policy verify-models failed: model weights are signed with the operator's key; verification details: image \"registry.boundary.internal:5000/models/plant-stranger@sha256:457f9a2109e15ed6069b1aac0f28e2586d88b3e1f7cb193f4105ffc0bf6fd4d4\", attestor \"operator\": failed to verify cosign signatures: no matching attestations: failed to verify signature: could not verify envelope: accepted signatures do not match threshold, Found: 0, Expected 1"
     },
     "model-nobom": {
       "passed": true,
-      "why": "refused by verify-models: Policy verify-models failed: model weights carry an AI-BOM signed with the operator's key"
+      "why": "refused by verify-models: Policy verify-models failed: model weights carry an AI-BOM signed with the operator's key; verification details: image \"registry.boundary.internal:5000/models/plant-nobom@sha256:46a80878f1ccccf3f169c6059e57f437f33a90037242327e6de8271fd25f1d00\", attestor \"operator\", attestation \"mlbom\": required predicate type https://cyclonedx.org/bom not found, found [https://sigstore.dev/cosign/sign/v1]"
     },
     "model-unlicensed": {
       "passed": true,
