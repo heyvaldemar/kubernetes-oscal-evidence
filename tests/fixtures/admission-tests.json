@@ -25,7 +25,7 @@
       "admitted": false,
       "refused_by": "models-need-kyverno",
       "message": "failed to configure binding: no params found for policy binding with `Deny` parameterNotFoundAction",
-      "readmitted_after_seconds": 0
+      "readmitted_after_seconds": 10
     },
     {
       "test": "image-by-tag",
@@ -97,7 +97,7 @@
       "expect": "model weights carry an AI-BOM signed with the operator's key",
       "admitted": false,
       "refused_by": "verify-models",
-      "message": "Policy verify-models failed: model weights carry an AI-BOM signed with the operator's key"
+      "message": "Policy verify-models failed: model weights carry an AI-BOM signed with the operator's key; verification details: image \"registry.boundary.internal:5000/models/plant-nobom@sha256:46a80878f1ccccf3f169c6059e57f437f33a90037242327e6de8271fd25f1d00\", attestor \"operator\", attestation \"mlbom\": required predicate type https://cyclonedx.org/bom not found, found [https://sigstore.dev/cosign/sign/v1]"
     },
     {
       "test": "model-signed",
@@ -115,7 +115,7 @@
       "expect": "signed with the operator's key",
       "admitted": false,
       "refused_by": "verify-models",
-      "message": "Policy verify-models failed: model weights are signed with the operator's key"
+      "message": "Policy verify-models failed: model weights are signed with the operator's key; verification details: image \"registry.boundary.internal:5000/models/plant-stranger@sha256:457f9a2109e15ed6069b1aac0f28e2586d88b3e1f7cb193f4105ffc0bf6fd4d4\", attestor \"operator\": failed to verify cosign signatures: no matching attestations: failed to verify signature: could not verify envelope: accepted signatures do not match threshold, Found: 0, Expected 1"
     },
     {
       "test": "model-unlicensed",
@@ -133,7 +133,16 @@
       "expect": "signed with the operator's key",
       "admitted": false,
       "refused_by": "verify-models",
-      "message": "Policy verify-models failed: model weights are signed with the operator's key"
+      "message": "Policy verify-models failed: model weights are signed with the operator's key; verification details: image \"registry.boundary.internal:5000/models/plant-unsigned@sha256:3098c45f12b0598a94ebdbd4651503d5594f50f215b74444d9e793acf2ece357\", attestor \"operator\": failed to verify cosign signatures: no signatures found"
+    },
+    {
+      "test": "vault-not-carried",
+      "source": "tests/e2e/plants/vault-not-carried.yaml",
+      "flagship_says": "a real Vault image, 2.2.0, that the bundle never carried: only 2.2.2 is in airgap/images.txt (ADR 24)",
+      "expect": "one the bundle carried",
+      "admitted": false,
+      "refused_by": "carried-images",
+      "message": "every image a pod runs is one the bundle carried"
     },
     {
       "test": "volume-elsewhere",

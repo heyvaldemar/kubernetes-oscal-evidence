@@ -1,6 +1,6 @@
 # Fixtures
 
-Files from one real run, [run 43775335140](https://github.com/heyvaldemar/kubernetes-oscal-evidence/actions/runs/43775335140) on 2026-11-15 (`tests/e2e/run.sh` on GitHub's hosted runner, commit f858c3c), with the flagship at v1.8.0 and Kyverno 1.19.2: nothing here is written by hand. Until then they were from a run of 2026-11-01 on kind on an arm64 Mac.
+Files from one real run of `tests/e2e/run.sh` on 2026-11-22, on kind on an arm64 Mac, with the flagship at v1.10.0 and Kyverno 1.20.0, the version it pins: nothing here is written by hand. Before that they were from run 43775335140 on 2026-11-15, on GitHub's hosted runner with the flagship at v1.8.0, and before that from a run of 2026-11-01.
 
 | File | What it is |
 |---|---|

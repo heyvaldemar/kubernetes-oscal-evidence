@@ -1,26 +1,26 @@
 {
   "assessment-results": {
-    "uuid": "8880b74f-5b45-4403-a321-ac656ca85e12",
+    "uuid": "f9a98337-12d2-46cc-addc-0bdad0dd2d4f",
     "metadata": {
-      "title": "Admission controls of kubernetes-air-gapped-ai-agent v1.8.0: NIST SP 800-53 Rev. 5.2.0, one run",
-      "last-modified": "2026-11-15T23:39:18+00:00",
+      "title": "Admission controls of kubernetes-air-gapped-ai-agent v1.10.0: NIST SP 800-53 Rev. 5.2.0, one run",
+      "last-modified": "2026-11-22T05:13:11+00:00",
       "version": "unreleased",
       "oscal-version": "1.1.3",
       "props": [
         {
           "name": "run",
           "ns": "https://github.com/heyvaldemar/kubernetes-oscal-evidence/ns",
-          "value": "https://github.com/heyvaldemar/kubernetes-oscal-evidence/actions/runs/43775335140"
+          "value": "a local run"
         },
         {
           "name": "commit",
           "ns": "https://github.com/heyvaldemar/kubernetes-oscal-evidence/ns",
-          "value": "f858c3c1aa5cd9f25c31a5026ee406174fe2322c"
+          "value": "local"
         },
         {
           "name": "flagship",
           "ns": "https://github.com/heyvaldemar/kubernetes-oscal-evidence/ns",
-          "value": "heyvaldemar/kubernetes-air-gapped-ai-agent@v1.8.0"
+          "value": "heyvaldemar/kubernetes-air-gapped-ai-agent@v1.10.0"
         },
         {
           "name": "catalog",
@@ -40,10 +40,10 @@
     },
     "results": [
       {
-        "uuid": "5d868010-f0dd-466a-8ba1-1bdf801dbdac",
-        "title": "NIST SP 800-53 Rev. 5.2.0: the admission controls of kubernetes-air-gapped-ai-agent v1.8.0",
+        "uuid": "df6dcc2c-acd4-4b0a-a7e8-0f35fb448a1c",
+        "title": "NIST SP 800-53 Rev. 5.2.0: the admission controls of kubernetes-air-gapped-ai-agent v1.10.0",
         "description": "C2P 1.0.0: its kyverno-cel plugin on Kyverno's PolicyReports, its vap plugin on the API server's answers to a server-side dry run of each running pod, aggregated into one assessment results.",
-        "start": "2026-11-15T23:39:18+00:00",
+        "start": "2026-11-22T05:13:11+00:00",
         "reviewed-controls": {
           "control-selections": [
             {
@@ -83,7 +83,7 @@
         },
         "observations": [
           {
-            "uuid": "6d03aa0a-492e-4b34-bcfa-79c0432677dc",
+            "uuid": "2118c9be-d2a0-46d2-a335-773bb534834f",
             "title": "carried-images",
             "description": "carried-images",
             "props": [
@@ -101,7 +101,7 @@
             ],
             "subjects": [
               {
-                "subject-uuid": "3e676f60-78d7-402a-8281-768b02e6e767",
+                "subject-uuid": "da1c356a-fc1b-4df8-981b-286c25ca1bf7",
                 "type": "resource",
                 "title": "Pod default/ordinary-pod",
                 "props": [
@@ -115,7 +115,7 @@
                   },
                   {
                     "name": "evaluated-on",
-                    "value": "2026-11-15T23:38:53+00:00"
+                    "value": "2026-11-22T05:12:47+00:00"
                   },
                   {
                     "name": "reason",
@@ -124,13 +124,13 @@
                 ]
               },
               {
-                "subject-uuid": "232d8a42-81e9-4fc2-b528-1bafdfb9896e",
+                "subject-uuid": "c701e549-a6d3-40f4-bb2d-051d5682a68d",
                 "type": "resource",
-                "title": "Pod inference/model-server-cf9b6f49-zctd8",
+                "title": "Pod inference/model-server-7d8cc46cb6-wgdl9",
                 "props": [
                   {
                     "name": "resource-id",
-                    "value": "v1/Pod/inference/model-server-cf9b6f49-zctd8"
+                    "value": "v1/Pod/inference/model-server-7d8cc46cb6-wgdl9"
                   },
                   {
                     "name": "result",
@@ -138,7 +138,7 @@
                   },
                   {
                     "name": "evaluated-on",
-                    "value": "2026-11-15T23:38:53+00:00"
+                    "value": "2026-11-22T05:12:47+00:00"
                   },
                   {
                     "name": "reason",
@@ -147,13 +147,13 @@
                 ]
               },
               {
-                "subject-uuid": "4f826490-1e06-48cb-be58-1611d7949075",
+                "subject-uuid": "d158a6b2-fd8e-45e6-b5bd-60b67c5ae56a",
                 "type": "resource",
-                "title": "Pod kyverno/kyverno-reports-controller-86d59886fd-zw9xr",
+                "title": "Pod kyverno/kyverno-background-controller-885b7677b-qmhtq",
                 "props": [
                   {
                     "name": "resource-id",
-                    "value": "v1/Pod/kyverno/kyverno-reports-controller-86d59886fd-zw9xr"
+                    "value": "v1/Pod/kyverno/kyverno-background-controller-885b7677b-qmhtq"
                   },
                   {
                     "name": "result",
@@ -161,7 +161,7 @@
                   },
                   {
                     "name": "evaluated-on",
-                    "value": "2026-11-15T23:37:51+00:00"
+                    "value": "2026-11-22T05:12:09+00:00"
                   },
                   {
                     "name": "reason",
@@ -170,13 +170,13 @@
                 ]
               },
               {
-                "subject-uuid": "96e5a51d-a648-4885-a7b4-4e7a65c93b28",
+                "subject-uuid": "1349f83d-f77d-458b-b9e3-01dd878cef86",
                 "type": "resource",
-                "title": "Pod kyverno/kyverno-background-controller-594f76ccb6-n6gcl",
+                "title": "Pod kyverno/kyverno-admission-controller-77687ffc98-5vk9s",
                 "props": [
                   {
                     "name": "resource-id",
-                    "value": "v1/Pod/kyverno/kyverno-background-controller-594f76ccb6-n6gcl"
+                    "value": "v1/Pod/kyverno/kyverno-admission-controller-77687ffc98-5vk9s"
                   },
                   {
                     "name": "result",
@@ -184,7 +184,7 @@
                   },
                   {
                     "name": "evaluated-on",
-                    "value": "2026-11-15T23:37:51+00:00"
+                    "value": "2026-11-22T05:12:12+00:00"
                   },
                   {
                     "name": "reason",
@@ -193,13 +193,13 @@
                 ]
               },
               {
-                "subject-uuid": "3417b3eb-8213-4aa8-9ba8-7882a4401e73",
+                "subject-uuid": "8f0c223a-968c-49a3-80af-c430e9a0baca",
                 "type": "resource",
-                "title": "Pod kyverno/kyverno-cleanup-controller-b8b66b769-4tdlj",
+                "title": "Pod kyverno/kyverno-reports-controller-76754cdf57-gwgvn",
                 "props": [
                   {
                     "name": "resource-id",
-                    "value": "v1/Pod/kyverno/kyverno-cleanup-controller-b8b66b769-4tdlj"
+                    "value": "v1/Pod/kyverno/kyverno-reports-controller-76754cdf57-gwgvn"
                   },
                   {
                     "name": "result",
@@ -207,7 +207,7 @@
                   },
                   {
                     "name": "evaluated-on",
-                    "value": "2026-11-15T23:37:51+00:00"
+                    "value": "2026-11-22T05:12:09+00:00"
                   },
                   {
                     "name": "reason",
@@ -216,13 +216,13 @@
                 ]
               },
               {
-                "subject-uuid": "00ee27d7-c72f-40f5-a5f3-61d8d71d2bf8",
+                "subject-uuid": "2cb0efea-c5ec-4ba7-90bf-2cf5291fb978",
                 "type": "resource",
-                "title": "Pod kyverno/kyverno-admission-controller-759f7dc7df-9l5fv",
+                "title": "Pod kyverno/kyverno-cleanup-controller-65c889b9c5-v676t",
                 "props": [
                   {
                     "name": "resource-id",
-                    "value": "v1/Pod/kyverno/kyverno-admission-controller-759f7dc7df-9l5fv"
+                    "value": "v1/Pod/kyverno/kyverno-cleanup-controller-65c889b9c5-v676t"
                   },
                   {
                     "name": "result",
@@ -230,7 +230,7 @@
                   },
                   {
                     "name": "evaluated-on",
-                    "value": "2026-11-15T23:38:23+00:00"
+                    "value": "2026-11-22T05:12:09+00:00"
                   },
                   {
                     "name": "reason",
@@ -239,10 +239,10 @@
                 ]
               }
             ],
-            "collected": "2026-11-15T23:39:18+00:00"
+            "collected": "2026-11-22T05:13:11+00:00"
           },
           {
-            "uuid": "b03f3e8e-8fce-46b1-b6f4-895fcf16ee1e",
+            "uuid": "ea3b1874-14c1-42b9-87fd-8c934f68b089",
             "title": "model-volumes",
             "description": "model-volumes",
             "props": [
@@ -260,13 +260,13 @@
             ],
             "subjects": [
               {
-                "subject-uuid": "59e552f1-7384-459f-8477-a963bdf31ed9",
+                "subject-uuid": "3db6f9ea-d5cb-41e5-ad61-a8ca7f72af81",
                 "type": "resource",
-                "title": "Pod inference/model-server-cf9b6f49-zctd8",
+                "title": "Pod inference/model-server-7d8cc46cb6-wgdl9",
                 "props": [
                   {
                     "name": "resource-id",
-                    "value": "v1/Pod/inference/model-server-cf9b6f49-zctd8"
+                    "value": "v1/Pod/inference/model-server-7d8cc46cb6-wgdl9"
                   },
                   {
                     "name": "result",
@@ -274,7 +274,7 @@
                   },
                   {
                     "name": "evaluated-on",
-                    "value": "2026-11-15T23:38:53+00:00"
+                    "value": "2026-11-22T05:12:47+00:00"
                   },
                   {
                     "name": "reason",
@@ -283,10 +283,10 @@
                 ]
               }
             ],
-            "collected": "2026-11-15T23:39:18+00:00"
+            "collected": "2026-11-22T05:13:11+00:00"
           },
           {
-            "uuid": "a75d9859-3075-4976-9f66-b9d6befc28c1",
+            "uuid": "1038acfe-2a21-465c-996a-dd65a34ce316",
             "title": "models-need-kyverno",
             "description": "models-need-kyverno",
             "props": [
@@ -304,13 +304,13 @@
             ],
             "subjects": [
               {
-                "subject-uuid": "6a5ca92d-d746-436e-b6aa-f4cc01a3b996",
+                "subject-uuid": "0db2dbbe-e70c-457c-afb6-ba315e27e2b4",
                 "type": "resource",
-                "title": "Pod inference/model-server-cf9b6f49-zctd8",
+                "title": "Pod inference/model-server-7d8cc46cb6-wgdl9",
                 "props": [
                   {
                     "name": "resource-id",
-                    "value": "v1/Pod/inference/model-server-cf9b6f49-zctd8"
+                    "value": "v1/Pod/inference/model-server-7d8cc46cb6-wgdl9"
                   },
                   {
                     "name": "result",
@@ -318,7 +318,7 @@
                   },
                   {
                     "name": "evaluated-on",
-                    "value": "2026-11-15T23:38:53+00:00"
+                    "value": "2026-11-22T05:12:47+00:00"
                   },
                   {
                     "name": "reason",
@@ -327,10 +327,10 @@
                 ]
               }
             ],
-            "collected": "2026-11-15T23:39:18+00:00"
+            "collected": "2026-11-22T05:13:11+00:00"
           },
           {
-            "uuid": "df6b2e47-64c0-4e95-8e43-c96f2144eca7",
+            "uuid": "03db789a-34f1-4cd4-b539-2aed30758fd8",
             "title": "verify-models",
             "description": "verify-models",
             "props": [
@@ -348,13 +348,13 @@
             ],
             "subjects": [
               {
-                "subject-uuid": "d204e90d-d5cc-4136-9052-fb6851ef867b",
+                "subject-uuid": "9b2a1bbd-ca95-4405-b980-8a8ad11d4bd5",
                 "type": "resource",
-                "title": "Pod inference/model-server-cf9b6f49-zctd8",
+                "title": "Pod inference/model-server-7d8cc46cb6-wgdl9",
                 "props": [
                   {
                     "name": "resource-id",
-                    "value": "v1/Pod/inference/model-server-cf9b6f49-zctd8"
+                    "value": "v1/Pod/inference/model-server-7d8cc46cb6-wgdl9"
                   },
                   {
                     "name": "result",
@@ -362,7 +362,7 @@
                   },
                   {
                     "name": "evaluated-on",
-                    "value": "2026-11-15T23:38:53+00:00"
+                    "value": "2026-11-22T05:12:47+00:00"
                   },
                   {
                     "name": "reason",
@@ -371,10 +371,10 @@
                 ]
               }
             ],
-            "collected": "2026-11-15T23:39:18+00:00"
+            "collected": "2026-11-22T05:13:11+00:00"
           },
           {
-            "uuid": "b3ab43be-ead1-4c98-9fbb-42e6fab04e99",
+            "uuid": "60d248cc-a2a9-4e7f-b29a-048b81a1a628",
             "title": "vap-carried-images",
             "description": "vap-carried-images",
             "props": [
@@ -392,13 +392,13 @@
             ],
             "subjects": [
               {
-                "subject-uuid": "d918e13f-a5e1-42a9-ab92-97eba2ebe5f6",
+                "subject-uuid": "5a5fa8ee-b997-4076-97bd-3fe57812a377",
                 "type": "resource",
-                "title": "Pod inference/model-server-cf9b6f49-zctd8",
+                "title": "Pod inference/model-server-7d8cc46cb6-wgdl9",
                 "props": [
                   {
                     "name": "resource-id",
-                    "value": "v1/Pod/inference/model-server-cf9b6f49-zctd8"
+                    "value": "v1/Pod/inference/model-server-7d8cc46cb6-wgdl9"
                   },
                   {
                     "name": "result",
@@ -406,7 +406,7 @@
                   },
                   {
                     "name": "evaluated-on",
-                    "value": "2026-11-15T23:39:07+00:00"
+                    "value": "2026-11-22T05:13:00+00:00"
                   },
                   {
                     "name": "reason",
@@ -415,7 +415,7 @@
                 ]
               },
               {
-                "subject-uuid": "7f8040af-302c-4654-89ea-23a6ff91e72d",
+                "subject-uuid": "7deb1b57-3f40-4b32-8978-786b3641e10d",
                 "type": "resource",
                 "title": "Pod default/ordinary-pod",
                 "props": [
@@ -429,7 +429,7 @@
                   },
                   {
                     "name": "evaluated-on",
-                    "value": "2026-11-15T23:39:07+00:00"
+                    "value": "2026-11-22T05:13:00+00:00"
                   },
                   {
                     "name": "reason",
@@ -438,10 +438,10 @@
                 ]
               }
             ],
-            "collected": "2026-11-15T23:39:18+00:00"
+            "collected": "2026-11-22T05:13:11+00:00"
           },
           {
-            "uuid": "48dfb30c-857a-4e1e-ae17-8075658ae76e",
+            "uuid": "276a8c92-9d22-4055-b55e-028dac076316",
             "title": "vap-model-volumes",
             "description": "vap-model-volumes",
             "props": [
@@ -459,13 +459,13 @@
             ],
             "subjects": [
               {
-                "subject-uuid": "c841ff2e-8c67-4a46-9166-4ee582f86ca9",
+                "subject-uuid": "26e93473-bf15-4429-9d6b-e4703111073b",
                 "type": "resource",
-                "title": "Pod inference/model-server-cf9b6f49-zctd8",
+                "title": "Pod inference/model-server-7d8cc46cb6-wgdl9",
                 "props": [
                   {
                     "name": "resource-id",
-                    "value": "v1/Pod/inference/model-server-cf9b6f49-zctd8"
+                    "value": "v1/Pod/inference/model-server-7d8cc46cb6-wgdl9"
                   },
                   {
                     "name": "result",
@@ -473,7 +473,7 @@
                   },
                   {
                     "name": "evaluated-on",
-                    "value": "2026-11-15T23:39:07+00:00"
+                    "value": "2026-11-22T05:13:00+00:00"
                   },
                   {
                     "name": "reason",
@@ -482,10 +482,10 @@
                 ]
               }
             ],
-            "collected": "2026-11-15T23:39:18+00:00"
+            "collected": "2026-11-22T05:13:11+00:00"
           },
           {
-            "uuid": "6a137687-6ca4-4f98-b1ed-06da1df73202",
+            "uuid": "54aa382c-c9dd-44f3-a46a-6bd9b144b35f",
             "title": "vap-models-need-kyverno",
             "description": "vap-models-need-kyverno",
             "props": [
@@ -503,13 +503,13 @@
             ],
             "subjects": [
               {
-                "subject-uuid": "e3ca2d87-3f04-44dc-aee1-f7f0ee30707d",
+                "subject-uuid": "44cdbfc2-0f58-447f-a095-da1dedef4ea9",
                 "type": "resource",
-                "title": "Pod inference/model-server-cf9b6f49-zctd8",
+                "title": "Pod inference/model-server-7d8cc46cb6-wgdl9",
                 "props": [
                   {
                     "name": "resource-id",
-                    "value": "v1/Pod/inference/model-server-cf9b6f49-zctd8"
+                    "value": "v1/Pod/inference/model-server-7d8cc46cb6-wgdl9"
                   },
                   {
                     "name": "result",
@@ -517,7 +517,7 @@
                   },
                   {
                     "name": "evaluated-on",
-                    "value": "2026-11-15T23:39:07+00:00"
+                    "value": "2026-11-22T05:13:00+00:00"
                   },
                   {
                     "name": "reason",
@@ -526,10 +526,10 @@
                 ]
               }
             ],
-            "collected": "2026-11-15T23:39:18+00:00"
+            "collected": "2026-11-22T05:13:11+00:00"
           },
           {
-            "uuid": "c8fab21d-0ab9-5e1c-bed6-944deea9d84d",
+            "uuid": "f98416ac-7761-5600-b1f5-9b14980f2846",
             "title": "Admission test: volume-elsewhere",
             "description": "an image volume from outside the models path",
             "methods": [
@@ -580,17 +580,17 @@
                 "value": "only from registry.boundary.internal:5000/models"
               }
             ],
-            "collected": "2026-11-15T23:39:18+00:00",
+            "collected": "2026-11-22T05:13:11+00:00",
             "remarks": "refused by model-volumes: model weights come only from registry.boundary.internal:5000/models, by digest",
             "relevant-evidence": [
               {
-                "href": "https://github.com/heyvaldemar/kubernetes-air-gapped-ai-agent/blob/v1.8.0/tests/e2e/plants/volume-elsewhere.yaml",
-                "description": "The planted pod, as the flagship ships it at v1.8.0"
+                "href": "https://github.com/heyvaldemar/kubernetes-air-gapped-ai-agent/blob/v1.10.0/tests/e2e/plants/volume-elsewhere.yaml",
+                "description": "The planted pod, as the flagship ships it at v1.10.0"
               }
             ]
           },
           {
-            "uuid": "3f03397a-e38d-5a70-86a7-c202df0768e8",
+            "uuid": "0691d479-f8de-5a7f-ad07-e530ac52f5d8",
             "title": "Admission test: model-unsigned",
             "description": "model weights nobody signed",
             "methods": [
@@ -649,17 +649,17 @@
                 "value": "signed with the operator's key"
               }
             ],
-            "collected": "2026-11-15T23:39:18+00:00",
-            "remarks": "refused by verify-models: Policy verify-models failed: model weights are signed with the operator's key",
+            "collected": "2026-11-22T05:13:11+00:00",
+            "remarks": "refused by verify-models: Policy verify-models failed: model weights are signed with the operator's key; verification details: image \"registry.boundary.internal:5000/models/plant-unsigned@sha256:3098c45f12b0598a94ebdbd4651503d5594f50f215b74444d9e793acf2ece357\", attestor \"operator\": failed to verify cosign signatures: no signatures found",
             "relevant-evidence": [
               {
-                "href": "https://github.com/heyvaldemar/kubernetes-air-gapped-ai-agent/blob/v1.8.0/tests/e2e/plants/model-unsigned.yaml",
-                "description": "The planted pod, as the flagship ships it at v1.8.0"
+                "href": "https://github.com/heyvaldemar/kubernetes-air-gapped-ai-agent/blob/v1.10.0/tests/e2e/plants/model-unsigned.yaml",
+                "description": "The planted pod, as the flagship ships it at v1.10.0"
               }
             ]
           },
           {
-            "uuid": "e3462098-a33d-505a-94a9-0bfc0399026b",
+            "uuid": "b9ec3062-77a4-5453-9ac1-cc8e7eff29a5",
             "title": "Admission test: model-stranger",
             "description": "model weights signed by a key the cluster does not trust",
             "methods": [
@@ -718,17 +718,17 @@
                 "value": "signed with the operator's key"
               }
             ],
-            "collected": "2026-11-15T23:39:18+00:00",
-            "remarks": "refused by verify-models: Policy verify-models failed: model weights are signed with the operator's key",
+            "collected": "2026-11-22T05:13:11+00:00",
+            "remarks": "refused by verify-models: Policy verify-models failed: model weights are signed with the operator's key; verification details: image \"registry.boundary.internal:5000/models/plant-stranger@sha256:457f9a2109e15ed6069b1aac0f28e2586d88b3e1f7cb193f4105ffc0bf6fd4d4\", attestor \"operator\": failed to verify cosign signatures: no matching attestations: failed to verify signature: could not verify envelope: accepted signatures do not match threshold, Found: 0, Expected 1",
             "relevant-evidence": [
               {
-                "href": "https://github.com/heyvaldemar/kubernetes-air-gapped-ai-agent/blob/v1.8.0/tests/e2e/plants/model-stranger.yaml",
-                "description": "The planted pod, as the flagship ships it at v1.8.0"
+                "href": "https://github.com/heyvaldemar/kubernetes-air-gapped-ai-agent/blob/v1.10.0/tests/e2e/plants/model-stranger.yaml",
+                "description": "The planted pod, as the flagship ships it at v1.10.0"
               }
             ]
           },
           {
-            "uuid": "ea5cd5b1-2731-524f-8db6-3d89bd0ebad4",
+            "uuid": "57965008-d4ab-51f2-af30-9bc9a7eb8a18",
             "title": "Admission test: model-signed",
             "description": "the control: the signed model, by digest",
             "methods": [
@@ -777,17 +777,17 @@
                 "value": "admitted"
               }
             ],
-            "collected": "2026-11-15T23:39:18+00:00",
+            "collected": "2026-11-22T05:13:11+00:00",
             "remarks": "admitted",
             "relevant-evidence": [
               {
-                "href": "https://github.com/heyvaldemar/kubernetes-air-gapped-ai-agent/blob/v1.8.0/tests/e2e/plants/model-signed.yaml",
-                "description": "The planted pod, as the flagship ships it at v1.8.0"
+                "href": "https://github.com/heyvaldemar/kubernetes-air-gapped-ai-agent/blob/v1.10.0/tests/e2e/plants/model-signed.yaml",
+                "description": "The planted pod, as the flagship ships it at v1.10.0"
               }
             ]
           },
           {
-            "uuid": "715d3945-a0c9-52d2-b4e7-9b88f32074f3",
+            "uuid": "6aa9369a-d714-598b-a15b-50e0c03571ba",
             "title": "Admission test: model-nobom",
             "description": "model weights signed by the operator, with no AI-BOM",
             "methods": [
@@ -834,17 +834,17 @@
                 "value": "model weights carry an AI-BOM signed with the operator's key"
               }
             ],
-            "collected": "2026-11-15T23:39:18+00:00",
-            "remarks": "refused by verify-models: Policy verify-models failed: model weights carry an AI-BOM signed with the operator's key",
+            "collected": "2026-11-22T05:13:11+00:00",
+            "remarks": "refused by verify-models: Policy verify-models failed: model weights carry an AI-BOM signed with the operator's key; verification details: image \"registry.boundary.internal:5000/models/plant-nobom@sha256:46a80878f1ccccf3f169c6059e57f437f33a90037242327e6de8271fd25f1d00\", attestor \"operator\", attestation \"mlbom\": required predicate type https://cyclonedx.org/bom not found, found [https://sigstore.dev/cosign/sign/v1]",
             "relevant-evidence": [
               {
-                "href": "https://github.com/heyvaldemar/kubernetes-air-gapped-ai-agent/blob/v1.8.0/tests/e2e/plants/model-nobom.yaml",
-                "description": "The planted pod, as the flagship ships it at v1.8.0"
+                "href": "https://github.com/heyvaldemar/kubernetes-air-gapped-ai-agent/blob/v1.10.0/tests/e2e/plants/model-nobom.yaml",
+                "description": "The planted pod, as the flagship ships it at v1.10.0"
               }
             ]
           },
           {
-            "uuid": "67c88600-4c27-5ddc-aa49-7b01a13c720f",
+            "uuid": "f8c69711-4cd0-50c5-8dfe-fe90ca4d69d3",
             "title": "Admission test: image-not-carried",
             "description": "an image the bundle never carried, by a digest of its own",
             "methods": [
@@ -899,17 +899,17 @@
                 "value": "one the bundle carried"
               }
             ],
-            "collected": "2026-11-15T23:39:18+00:00",
+            "collected": "2026-11-22T05:13:11+00:00",
             "remarks": "refused by carried-images: every image a pod runs is one the bundle carried",
             "relevant-evidence": [
               {
-                "href": "https://github.com/heyvaldemar/kubernetes-air-gapped-ai-agent/blob/v1.8.0/tests/e2e/plants/image-not-carried.yaml",
-                "description": "The planted pod, as the flagship ships it at v1.8.0"
+                "href": "https://github.com/heyvaldemar/kubernetes-air-gapped-ai-agent/blob/v1.10.0/tests/e2e/plants/image-not-carried.yaml",
+                "description": "The planted pod, as the flagship ships it at v1.10.0"
               }
             ]
           },
           {
-            "uuid": "790425dd-72a0-5594-8231-fc77f9bd6e45",
+            "uuid": "ab0a07a8-c7fa-588c-b13a-057ea42aae25",
             "title": "Admission test: volume-not-carried",
             "description": "an image the bundle never carried, mounted as a volume where no model policy looks: carried-images holds every image a pod uses, volumes too",
             "methods": [
@@ -964,17 +964,17 @@
                 "value": "one the bundle carried"
               }
             ],
-            "collected": "2026-11-15T23:39:18+00:00",
+            "collected": "2026-11-22T05:13:11+00:00",
             "remarks": "refused by carried-images: every image a pod runs is one the bundle carried",
             "relevant-evidence": [
               {
-                "href": "https://github.com/heyvaldemar/kubernetes-air-gapped-ai-agent/blob/v1.8.0/tests/e2e/plants/volume-not-carried.yaml",
-                "description": "The planted pod, as the flagship ships it at v1.8.0"
+                "href": "https://github.com/heyvaldemar/kubernetes-air-gapped-ai-agent/blob/v1.10.0/tests/e2e/plants/volume-not-carried.yaml",
+                "description": "The planted pod, as the flagship ships it at v1.10.0"
               }
             ]
           },
           {
-            "uuid": "a42ec70f-f871-507b-a6ba-90469ee30c00",
+            "uuid": "4b67c153-db6a-5e5d-9c0c-198ee8a82a56",
             "title": "Admission test: kyverno-away",
             "description": "Kyverno's admission controller at zero replicas: the signed model is refused, and admitted again once Kyverno is back",
             "methods": [
@@ -1029,17 +1029,17 @@
                 "value": "no params found for policy binding with `Deny` parameterNotFoundAction"
               }
             ],
-            "collected": "2026-11-15T23:39:18+00:00",
+            "collected": "2026-11-22T05:13:11+00:00",
             "remarks": "refused by models-need-kyverno: failed to configure binding: no params found for policy binding with `Deny` parameterNotFoundAction",
             "relevant-evidence": [
               {
-                "href": "https://github.com/heyvaldemar/kubernetes-air-gapped-ai-agent/blob/v1.8.0/tests/e2e/gameday.sh (step 1)",
-                "description": "The planted pod, as the flagship ships it at v1.8.0"
+                "href": "https://github.com/heyvaldemar/kubernetes-air-gapped-ai-agent/blob/v1.10.0/tests/e2e/gameday.sh (step 1)",
+                "description": "The planted pod, as the flagship ships it at v1.10.0"
               }
             ]
           },
           {
-            "uuid": "d25863a9-9d2c-5756-8d10-dfb211b08204",
+            "uuid": "a30c8d9b-21af-5f50-9702-b55936819699",
             "title": "Admission test: image-by-tag",
             "description": "an image the bundle carried, named by its tag alone",
             "methods": [
@@ -1086,19 +1086,19 @@
                 "value": "named by digest"
               }
             ],
-            "collected": "2026-11-15T23:39:18+00:00",
+            "collected": "2026-11-22T05:13:11+00:00",
             "remarks": "refused by carried-images: every image a pod runs is named by digest",
             "relevant-evidence": [
               {
-                "href": "https://github.com/heyvaldemar/kubernetes-air-gapped-ai-agent/blob/v1.8.0/tests/e2e/plants/image-by-tag.yaml",
-                "description": "The planted pod, as the flagship ships it at v1.8.0"
+                "href": "https://github.com/heyvaldemar/kubernetes-air-gapped-ai-agent/blob/v1.10.0/tests/e2e/plants/image-by-tag.yaml",
+                "description": "The planted pod, as the flagship ships it at v1.10.0"
               }
             ]
           }
         ],
         "findings": [
           {
-            "uuid": "6322899f-a59c-5a66-bbfb-bc0692dce08d",
+            "uuid": "0d9b405b-fbba-5418-a47d-d2b6665c7e79",
             "title": "si-7: satisfied",
             "description": "Kyverno and the API server's dry run reported every running pod passing model-volumes, verify-models, and every test that proves it did what the mapping says (volume-elsewhere, model-unsigned, model-stranger, model-signed).",
             "props": [
@@ -1148,30 +1148,30 @@
             },
             "related-observations": [
               {
-                "observation-uuid": "b03f3e8e-8fce-46b1-b6f4-895fcf16ee1e"
+                "observation-uuid": "ea3b1874-14c1-42b9-87fd-8c934f68b089"
               },
               {
-                "observation-uuid": "48dfb30c-857a-4e1e-ae17-8075658ae76e"
+                "observation-uuid": "276a8c92-9d22-4055-b55e-028dac076316"
               },
               {
-                "observation-uuid": "df6b2e47-64c0-4e95-8e43-c96f2144eca7"
+                "observation-uuid": "03db789a-34f1-4cd4-b539-2aed30758fd8"
               },
               {
-                "observation-uuid": "c8fab21d-0ab9-5e1c-bed6-944deea9d84d"
+                "observation-uuid": "f98416ac-7761-5600-b1f5-9b14980f2846"
               },
               {
-                "observation-uuid": "3f03397a-e38d-5a70-86a7-c202df0768e8"
+                "observation-uuid": "0691d479-f8de-5a7f-ad07-e530ac52f5d8"
               },
               {
-                "observation-uuid": "e3462098-a33d-505a-94a9-0bfc0399026b"
+                "observation-uuid": "b9ec3062-77a4-5453-9ac1-cc8e7eff29a5"
               },
               {
-                "observation-uuid": "ea5cd5b1-2731-524f-8db6-3d89bd0ebad4"
+                "observation-uuid": "57965008-d4ab-51f2-af30-9bc9a7eb8a18"
               }
             ]
           },
           {
-            "uuid": "34c8bd8b-aaeb-5246-990a-d7b8cb0a8a84",
+            "uuid": "16ddeac2-a3cf-51ac-ab54-9f8454694b65",
             "title": "sr-4: satisfied",
             "description": "Kyverno reported every running pod passing verify-models, and every test that proves it did what the mapping says (model-nobom, model-signed).",
             "props": [
@@ -1216,18 +1216,18 @@
             },
             "related-observations": [
               {
-                "observation-uuid": "df6b2e47-64c0-4e95-8e43-c96f2144eca7"
+                "observation-uuid": "03db789a-34f1-4cd4-b539-2aed30758fd8"
               },
               {
-                "observation-uuid": "715d3945-a0c9-52d2-b4e7-9b88f32074f3"
+                "observation-uuid": "6aa9369a-d714-598b-a15b-50e0c03571ba"
               },
               {
-                "observation-uuid": "ea5cd5b1-2731-524f-8db6-3d89bd0ebad4"
+                "observation-uuid": "57965008-d4ab-51f2-af30-9bc9a7eb8a18"
               }
             ]
           },
           {
-            "uuid": "2001bdde-b8be-587b-88b7-ca8ed3d8b4b2",
+            "uuid": "de3767ab-1697-5166-8e1c-9a6487c03b73",
             "title": "sr-11: satisfied",
             "description": "Kyverno and the API server's dry run reported every running pod passing carried-images, verify-models, models-need-kyverno, and every test that proves it did what the mapping says (image-not-carried, volume-not-carried, model-unsigned, model-stranger, kyverno-away, model-signed).",
             "props": [
@@ -1272,42 +1272,42 @@
             },
             "related-observations": [
               {
-                "observation-uuid": "6d03aa0a-492e-4b34-bcfa-79c0432677dc"
+                "observation-uuid": "2118c9be-d2a0-46d2-a335-773bb534834f"
               },
               {
-                "observation-uuid": "b3ab43be-ead1-4c98-9fbb-42e6fab04e99"
+                "observation-uuid": "60d248cc-a2a9-4e7f-b29a-048b81a1a628"
               },
               {
-                "observation-uuid": "df6b2e47-64c0-4e95-8e43-c96f2144eca7"
+                "observation-uuid": "03db789a-34f1-4cd4-b539-2aed30758fd8"
               },
               {
-                "observation-uuid": "a75d9859-3075-4976-9f66-b9d6befc28c1"
+                "observation-uuid": "1038acfe-2a21-465c-996a-dd65a34ce316"
               },
               {
-                "observation-uuid": "6a137687-6ca4-4f98-b1ed-06da1df73202"
+                "observation-uuid": "54aa382c-c9dd-44f3-a46a-6bd9b144b35f"
               },
               {
-                "observation-uuid": "67c88600-4c27-5ddc-aa49-7b01a13c720f"
+                "observation-uuid": "f8c69711-4cd0-50c5-8dfe-fe90ca4d69d3"
               },
               {
-                "observation-uuid": "790425dd-72a0-5594-8231-fc77f9bd6e45"
+                "observation-uuid": "ab0a07a8-c7fa-588c-b13a-057ea42aae25"
               },
               {
-                "observation-uuid": "3f03397a-e38d-5a70-86a7-c202df0768e8"
+                "observation-uuid": "0691d479-f8de-5a7f-ad07-e530ac52f5d8"
               },
               {
-                "observation-uuid": "e3462098-a33d-505a-94a9-0bfc0399026b"
+                "observation-uuid": "b9ec3062-77a4-5453-9ac1-cc8e7eff29a5"
               },
               {
-                "observation-uuid": "a42ec70f-f871-507b-a6ba-90469ee30c00"
+                "observation-uuid": "4b67c153-db6a-5e5d-9c0c-198ee8a82a56"
               },
               {
-                "observation-uuid": "ea5cd5b1-2731-524f-8db6-3d89bd0ebad4"
+                "observation-uuid": "57965008-d4ab-51f2-af30-9bc9a7eb8a18"
               }
             ]
           },
           {
-            "uuid": "f69780e2-60f1-56e2-9c0e-ac8abd4de64a",
+            "uuid": "d2bc1ccb-683a-5b29-8dac-45e8fe3547f4",
             "title": "cm-7.5: satisfied",
             "description": "Kyverno and the API server's dry run reported every running pod passing carried-images, and every test that proves it did what the mapping says (image-by-tag, image-not-carried, model-signed).",
             "props": [
@@ -1352,19 +1352,19 @@
             },
             "related-observations": [
               {
-                "observation-uuid": "6d03aa0a-492e-4b34-bcfa-79c0432677dc"
+                "observation-uuid": "2118c9be-d2a0-46d2-a335-773bb534834f"
               },
               {
-                "observation-uuid": "b3ab43be-ead1-4c98-9fbb-42e6fab04e99"
+                "observation-uuid": "60d248cc-a2a9-4e7f-b29a-048b81a1a628"
               },
               {
-                "observation-uuid": "d25863a9-9d2c-5756-8d10-dfb211b08204"
+                "observation-uuid": "a30c8d9b-21af-5f50-9702-b55936819699"
               },
               {
-                "observation-uuid": "67c88600-4c27-5ddc-aa49-7b01a13c720f"
+                "observation-uuid": "f8c69711-4cd0-50c5-8dfe-fe90ca4d69d3"
               },
               {
-                "observation-uuid": "ea5cd5b1-2731-524f-8db6-3d89bd0ebad4"
+                "observation-uuid": "57965008-d4ab-51f2-af30-9bc9a7eb8a18"
               }
             ]
           }

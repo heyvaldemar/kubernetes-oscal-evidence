@@ -6,6 +6,7 @@ All notable changes to this project are documented in this file. The format is b
 
 ### Changed
 
+- The flagship at v1.10.0, from v1.8.0 (`flagship.lock`), its source archive verified as before: the pinned sha256, cosign for its release workflow on the tag, slsa-verifier for the tag. It pins Kyverno 1.20.0 with chart 3.10.0, so the run here installs that; 1.20.0 is the commit 1.20.0-rc.5 was cut from, on which each of the three reporting settings in `scripts/admission.sh` was measured still needed (run 43039211836). The flagship's policies and planted pods keep their names, and one planted pod is new: `vault-not-carried`, a Vault image its bundle never carried, added with Vault in 1.9.0. It is mapped as a test carried-images must refuse and credited to no control, since the control-to-test matrix pinned here counts the planted pods before it. The model server's busybox follows the one the flagship now carries. The fixtures are rebuilt from a run on the new release: 7 of 7 controls satisfied, 20 admission tests (17 refused, 3 admitted), 4 dry-run answers, every one a pass.
 - helm v4.3.2, from v4.3.1, in `tools.lock`, its hashes checked against helm's own checksum files. The release is of 2026-11-13 at 04:53 UTC, and the pin moved no earlier than three days after it.
 
 ## [1.3.0] - 2026-11-16
